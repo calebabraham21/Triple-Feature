@@ -1,0 +1,181 @@
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-cinema-black text-white font-sans;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
+}
+
+@layer components {
+  /* 4-span snake outline effect: fast, clean, no scale/color change */
+  .trace-snake {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate;
+  }
+  .trace-snake .trace-line {
+    position: absolute;
+    display: block;
+    pointer-events: none;
+    background: currentColor;
+  }
+  /* top */
+  .trace-snake .trace-line--t {
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, currentColor);
+    transform: translateX(-115%);
+    transition: transform 0.35s linear;
+  }
+  .trace-snake:hover .trace-line--t { transform: translateX(100%); transition-delay: 0s; }
+  /* right */
+  .trace-snake .trace-line--r {
+    top: 0;
+    right: 0;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(180deg, transparent, currentColor);
+    transform: translateY(-130%);
+    transition: transform 0.35s linear 0.08s;
+  }
+  .trace-snake:hover .trace-line--r { transform: translateY(100%); }
+  /* bottom */
+  .trace-snake .trace-line--b {
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: linear-gradient(270deg, transparent, currentColor);
+    transform: translateX(100%);
+    transition: transform 0.35s linear 0.17s;
+  }
+  .trace-snake:hover .trace-line--b { transform: translateX(-115%); }
+  /* left */
+  .trace-snake .trace-line--l {
+    top: 0;
+    left: 0;
+    width: 2px;
+    height: 100%;
+    background: linear-gradient(360deg, transparent, currentColor);
+    transform: translateY(130%);
+    transition: transform 0.35s linear 0.25s;
+  }
+  .trace-snake:hover .trace-line--l { transform: translateY(-130%); }
+
+  /* Persistent hover feedback: subtle inner outline and soft shadow */
+  .trace-snake:hover {
+    box-shadow:
+      0 0 0 2px rgba(255,255,255,0.12) inset,
+      0 4px 10px rgba(0,0,0,0.25);
+  }
+  /* Snake-outline: fast, clean animated outline on hover */
+  .snake-outline,
+  .neon-trace,
+  .btn-primary,
+  .btn-secondary,
+  .snake-hover {
+    position: relative;
+    overflow: hidden;
+    isolation: isolate; /* ensure local stacking context */
+  }
+  .snake-outline::after,
+  .neon-trace::after,
+  .btn-primary::after,
+  .btn-secondary::after,
+  .trace-snake--rb::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit; /* follow the element's rounding */
+    pointer-events: none;
+    z-index: 1;
+  }
+  /* Animated stroke mask */
+  .snake-outline::after,
+  .neon-trace::after,
+  .btn-primary::after,
+  .btn-secondary::after {
+    --snake-color: currentColor;
+    background: conic-gradient(
+      from var(--angle, 0deg),
+      transparent 0deg 300deg,
+      #4a9eff 300deg 320deg,
+      #ff4444 320deg 340deg,
+      transparent 340deg 360deg
+    );
+    border-radius: inherit;
+    /* Reveal only a thin ring */
+    -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #fff 0);
+            mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #fff 0);
+    opacity: 0;
+    transition: opacity 120ms ease;
+  }
+
+  @keyframes snake {
+    from { --angle: 0deg; }
+    to { --angle: 360deg; }
+  }
+
+  /* SVG-based snake border (robust across browsers) */
+  .snake-border {
+    stroke-dasharray: 100;
+    stroke-dashoffset: 100;
+    opacity: 0;
+    transition: stroke-dashoffset 350ms linear, opacity 180ms ease;
+  }
+  .snake-hover:hover .snake-border {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+
+  .snake-outline:hover::after,
+  .neon-trace:hover::after,
+  .btn-primary:hover::after,
+  .btn-secondary:hover::after {
+    opacity: 1;
+    animation: snake 0.35s linear forwards;
+  }
+  .btn-primary {
+    @apply text-white font-semibold py-3 px-6 rounded-lg border;
+    background-color: #1a1a1a; /* cinema-dark */
+    border-color: #2a2a2a; /* cinema-gray */
+  }
+  
+  .btn-secondary {
+    @apply bg-cinema-gray text-white font-medium py-2 px-4 rounded-lg border border-cinema-light;
+  }
+  
+  .card {
+    @apply bg-cinema-dark rounded-xl p-6 border border-cinema-gray 
+           hover:border-accent-blue transition-all duration-300 transform hover:scale-105 
+           shadow-lg hover:shadow-2xl;
+  }
+  
+  .movie-card {
+    @apply bg-cinema-dark rounded-xl overflow-hidden border border-cinema-gray 
+           hover:border-accent-red transition-all duration-300 transform hover:scale-105 
+           shadow-lg hover:shadow-2xl;
+  }
+  
+  .glass-effect {
+    @apply bg-white/10 backdrop-blur-md border border-white/20;
+  }
+  
+  .text-glow {
+    text-shadow: 0 0 10px currentColor;
+  }
+  
+  .cinema-gradient {
+    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #2a2a2a 100%);
+  }
+  
+  .accent-gradient {
+    background: linear-gradient(135deg, #ff4444 0%, #8b5cf6 50%, #4a9eff 100%);
+  }
+}

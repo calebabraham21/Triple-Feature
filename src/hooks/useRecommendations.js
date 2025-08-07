@@ -1,0 +1,270 @@
+import { useState, useEffect } from 'react';
+import { getGenres, getMoviesByFilters, getMovieDetails } from '../utils/tmdb';
+
+export const useRecommendations = () => {
+  const [genres, setGenres] = useState([]);
+  const [selectedGenres, setSelectedGenres] = useState([]);
+  // Multi-decade selection; default to all decades
+  const getAllDecades = () => {
+    const decades = [];
+    for (let year = 1890; year <= 2020; year += 10) {
+      decades.push(year);
+    }
+    return decades;
+  };
+  const [selectedDecades, setSelectedDecades] = useState(getAllDecades());
+  const [selectedMood, setSelectedMood] = useState(null);
+  const [recommendations, setRecommendations] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [currentStep, setCurrentStep] = useState(1);
+
+  // Load genres on mount
+  useEffect(() => {
+    const loadGenres = async () => {
+      try {
+        setLoading(true);
+        const response = await getGenres();
+        setGenres(response.genres || []);
+      } catch (err) {
+        setError('Failed to load genres');
+        console.error('Error loading genres:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadGenres();
+  }, []);
+
+  // Generate recommendations based on filters
+  const generateRecommendations = async () => {
+    if (!selectedGenres.length && (!selectedDecades || selectedDecades.length === 0)) {
+      setError('Please select at least one genre or decade');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      // Build base filters
+      const baseFilters = {
+        genres: selectedGenres,
+        decades: selectedDecades,
+        sortBy: 'popularity.desc',
+        minRating: 6.5,
+      };
+
+      // Fetch a larger pool by sampling multiple random pages
+      const firstPage = await getMoviesByFilters({ ...baseFilters, page: 1 });
+      const totalPages = Math.max(1, Math.min(firstPage?.total_pages || 1, 15)); // cap for perf
+      const pool = [...(firstPage?.results || [])];
+
+      // Choose up to 4 additional random distinct pages among available pages
+      const pagesToFetch = new Set();
+      while (pagesToFetch.size < 4 && pagesToFetch.size < totalPages - 1) {
+        const randomPage = Math.floor(Math.random() * totalPages) + 1; // 1..totalPages
+        if (randomPage !== 1) pagesToFetch.add(randomPage);
+      }
+
+      const additionalResponses = await Promise.all(
+        Array.from(pagesToFetch).map((p) => getMoviesByFilters({ ...baseFilters, page: p }))
+      );
+      additionalResponses.forEach((r) => {
+        if (r?.results) pool.push(...r.results);
+      });
+
+      // Deduplicate by id
+      const seenIds = new Set();
+      let movies = pool.filter((m) => {
+        if (!m || !m.id) return false;
+        if (seenIds.has(m.id)) return false;
+        seenIds.add(m.id);
+        return true;
+      });
+
+      // If a subset of decades was selected, filter client-side to include only those decades
+      if (selectedDecades && selectedDecades.length > 0 && selectedDecades.length < getAllDecades().length) {
+        movies = movies.filter((movie) => {
+          const year = movie.release_date ? parseInt(movie.release_date.slice(0, 4), 10) : null;
+          if (!year) return false;
+          const decade = Math.floor(year / 10) * 10;
+          return selectedDecades.includes(decade);
+        });
+      }
+
+      // Filter based on mood/context
+      if (selectedMood) {
+        movies = filterByMood(movies, selectedMood);
+      }
+
+      // Shuffle the pool for freshness
+      const shuffle = (arr) => {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+      };
+      const randomized = shuffle(movies);
+
+      // Pick up to 3 distinct movies
+      const picks = randomized.slice(0, 3);
+
+      // Get detailed information for selected movies
+      const detailedMovies = await Promise.all(
+        picks.map(async (movie) => {
+          try {
+            const details = await getMovieDetails(movie.id);
+            return {
+              ...movie,
+              director: details.credits?.crew?.find(person => person.job === 'Director')?.name || 'Unknown',
+              cast: details.credits?.cast?.slice(0, 3).map(actor => actor.name) || [],
+            };
+          } catch (err) {
+            console.error(`Error getting details for movie ${movie.id}:`, err);
+            return movie;
+          }
+        })
+      );
+
+      setRecommendations(detailedMovies);
+      setCurrentStep(3);
+    } catch (err) {
+      setError('Failed to generate recommendations');
+      console.error('Error generating recommendations:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Filter movies based on mood/context
+  const filterByMood = (movies, mood) => {
+    switch (mood) {
+      case 'solo':
+        // Prefer critically acclaimed, thought-provoking films
+        return movies
+          .filter(movie => movie.vote_average >= 7.0)
+          .sort((a, b) => b.vote_average - a.vote_average);
+      
+      case 'date':
+        // Prefer romantic, feel-good, or visually stunning films
+        return movies
+          .filter(movie => 
+            movie.vote_average >= 6.5 && 
+            (movie.genre_ids?.includes(10749) || // Romance
+             movie.genre_ids?.includes(35) || // Comedy
+             movie.genre_ids?.includes(14)) // Fantasy
+          )
+          .sort((a, b) => b.popularity - a.popularity);
+      
+      case 'group':
+        // Prefer action, comedy, or crowd-pleasing films
+        return movies
+          .filter(movie => 
+            movie.vote_average >= 6.0 && 
+            (movie.genre_ids?.includes(28) || // Action
+             movie.genre_ids?.includes(35) || // Comedy
+             movie.genre_ids?.includes(12)) // Adventure
+          )
+          .sort((a, b) => b.popularity - a.popularity);
+      
+      default:
+        return movies;
+    }
+  };
+
+  // Reset the recommendation flow
+  const resetFlow = () => {
+    setSelectedGenres([]);
+    setSelectedDecades(getAllDecades());
+    setSelectedMood(null);
+    setRecommendations([]);
+    setError(null);
+    setCurrentStep(1);
+  };
+
+  // Navigate to next step
+  const nextStep = () => {
+    if (currentStep < 3) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  // Navigate to previous step
+  const prevStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  // Toggle genre selection
+  const toggleGenre = (genreId) => {
+    setSelectedGenres((previousSelected) => {
+      const isSelected = previousSelected.includes(genreId);
+      if (isSelected) {
+        return previousSelected.filter((id) => id !== genreId);
+      }
+      // Enforce max of 2 genres
+      if (previousSelected.length >= 2) {
+        return previousSelected; // ignore additional selections
+      }
+      return [...previousSelected, genreId];
+    });
+  };
+
+  // Toggle decade selection
+  const toggleDecade = (decade) => {
+    setSelectedDecades((previousSelected) => {
+      if (previousSelected.includes(decade)) {
+        return previousSelected.filter((d) => d !== decade);
+      }
+      return [...previousSelected, decade];
+    });
+  };
+
+  // Get decade options (1890s to 2020s)
+  const getDecadeOptions = () => {
+    const decades = [];
+    for (let year = 1890; year <= 2020; year += 10) {
+      decades.push({ value: year, label: `${year}s` });
+    }
+    return decades;
+  };
+
+  // Get mood options
+  const getMoodOptions = () => [
+    { value: 'solo', label: 'Solo', description: 'Thought-provoking films for personal viewing' },
+    { value: 'date', label: 'Date Night', description: 'Romantic and feel-good movies' },
+    { value: 'group', label: 'Group', description: 'Crowd-pleasing action and comedy' },
+  ];
+
+  return {
+    // State
+    genres,
+    selectedGenres,
+    selectedDecades,
+    selectedMood,
+    recommendations,
+    loading,
+    error,
+    currentStep,
+    
+    // Actions
+    setSelectedGenres,
+    setSelectedDecades,
+    setSelectedMood,
+    generateRecommendations,
+    resetFlow,
+    nextStep,
+    prevStep,
+    toggleGenre,
+    toggleDecade,
+    
+    // Helpers
+    getDecadeOptions,
+    getMoodOptions,
+  };
+};

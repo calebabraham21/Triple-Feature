@@ -178,4 +178,55 @@
   .accent-gradient {
     background: linear-gradient(135deg, #ff4444 0%, #8b5cf6 50%, #4a9eff 100%);
   }
+
+  /* Main content spacing to prevent nav overlap */
+  main {
+    padding-top: var(--nav-height, 80px);
+  }
+
+  /* Smooth gradient animation for buttons */
+  .gradient-button {
+    background: linear-gradient(90deg, 
+      rgba(255, 68, 68, 0.3) 0%, 
+      rgba(139, 92, 246, 0.3) 50%, 
+      rgba(74, 158, 255, 0.3) 100%);
+    background-size: 200% 100%;
+    transition: background-position 0.5s ease;
+  }
+  
+  .gradient-button:hover {
+    background-position: 100% 0;
+  }
+
+  /* Dynamic spotlight effect */
+  .spotlight-button {
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .spotlight-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(ellipse 80px 40px at var(--x, 50%) var(--y, 50%), 
+      rgba(255, 68, 68, 0.05) 0%, 
+      rgba(74, 158, 255, 0.05) 50%, 
+      transparent 100%);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+    z-index: 1;
+  }
+  
+  .spotlight-button:hover::before {
+    opacity: 1;
+  }
+  
+  .spotlight-button > * {
+    position: relative;
+    z-index: 2;
+  }
 }

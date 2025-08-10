@@ -7,7 +7,7 @@ export const useRecommendations = () => {
   // Multi-decade selection; default to all decades
   const getAllDecades = () => {
     const decades = [];
-    for (let year = 1890; year <= 2020; year += 10) {
+    for (let year = 1900; year <= 2020; year += 10) {
       decades.push(year);
     }
     return decades;
@@ -18,6 +18,9 @@ export const useRecommendations = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [currentStep, setCurrentStep] = useState(1);
+  
+  // Track recently shown movies to avoid repetition
+  const [recentlyShown, setRecentlyShown] = useState(new Set());
 
   // Load genres on mount
   useEffect(() => {
@@ -99,19 +102,70 @@ export const useRecommendations = () => {
         movies = filterByMood(movies, selectedMood);
       }
 
-      // Shuffle the pool for freshness
-      const shuffle = (arr) => {
-        const a = [...arr];
+      // Filter out recently shown movies to avoid repetition
+      movies = movies.filter(movie => !recentlyShown.has(movie.id));
+
+      // Advanced shuffling with multiple randomization passes
+      const advancedShuffle = (arr) => {
+        let a = [...arr];
+        
+        // First pass: Standard Fisher-Yates shuffle
         for (let i = a.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
           [a[i], a[j]] = [a[j], a[i]];
         }
+        
+        // Second pass: Random chunk swapping for extra randomness
+        const chunkSize = Math.max(1, Math.floor(a.length / 8));
+        for (let i = 0; i < 3; i++) {
+          const start1 = Math.floor(Math.random() * (a.length - chunkSize));
+          const start2 = Math.floor(Math.random() * (a.length - chunkSize));
+          
+          if (start1 !== start2) {
+            const chunk1 = a.slice(start1, start1 + chunkSize);
+            const chunk2 = a.slice(start2, start2 + chunkSize);
+            
+            // Swap chunks
+            a.splice(start1, chunkSize, ...chunk2);
+            a.splice(start2, chunkSize, ...chunk1);
+          }
+        }
+        
+        // Third pass: Random individual swaps
+        for (let i = 0; i < Math.floor(a.length / 2); i++) {
+          const idx1 = Math.floor(Math.random() * a.length);
+          const idx2 = Math.floor(Math.random() * a.length);
+          [a[idx1], a[idx2]] = [a[idx2], a[idx1]];
+        }
+        
         return a;
       };
-      const randomized = shuffle(movies);
+      
+      const randomized = advancedShuffle(movies);
 
-      // Pick up to 3 distinct movies
-      const picks = randomized.slice(0, 3);
+      // Use weighted selection for final picks to avoid always picking from the start
+      const picks = [];
+      const availableMovies = [...randomized];
+      
+      for (let i = 0; i < 3 && availableMovies.length > 0; i++) {
+        // Weighted selection: higher chance for earlier indices, but still random
+        const weights = availableMovies.map((_, idx) => Math.pow(0.8, idx));
+        const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+        
+        let random = Math.random() * totalWeight;
+        let selectedIndex = 0;
+        
+        for (let j = 0; j < weights.length; j++) {
+          random -= weights[j];
+          if (random <= 0) {
+            selectedIndex = j;
+            break;
+          }
+        }
+        
+        picks.push(availableMovies[selectedIndex]);
+        availableMovies.splice(selectedIndex, 1);
+      }
 
       // Get detailed information for selected movies
       const detailedMovies = await Promise.all(
@@ -131,6 +185,20 @@ export const useRecommendations = () => {
       );
 
       setRecommendations(detailedMovies);
+      
+      // Track these movies as recently shown
+      const newRecentlyShown = new Set(recentlyShown);
+      detailedMovies.forEach(movie => newRecentlyShown.add(movie.id));
+      
+      // Keep only the last 30 movies to prevent the set from growing too large
+      if (newRecentlyShown.size > 30) {
+        const recentArray = Array.from(newRecentlyShown);
+        const trimmed = new Set(recentArray.slice(-30));
+        setRecentlyShown(trimmed);
+      } else {
+        setRecentlyShown(newRecentlyShown);
+      }
+      
       setCurrentStep(3);
     } catch (err) {
       setError('Failed to generate recommendations');
@@ -184,6 +252,8 @@ export const useRecommendations = () => {
     setRecommendations([]);
     setError(null);
     setCurrentStep(1);
+    // Optionally clear recently shown movies on reset (uncomment if desired)
+    // setRecentlyShown(new Set());
   };
 
   // Navigate to next step
@@ -225,10 +295,10 @@ export const useRecommendations = () => {
     });
   };
 
-  // Get decade options (1890s to 2020s)
+  // Get decade options (1900s to 2020s)
   const getDecadeOptions = () => {
     const decades = [];
-    for (let year = 1890; year <= 2020; year += 10) {
+    for (let year = 1900; year <= 2020; year += 10) {
       decades.push({ value: year, label: `${year}s` });
     }
     return decades;

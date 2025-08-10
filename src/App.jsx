@@ -3,6 +3,8 @@ import { WatchlistProvider } from './context/WatchlistContext';
 import Header from './components/Header';
 import HomePage from './pages/HomePage';
 import WatchlistPage from './pages/WatchlistPage';
+import AboutMe from './pages/AboutMe';
+import AboutTripleFeature from './pages/AboutTripleFeature';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
@@ -15,6 +17,10 @@ function App() {
     switch (currentPage) {
       case 'watchlist':
         return <WatchlistPage />;
+      case 'about-me':
+        return <AboutMe />;
+      case 'about-triple':
+        return <AboutTripleFeature />;
       default:
         return <HomePage />;
     }
@@ -22,7 +28,7 @@ function App() {
 
   return (
     <WatchlistProvider>
-      <div className="min-h-screen bg-cinema-black">
+      <div className="min-h-screen">
         <Header currentPage={currentPage} onNavigate={handleNavigate} />
         <main>
           {renderPage()}

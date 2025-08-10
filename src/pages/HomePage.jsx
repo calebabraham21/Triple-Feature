@@ -2,7 +2,6 @@ import { motion } from 'framer-motion';
 import { useRecommendations } from '../hooks/useRecommendations';
 import MovieCard from '../components/MovieCard';
 import { ChevronLeft, ChevronRight, Sparkles, Clock, Users, Heart } from 'lucide-react';
-import TripFeatLogo from '../../TripFeatLogo.png';
 import GlowButton from '../components/GlowButton';
 // Using public asset path for reliability in dev/prod
 
@@ -34,6 +33,7 @@ const HomePage = () => {
 
   const renderStep1 = () => (
     <motion.div
+      id="preferences"
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: -20 }}
@@ -254,7 +254,7 @@ const HomePage = () => {
             <img
               src={'/movie-posters.jpg'}
               alt="Movie posters background"
-              className="w-full h-full object-cover blur-xl opacity-50 scale-110 brightness-110"
+              className="w-full h-full object-cover blur-sm opacity-20 scale-110 brightness-100"
               loading="lazy"
               decoding="async"
             />
@@ -266,30 +266,45 @@ const HomePage = () => {
             <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(255,68,68,0.1)_0%,transparent_50%)]" />
           </div>
 
-          <div className="relative z-10 max-w-4xl mx-auto px-4 py-10 md:py-14 text-center">
+          <div className="relative z-10 max-w-4xl mx-auto px-4 pt-8 md:pt-16 text-center">
             <motion.div
               initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               transition={{ delay: 0.2 }}
             >
-              <div className="flex justify-center mb-4 md:mb-5">
-                <img
-                  src={TripFeatLogo}
-                  alt="Triple Feature"
-                  className="w-[180px] md:w-[280px] h-auto object-contain drop-shadow-[0_8px_20px_rgba(0,0,0,0.35)]"
-                />
+              {/* Tagline */}
+              <div className="max-w-4xl mx-auto mb-8 text-white">
+                <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
+                  Stop scrolling.<br />Start watching.
+                </h1>
               </div>
-              <p className="text-base md:text-lg text-white mb-6 md:mb-7 max-w-2xl mx-auto">
-                Discover your perfect movie night with personalized recommendations
-              </p>
-              {/* Removed the redundant hero CTA button */}
+
+              <div className="flex justify-center mb-8">
+                <GlowButton
+                  onClick={() => {
+                    const el = document.getElementById('preferences');
+                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }}
+                  onMouseMove={(e) => {
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    const x = ((e.clientX - rect.left) / rect.width) * 100;
+                    const y = ((e.clientY - rect.top) / rect.height) * 100;
+                    e.currentTarget.style.setProperty('--x', `${x}%`);
+                    e.currentTarget.style.setProperty('--y', `${y}%`);
+                  }}
+                  className="px-4 py-2 text-sm gradient-button spotlight-button text-white border-0 shadow-lg hover:shadow-xl"
+                >
+                  Start Watching
+                  <ChevronRight size={20} />
+                </GlowButton>
+              </div>
             </motion.div>
           </div>
         </motion.div>
       )}
 
       {/* Recommendation Flow */}
-      <div className="px-4 py-12">
+      <div className="px-4 pt-8">
         {currentStep === 1 && renderStep1()}
         {currentStep === 2 && renderStep2()}
         {currentStep === 3 && renderStep3()}

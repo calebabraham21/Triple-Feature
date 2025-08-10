@@ -204,8 +204,7 @@ const HomePage = () => {
       className="max-w-7xl mx-auto"
     >
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold mb-4">Your Triple Feature</h2>
-        <p className="text-white">Here are your personalized movie recommendations</p>
+        <p className="text-white">Congratulations, you've successfully outsourced your decision-making to an <i>algorithm</i></p>
       </div>
 
       {error && (
@@ -292,10 +291,10 @@ const HomePage = () => {
                     e.currentTarget.style.setProperty('--x', `${x}%`);
                     e.currentTarget.style.setProperty('--y', `${y}%`);
                   }}
-                  className="px-4 py-2 text-sm gradient-button spotlight-button text-white border-0 shadow-lg hover:shadow-xl"
+                  className="px-6 py-4 text-sm gradient-button spotlight-button text-white border-0 shadow-lg hover:shadow-xl"
                 >
-                  Start Watching
-                  <ChevronRight size={20} />
+                  <b>START WATCHING</b>
+          
                 </GlowButton>
               </div>
             </motion.div>

@@ -1,34 +1,37 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Plus, Check, Calendar, User, Globe } from 'lucide-react';
-import { useWatchlist } from '../context/WatchlistContext';
+import { Star, Plus, Check, Calendar, User, Globe, Heart } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
+import { useWatchlist } from '../hooks/useWatchlist';
+import { useAuth } from '../hooks/useAuth';
 import { getPosterUrl, getBackdropUrl, truncateText, formatRating, getLanguageName, getWatchProviders, tmdbConfig, getMovieDetails } from '../utils/tmdb';
 
 const MovieCard = ({ movie, showAddButton = true, showDirector = true }) => {
-  const { addMovie, removeMovie, isInWatchlist, toggleWatched } = useWatchlist();
+  const { toggleWatchlist, isInWatchlist } = useWatchlist();
+  const { isAuthenticated } = useAuth();
+  const navigate = useNavigate();
   const isInList = isInWatchlist(movie.id);
   const [showDetails, setShowDetails] = useState(false);
   const [providers, setProviders] = useState(null);
   const [details, setDetails] = useState(null);
   const [detailsLoading, setDetailsLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [watchlistLoading, setWatchlistLoading] = useState(false);
 
-  const handleAddToWatchlist = () => {
-    if (isInList) {
-      removeMovie(movie.id);
-    } else {
-      addMovie({
-        id: movie.id,
-        title: movie.title,
-        overview: movie.overview,
-        posterPath: movie.poster_path,
-        backdropPath: movie.backdrop_path,
-        releaseDate: movie.release_date,
-        voteAverage: movie.vote_average,
-        director: movie.director,
-        cast: movie.cast,
-      });
+  const handleAddToWatchlist = async () => {
+    if (!isAuthenticated) {
+      navigate('/auth');
+      return;
+    }
+
+    setWatchlistLoading(true);
+    try {
+      await toggleWatchlist(movie);
+    } catch (error) {
+      console.error('Error toggling watchlist:', error);
+    } finally {
+      setWatchlistLoading(false);
     }
   };
 
@@ -160,13 +163,19 @@ const MovieCard = ({ movie, showAddButton = true, showDirector = true }) => {
               whileHover={{}}
               whileTap={{}}
               onClick={handleAddToWatchlist}
+              disabled={watchlistLoading}
               className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg font-medium transition-all duration-200 ${
                 isInList
                   ? 'bg-accent-gold text-cinema-black hover:bg-accent-gold/80'
                   : 'bg-cinema-gray text-white hover:bg-cinema-light border border-cinema-light hover:border-accent-blue'
-              }`}
+              } ${watchlistLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
-              {isInList ? (
+              {watchlistLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                  {isInList ? 'Removing...' : 'Adding...'}
+                </>
+              ) : isInList ? (
                 <>
                   <Check size={16} />
                   In Watchlist
@@ -174,7 +183,7 @@ const MovieCard = ({ movie, showAddButton = true, showDirector = true }) => {
               ) : (
                 <>
                   <Plus size={16} />
-                  Add to Watchlist
+                  {isAuthenticated ? 'Add to Watchlist' : 'Sign in to Save'}
                 </>
               )}
             </motion.button>

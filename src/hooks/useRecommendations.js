@@ -14,6 +14,11 @@ export const useRecommendations = () => {
   };
   const [selectedDecades, setSelectedDecades] = useState(getAllDecades());
   const [selectedMood, setSelectedMood] = useState(null);
+  
+  // New consent state variables
+  const [includeAdult, setIncludeAdult] = useState(false);
+  const [languagePreference, setLanguagePreference] = useState('both'); // 'english', 'non-english', 'both'
+  
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -42,6 +47,14 @@ export const useRecommendations = () => {
 
   // Generate recommendations based on filters
   const generateRecommendations = async () => {
+    console.log('generateRecommendations called with:', {
+      selectedGenres,
+      selectedDecades,
+      selectedMood,
+      includeAdult,
+      languagePreference
+    });
+    
     if (!selectedGenres.length && (!selectedDecades || selectedDecades.length === 0)) {
       setError('Please select at least one genre or decade');
       return;
@@ -57,6 +70,8 @@ export const useRecommendations = () => {
         decades: selectedDecades,
         sortBy: 'popularity.desc',
         minRating: 6.5,
+        includeAdult: includeAdult,
+        languagePreference: languagePreference,
       };
 
       // Fetch a larger pool by sampling multiple random pages
@@ -199,7 +214,7 @@ export const useRecommendations = () => {
         setRecentlyShown(newRecentlyShown);
       }
       
-      setCurrentStep(3);
+      setCurrentStep(4);
     } catch (err) {
       setError('Failed to generate recommendations');
       console.error('Error generating recommendations:', err);
@@ -249,6 +264,8 @@ export const useRecommendations = () => {
     setSelectedGenres([]);
     setSelectedDecades(getAllDecades());
     setSelectedMood(null);
+    setIncludeAdult(false);
+    setLanguagePreference('both');
     setRecommendations([]);
     setError(null);
     setCurrentStep(1);
@@ -258,7 +275,7 @@ export const useRecommendations = () => {
 
   // Navigate to next step
   const nextStep = () => {
-    if (currentStep < 3) {
+    if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -317,6 +334,8 @@ export const useRecommendations = () => {
     selectedGenres,
     selectedDecades,
     selectedMood,
+    includeAdult,
+    languagePreference,
     recommendations,
     loading,
     error,
@@ -326,6 +345,8 @@ export const useRecommendations = () => {
     setSelectedGenres,
     setSelectedDecades,
     setSelectedMood,
+    setIncludeAdult,
+    setLanguagePreference,
     generateRecommendations,
     resetFlow,
     nextStep,

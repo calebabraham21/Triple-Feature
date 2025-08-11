@@ -1,11 +1,20 @@
 import { motion } from 'framer-motion';
-import { List, Home, Info, Menu, X, Sparkles, Code, Mail, ExternalLink, Linkedin, Github } from 'lucide-react';
+import { List, Home, Info, Menu, X, Sparkles, Code, Mail, ExternalLink, Linkedin, Github, User, LogOut } from 'lucide-react';
 import { useState, useLayoutEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import TripFeatLogo from '../../TripFeatLogo.png';
+import { useAuth } from '../hooks/useAuth';
+
 
 const Header = ({ currentPage, onNavigate }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navRef = useRef(null);
+  const { user, isAuthenticated, signOut } = useAuth();
+
+  const navigate = useNavigate();
+  
+  // Debug authentication state
+  console.log('Header render - isAuthenticated:', isAuthenticated, 'user:', user);
   
   const leftNavItems = [
     { id: 'home', label: 'Home', icon: Home },
@@ -41,6 +50,13 @@ const Header = ({ currentPage, onNavigate }) => {
   const handleNavigation = (page) => {
     onNavigate(page);
     setIsMobileMenuOpen(false);
+  };
+
+  const handleSignOut = async () => {
+    console.log('Signing out...');
+    await signOut();
+    console.log('Sign out completed, navigating to home');
+    navigate('/');
   };
 
   const renderNavButton = (item) => {
@@ -185,6 +201,58 @@ const Header = ({ currentPage, onNavigate }) => {
             className="flex items-center gap-2"
           >
             {rightNavItems.map(renderNavButton)}
+            
+            {/* Authentication Button */}
+            <div className="ml-2">
+              {isAuthenticated ? (
+                <div className="relative group">
+                  <motion.button
+                    whileHover={{}}
+                    whileTap={{}}
+                    className="relative inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium border trace-snake trace-snake--rb transition-colors transition-shadow duration-300 bg-accent-blue text-white border-accent-blue hover:bg-accent-blue/80"
+                  >
+                    <User size={16} />
+                                         <span className="hidden lg:inline">
+                       {user?.user_metadata?.name || 'Account'}
+                     </span>
+                    <span className="trace-line trace-line--t" />
+                    <span className="trace-line trace-line--r" />
+                    <span className="trace-line trace-line--b" />
+                    <span className="trace-line trace-line--l" />
+                  </motion.button>
+                  
+                                     {/* User Dropdown */}
+                   <div className="absolute right-0 top-full w-48 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-200 z-50">
+                     <div className="bg-black/90 backdrop-blur-md border border-white/20 rounded-lg shadow-xl p-2">
+                       <button
+                         onClick={handleSignOut}
+                         className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-white/10 transition-colors text-white"
+                       >
+                         <LogOut size={18} className="text-accent-red" />
+                         <span>Sign Out</span>
+                       </button>
+                     </div>
+                   </div>
+                </div>
+              ) : (
+                <motion.button
+                  whileHover={{}}
+                  whileTap={{}}
+                  onClick={() => {
+                    console.log('Sign In button clicked, navigating to /auth');
+                    navigate('/auth');
+                  }}
+                  className="relative inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium border trace-snake trace-snake--rb transition-colors transition-shadow duration-300 bg-cinema-gray text-white border-cinema-light hover:bg-accent-blue hover:border-accent-blue"
+                >
+                  <User size={16} />
+                  <span className="hidden lg:inline">Sign In</span>
+                  <span className="trace-line trace-line--t" />
+                  <span className="trace-line trace-line--r" />
+                  <span className="trace-line trace-line--b" />
+                  <span className="trace-line trace-line--l" />
+                </motion.button>
+              )}
+            </div>
           </motion.nav>
         </div>
       </div>
@@ -284,6 +352,7 @@ const Header = ({ currentPage, onNavigate }) => {
           </nav>
         </motion.div>
       )}
+
     </header>
   );
 };

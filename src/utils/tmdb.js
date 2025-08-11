@@ -47,6 +47,8 @@ export const getMoviesByFilters = async (filters = {}) => {
     page = 1,
     sortBy = 'popularity.desc',
     minRating = 6.0,
+    includeAdult = false,
+    languagePreference = 'both',
   } = filters;
 
   let params = {
@@ -60,6 +62,27 @@ export const getMoviesByFilters = async (filters = {}) => {
     params.with_genres = genres.join(',');
   }
 
+  // Handle adult content preference using US certification system
+  // adult: false = family-friendly (up to PG-13), adult: true = R-rated and above, null = any rating
+  if (includeAdult === false) {
+    params.certification_country = 'US';
+    params['certification.lte'] = 'PG-13';
+  } else if (includeAdult === true) {
+    params.certification_country = 'US';
+    params['certification.gte'] = 'R';
+  }
+  // If includeAdult is null, no certification filtering at API level
+  
+  // Always keep include_adult=false unless we want pornographic content
+  params.include_adult = false;
+  
+  // Add US region bias for better theatrical data
+  params.region = 'US';
+  params.with_release_type = '2|3'; // Theatrical and digital releases
+
+  // Note: Language filtering will be done client-side for better accuracy
+  // TMDB's with_original_language and without_original_language don't work reliably
+
   // If specific decades are provided, pass the broadest range to TMDB (min..max)
   if (Array.isArray(decades) && decades.length > 0) {
     const minDecade = Math.min(...decades);
@@ -68,7 +91,96 @@ export const getMoviesByFilters = async (filters = {}) => {
     params['primary_release_date.lte'] = `${maxDecade}-12-31`;
   }
 
-  return makeRequest('/discover/movie', params);
+  console.log('Making TMDB API call with params:', params);
+  console.log(`Adult content preference: ${includeAdult === null ? 'Any rating' : includeAdult ? 'R-rated and above' : 'Family-friendly (up to PG-13)'}`);
+  const response = await makeRequest('/discover/movie', params);
+  
+  // Apply strict certification filtering if not "any" mode
+  if (includeAdult !== null) { // null means "any" mode
+    console.log(`Applying strict certification filtering for ${includeAdult ? 'adult' : 'family'} mode...`);
+    
+    const beforeCount = response.results.length;
+    const moviesToCheck = response.results.slice(0, 20); // Check first 20 movies for efficiency
+    
+    try {
+      // Fetch release dates for movies in parallel
+      const releaseDatesPromises = moviesToCheck.map(movie => 
+        getMovieReleaseDates(movie.id).catch(err => {
+          console.warn(`Failed to fetch release dates for ${movie.title}:`, err);
+          return null;
+        })
+      );
+      
+      const releaseDatesResults = await Promise.all(releaseDatesPromises);
+      
+      // Filter movies based on strict certification requirements
+      const filteredResults = [];
+      let checkedCount = 0;
+      
+      for (let i = 0; i < response.results.length; i++) {
+        const movie = response.results[i];
+        
+        if (i < moviesToCheck.length) {
+          // Check certification for movies we fetched release dates for
+          const releaseDates = releaseDatesResults[i];
+          if (releaseDates) {
+            const certification = parseUSCertification(releaseDates);
+            const meetsRequirement = meetsCertificationRequirement(certification, includeAdult);
+            
+            if (meetsRequirement) {
+              filteredResults.push(movie);
+            } else {
+              console.log(`Excluded ${movie.title} - US cert: ${certification || 'none'} (${includeAdult ? 'adult' : 'family'} mode)`);
+            }
+            checkedCount++;
+          } else {
+            // If we couldn't fetch release dates, exclude for safety
+            console.log(`Excluded ${movie.title} - couldn't fetch release dates`);
+          }
+        } else {
+          // For movies beyond our check limit, include them (they passed initial API filtering)
+          filteredResults.push(movie);
+        }
+      }
+      
+      response.results = filteredResults;
+      console.log(`Strict certification filtering: ${beforeCount} movies before, ${response.results.length} after (checked ${checkedCount} movies)`);
+      
+    } catch (error) {
+      console.error('Error during strict certification filtering:', error);
+      console.log('Falling back to API-level filtering only');
+    }
+  }
+  
+  // Apply language filtering client-side for better accuracy
+  if (languagePreference !== 'both' && response.results) {
+    const beforeCount = response.results.length;
+    response.results = response.results.filter(movie => {
+      const originalLanguage = movie.original_language;
+      
+      if (languagePreference === 'english') {
+        return originalLanguage === 'en';
+      } else if (languagePreference === 'non-english') {
+        return originalLanguage !== 'en';
+      }
+      
+      return true; // 'both' case
+    });
+    
+    console.log(`Language filtering: ${beforeCount} movies before, ${response.results.length} after (${languagePreference})`);
+    
+    // Log a few examples for debugging
+    if (response.results.length > 0) {
+      console.log('Sample movies after language filtering:', 
+        response.results.slice(0, 3).map(m => ({ 
+          title: m.title, 
+          original_language: m.original_language 
+        }))
+      );
+    }
+  }
+  
+  return response;
 };
 
 // Get movie details including credits
@@ -208,6 +320,47 @@ export const getLanguageName = (code) => {
 // Get watch providers for a movie (country-scoped)
 export const getWatchProviders = async (movieId) => {
   return makeRequest(`/movie/${movieId}/watch/providers`);
+};
+
+// Get release dates for a movie
+export const getMovieReleaseDates = async (movieId) => {
+  return makeRequest(`/movie/${movieId}/release_dates`);
+};
+
+// Parse US certification from release dates
+export const parseUSCertification = (releaseDates) => {
+  if (!releaseDates?.results) return null;
+  
+  // Find US release dates
+  const usRelease = releaseDates.results.find(country => country.iso_3166_1 === 'US');
+  if (!usRelease?.release_dates || usRelease.release_dates.length === 0) return null;
+  
+  // Sort by release type priority: theatrical (3) > digital (4) > physical (5) > tv (6)
+  const sortedReleases = usRelease.release_dates.sort((a, b) => {
+    const typePriority = { 3: 1, 4: 2, 5: 3, 6: 4, 2: 5, 1: 6 };
+    return (typePriority[a.type] || 999) - (typePriority[b.type] || 999);
+  });
+  
+  // Return the certification from the most relevant release
+  return sortedReleases[0]?.certification || null;
+};
+
+// Check if certification meets the strict requirements
+export const meetsCertificationRequirement = (certification, includeAdult) => {
+  if (!certification) return false; // No US certification = exclude
+  
+  const ratingOrder = ['G', 'PG', 'PG-13', 'R', 'NC-17', 'X'];
+  const certIndex = ratingOrder.indexOf(certification);
+  
+  if (certIndex === -1) return false; // Unknown rating = exclude
+  
+  if (!includeAdult) {
+    // Family mode: must be ≤ PG-13
+    return certIndex <= 2; // G, PG, or PG-13
+  } else {
+    // Adult mode: must be ≥ R
+    return certIndex >= 3; // R, NC-17, or X
+  }
 };
 
 // Helper function to get decade from year

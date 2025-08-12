@@ -16,7 +16,6 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
   
   const leftNavItems = [
     { id: 'home', label: 'Home', icon: Home },
-    { id: 'watchlist', label: 'Watchlist', icon: List },
     { id: 'top-picks', label: 'Top Picks', icon: Sparkles },
   ];
 
@@ -221,6 +220,16 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
                    <div className="absolute right-0 top-full w-48 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-200 z-50">
                      <div className="bg-black/90 backdrop-blur-md border border-white/20 rounded-lg shadow-xl p-2">
                        <button
+                         onClick={() => {
+                           handleNavigation('watchlist');
+                           navigate('/watchlist');
+                         }}
+                         className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-white/10 transition-colors text-white"
+                       >
+                         <List size={18} className="text-accent-gold" />
+                         <span>My Watchlist</span>
+                       </button>
+                       <button
                          onClick={handleSignOut}
                          className="flex items-center gap-3 w-full p-3 rounded-lg hover:bg-white/10 transition-colors text-white"
                        >
@@ -350,14 +359,28 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
               <h4 className="text-xs font-semibold text-white uppercase tracking-wider mb-2">Account</h4>
               <div className="space-y-1">
                 {isAuthenticated ? (
-                  <motion.button
-                    whileTap={{ scale: 0.95 }}
-                    onClick={handleSignOut}
-                    className="flex items-center gap-2 w-full px-2 py-2 rounded text-sm font-medium text-white hover:text-white hover:bg-cinema-gray/50"
-                  >
-                    <LogOut size={16} />
-                    Sign Out
-                  </motion.button>
+                  <>
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => {
+                        handleNavigation('watchlist');
+                        navigate('/watchlist');
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className="flex items-center gap-2 w-full px-2 py-2 rounded text-sm font-medium text-white hover:text-white hover:bg-cinema-gray/50"
+                    >
+                      <List size={16} className="text-accent-gold" />
+                      My Watchlist
+                    </motion.button>
+                    <motion.button
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleSignOut}
+                      className="flex items-center gap-2 w-full px-2 py-2 rounded text-sm font-medium text-white hover:text-white hover:bg-cinema-gray/50"
+                    >
+                      <LogOut size={16} />
+                      Sign Out
+                    </motion.button>
+                  </>
                 ) : (
                   <motion.button
                     whileTap={{ scale: 0.95 }}

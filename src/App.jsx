@@ -10,6 +10,17 @@ import AboutTripleFeature from './pages/AboutTripleFeature';
 import AuthPage from './pages/AuthPage';
 import { useAuth } from './hooks/useAuth';
 
+// Protected Route Component
+const ProtectedRoute = ({ children }) => {
+  const { isAuthenticated } = useAuth();
+  
+  if (!isAuthenticated) {
+    return <Navigate to="/auth" replace />;
+  }
+  
+  return children;
+};
+
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
@@ -62,7 +73,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/auth" element={<AuthPage />} />
-            <Route path="/watchlist" element={<WatchlistPage />} />
+            <Route path="/watchlist" element={<ProtectedRoute><WatchlistPage /></ProtectedRoute>} />
             <Route path="/about-me" element={<AboutMe />} />
             <Route path="/about-triple" element={<AboutTripleFeature />} />
             <Route path="*" element={<Navigate to="/" replace />} />

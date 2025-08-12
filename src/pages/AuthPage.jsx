@@ -398,10 +398,10 @@ const AuthPage = () => {
         >
           <CheckCircle size={64} className="mx-auto text-green-400 mb-6" />
           <h2 className="text-2xl font-bold text-white mb-4">Check Your Email!</h2>
-          <p className="text-gray-300 mb-6">
+          <p className="text-white mb-6">
             We've sent a confirmation link to <strong className="text-white">{email}</strong>
           </p>
-          <p className="text-sm text-gray-400 mb-8">
+          <p className="text-sm text-white mb-8">
             Click the link in your email to complete your account setup. Your profile will be created automatically when you sign in for the first time.
           </p>
           <div className="space-y-3">
@@ -439,7 +439,7 @@ const AuthPage = () => {
         {/* Back Button */}
         <button
           onClick={goBack}
-          className="absolute top-6 left-6 text-gray-400 hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10"
+          className="absolute top-6 left-6 text-white hover:text-white transition-colors p-2 rounded-lg hover:bg-white/10"
         >
           <ArrowLeft size={20} />
         </button>
@@ -449,7 +449,7 @@ const AuthPage = () => {
           <h1 className="text-3xl font-bold text-white mb-2">
             {isSignUp ? 'Create Account' : 'Welcome Back'}
           </h1>
-          <p className="text-gray-300">
+          <p className="text-white">
             {isSignUp ? 'Join the movie community' : 'Sign in to your account'}
           </p>
         </div>
@@ -460,7 +460,7 @@ const AuthPage = () => {
             <>
               {/* First Name */}
               <div className="relative">
-                <User size={18} className="absolute left-3 top-3 text-gray-400" />
+                <User size={18} className="absolute left-3 top-3 text-white" />
                 <input
                   type="text"
                   placeholder="First Name *"
@@ -533,7 +533,7 @@ const AuthPage = () => {
 
           {/* Password */}
           <div className="relative">
-            <Lock size={18} className="absolute left-3 top-3 text-gray-400" />
+            <Lock size={18} className="absolute left-3 top-3 text-white" />
             <input
               type={showPassword ? 'text' : 'password'}
               placeholder="Password *"
@@ -547,7 +547,7 @@ const AuthPage = () => {
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3 top-3 text-gray-400 hover:text-white transition-colors p-1 rounded hover:bg-white/10"
+              className="absolute right-3 top-3 text-white hover:text-white transition-colors p-1 rounded hover:bg-white/10"
             >
               {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
             </button>
@@ -593,7 +593,7 @@ const AuthPage = () => {
 
         {/* Toggle Mode */}
         <div className="text-center mt-8">
-          <p className="text-gray-300">
+          <p className="text-white">
             {isSignUp ? 'Already have an account?' : "Don't have an account?"}
             <button
               onClick={toggleMode}
@@ -608,7 +608,7 @@ const AuthPage = () => {
         {isSignUp && (
           <div className="mt-6 p-4 bg-white/5 rounded-lg border border-white/10 backdrop-blur-sm">
             <h3 className="text-sm font-medium text-white mb-2">Password Requirements:</h3>
-            <ul className="text-xs text-gray-300 space-y-1">
+            <ul className="text-xs text-white space-y-1">
               <li>• At least 6 characters long</li>
               <li>• Can include letters, numbers, and symbols</li>
             </ul>

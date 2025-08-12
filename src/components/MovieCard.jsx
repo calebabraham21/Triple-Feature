@@ -126,30 +126,30 @@ const MovieCard = ({ movie, showAddButton = true, showDirector = true }) => {
           <h3 className="font-semibold text-lg leading-tight group-hover:text-accent-red transition-colors text-white">
             {movie.title}
           </h3>
-          <div className="flex items-center gap-1 text-sm flex-shrink-0 text-gray-200">
-            <Calendar size={14} className="text-gray-300" />
+          <div className="flex items-center gap-1 text-sm flex-shrink-0 text-white">
+            <Calendar size={14} className="text-white" />
             <span className="font-medium">{getYear(releaseDate)}</span>
           </div>
         </div>
 
         {/* Director */}
         {showDirector && movie.director && (
-          <div className="flex items-center gap-2 text-sm text-gray-200 mb-2">
-            <User size={14} className="text-gray-300" />
+          <div className="flex items-center gap-2 text-sm text-white mb-2">
+            <User size={14} className="text-white" />
             <span className="font-medium">Dir. {movie.director}</span>
           </div>
         )}
 
         {/* Overview */}
-        <p className="text-sm text-gray-300 mb-4 leading-relaxed">
+        <p className="text-sm text-white mb-4 leading-relaxed">
           {truncateText(movie.overview, 120)}
         </p>
 
         {/* Cast (if available) */}
         {movie.cast && movie.cast.length > 0 && (
           <div className="mb-4">
-            <p className="text-xs text-cinema-light mb-1">Cast:</p>
-            <p className="text-sm text-gray-300">
+            <p className="text-xs text-white mb-1">Cast:</p>
+            <p className="text-sm text-white">
               {movie.cast.slice(0, 2).join(', ')}
               {movie.cast.length > 2 && '...'}
             </p>
@@ -236,7 +236,7 @@ const MovieCard = ({ movie, showAddButton = true, showDirector = true }) => {
 
                   {/* Description */}
                   {movie.overview && (
-                    <p className="text-gray-200 leading-relaxed mb-5">{movie.overview}</p>
+                    <p className="text-white leading-relaxed mb-5">{movie.overview}</p>
                   )}
 
                   {/* Key Info Blocks */}
@@ -270,7 +270,7 @@ const MovieCard = ({ movie, showAddButton = true, showDirector = true }) => {
                     if (!castNames || castNames.length === 0) return null;
                     return (
                       <div className="mb-6">
-                        <p className="text-sm text-cinema-light mb-2">Cast:</p>
+                        <p className="text-sm text-white mb-2">Cast:</p>
                         <div className="flex flex-wrap gap-2">
                           {castNames.map((name) => (
                             <span key={name} className="px-3 py-1 rounded-full bg-cinema-gray/50 border border-cinema-light text-sm text-white">
@@ -360,10 +360,10 @@ const StreamingProviders = ({ movieId, delayMs = 0 }) => {
 
   return (
     <div className="mb-6">
-      <p className="text-sm text-cinema-light mb-2">Where to watch (US):</p>
+      <p className="text-sm text-white mb-2">Where to watch (US):</p>
       {nonEmpty.map(([label, list]) => (
         <div key={label} className="mb-3">
-          <p className="text-xs text-gray-400 mb-1">{label}</p>
+          <p className="text-xs text-white mb-1">{label}</p>
           <div className="flex flex-wrap items-center gap-2">
             {list.map((p) => (
               <div key={`${label}-${p.provider_id}`} className="flex items-center gap-2 bg-cinema-gray/60 border border-cinema-light rounded-full px-2 py-1">

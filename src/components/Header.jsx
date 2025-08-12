@@ -293,7 +293,7 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
           <nav className="flex flex-col space-y-3">
             {/* Movie App Section */}
             <div>
-              <h4 className="text-xs font-semibold text-cinema-light uppercase tracking-wider mb-2">Movie App</h4>
+                             <h4 className="text-xs font-semibold text-white uppercase tracking-wider mb-2">Movie App</h4>
               <div className="space-y-1">
                 {leftNavItems.map((item) => {
                   const Icon = item.icon;
@@ -307,7 +307,7 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
                       className={`flex items-center gap-2 w-full px-2 py-2 rounded text-sm font-medium transition-colors ${
                         isActive 
                           ? 'bg-cinema-gray text-white' 
-                          : 'text-cinema-light hover:text-white hover:bg-cinema-gray/50'
+                          : 'text-white hover:text-white hover:bg-cinema-gray/50'
                       }`}
                     >
                       <Icon size={16} />
@@ -320,7 +320,7 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
 
             {/* Personal Section */}
             <div>
-              <h4 className="text-xs font-semibold text-cinema-light uppercase tracking-wider mb-2">Personal</h4>
+              <h4 className="text-xs font-semibold text-white uppercase tracking-wider mb-2">Personal</h4>
               <div className="space-y-1">
                 {rightNavItems.map((item) => {
                   const Icon = item.icon;
@@ -334,7 +334,7 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
                       className={`flex items-center gap-2 w-full px-2 py-2 rounded text-sm font-medium transition-colors ${
                         isActive 
                           ? 'bg-cinema-gray text-white' 
-                          : 'text-cinema-light hover:text-white hover:bg-cinema-gray/50'
+                          : 'text-white hover:text-white hover:bg-cinema-gray/50'
                       }`}
                     >
                       <Icon size={16} />
@@ -347,13 +347,13 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
 
             {/* Authentication Section */}
             <div>
-              <h4 className="text-xs font-semibold text-cinema-light uppercase tracking-wider mb-2">Account</h4>
+              <h4 className="text-xs font-semibold text-white uppercase tracking-wider mb-2">Account</h4>
               <div className="space-y-1">
                 {isAuthenticated ? (
                   <motion.button
                     whileTap={{ scale: 0.95 }}
                     onClick={handleSignOut}
-                    className="flex items-center gap-2 w-full px-2 py-2 rounded text-sm font-medium text-cinema-light hover:text-white hover:bg-cinema-gray/50"
+                    className="flex items-center gap-2 w-full px-2 py-2 rounded text-sm font-medium text-white hover:text-white hover:bg-cinema-gray/50"
                   >
                     <LogOut size={16} />
                     Sign Out
@@ -365,7 +365,7 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
                       navigate('/auth');
                       setIsMobileMenuOpen(false);
                     }}
-                    className="flex items-center gap-2 w-full px-2 py-2 rounded text-sm font-medium text-cinema-light hover:text-white hover:bg-cinema-gray/50"
+                    className="flex items-center gap-2 w-full px-2 py-2 rounded text-sm font-medium text-white hover:text-white hover:bg-cinema-gray/50"
                   >
                     <User size={16} />
                     Sign In

@@ -48,14 +48,14 @@ const HomePage = () => {
     >
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold mb-4">Choose Your Preferences</h2>
-        <p className="text-cinema-light">Select genres and decade to get personalized recommendations</p>
+        <p className="text-white">Select genres and decade to get personalized recommendations</p>
       </div>
 
       {/* Genres */}
       <div className="mb-8">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-xl font-semibold select-none">Genres</h3>
-          <p className="text-sm text-cinema-light">Choose up to 2 genres</p>
+          <p className="text-sm text-white">Choose up to 2 genres</p>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
           {genres.map((genre) => (
@@ -122,7 +122,7 @@ const HomePage = () => {
             );
           })}
         </div>
-        <p className="text-xs text-cinema-light mt-2">By default, all decades are selected.</p>
+        <p className="text-xs text-white mt-2">By default, all decades are selected.</p>
       </div>
 
       {/* Next button */}
@@ -148,13 +148,13 @@ const HomePage = () => {
     >
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold mb-4">Content Preferences</h2>
-        <p className="text-cinema-light">Customize your viewing experience</p>
+        <p className="text-white">Customize your viewing experience</p>
       </div>
 
              {/* Adult Content Preference */}
        <div className="mb-8 p-6 rounded-xl border border-cinema-light/20 bg-cinema-gray/20">
         <h3 className="text-xl font-semibold mb-2 text-white">Content Rating Preference</h3>
-        <p className="text-sm text-cinema-light mb-4">Choose your content comfort level</p>
+        <p className="text-sm text-white mb-4">Choose your content comfort level</p>
         <div className="space-y-3">
           {[
             { value: false, label: 'Family-friendly', description: 'G, PG, PG-13 only' },
@@ -188,7 +188,7 @@ const HomePage = () => {
               </div>
               <div className="flex-1">
                 <div className="text-white font-medium text-lg">{option.label}</div>
-                <div className="text-sm text-cinema-light">{option.description}</div>
+                <div className="text-sm text-white">{option.description}</div>
               </div>
             </label>
           ))}
@@ -198,7 +198,7 @@ const HomePage = () => {
              {/* Language Preference */}
        <div className="mb-8 p-6 rounded-xl border border-cinema-light/20 bg-cinema-gray/20">
         <h3 className="text-xl font-semibold mb-2 text-white">Language Preference</h3>
-        <p className="text-sm text-cinema-light mb-4 italic">Hey c'mon, some of the best movies ever are non-English! Subtitles broooo 😎</p>
+        <p className="text-sm text-white mb-4 italic">Hey c'mon, some of the best movies ever are non-English! Subtitles broooo 😎</p>
         <div className="space-y-3">
           {[
             { value: 'english', label: 'English only' },
@@ -252,7 +252,7 @@ const HomePage = () => {
     >
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold mb-4">What's Your Mood?</h2>
-        <p className="text-cinema-light">Choose your viewing context for better recommendations</p>
+        <p className="text-white">Choose your viewing context for better recommendations</p>
       </div>
 
       <div className="grid md:grid-cols-3 gap-6 mb-8">
@@ -273,7 +273,7 @@ const HomePage = () => {
                 {mood.value === 'group' && <Users size={48} className="mx-auto text-accent-blue" />}
               </div>
               <h3 className="text-xl font-semibold mb-2">{mood.label}</h3>
-              <p className="text-sm text-cinema-light">{mood.description}</p>
+              <p className="text-sm text-white">{mood.description}</p>
             </div>
           </motion.div>
         ))}
@@ -417,7 +417,7 @@ const HomePage = () => {
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
                   currentStep >= step 
                     ? 'bg-accent-blue text-white' 
-                    : 'bg-cinema-gray text-cinema-light'
+                    : 'bg-cinema-gray text-white'
                 }`}>
                   {step}
                 </div>
@@ -429,7 +429,7 @@ const HomePage = () => {
               </div>
             ))}
           </div>
-          <div className="text-center mt-2 text-sm text-cinema-light">
+          <div className="text-center mt-2 text-sm text-white">
             {currentStep === 1 && 'Genres & Decades'}
             {currentStep === 2 && 'Content Preferences'}
             {currentStep === 3 && 'Mood Selection'}

@@ -91,7 +91,7 @@ function App() {
                 <div className="text-center mb-6">
                   <LogOut size={48} className="mx-auto text-accent-red mb-4" />
                   <h3 className="text-xl font-bold text-white mb-2">Sign Out</h3>
-                  <p className="text-cinema-light text-sm">
+                  <p className="text-white text-sm">
                     Are you sure you want to sign out of your account?
                   </p>
                 </div>

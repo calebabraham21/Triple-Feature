@@ -56,7 +56,7 @@ const WatchlistPage = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-4">My Watchlist</h1>
-          <p className="text-cinema-light">
+          <p className="text-white">
             {movies.length} movie{movies.length !== 1 ? 's' : ''} in your collection
           </p>
         </div>
@@ -68,7 +68,7 @@ const WatchlistPage = () => {
             className="card text-center"
           >
             <div className="text-2xl font-bold text-white">{movies.length}</div>
-            <div className="text-cinema-light">Total Movies</div>
+            <div className="text-white">Total Movies</div>
           </motion.div>
           
           <motion.div
@@ -76,7 +76,7 @@ const WatchlistPage = () => {
             className="card text-center"
           >
             <div className="text-2xl font-bold text-accent-gold">{watchedCount}</div>
-            <div className="text-cinema-light">Watched</div>
+            <div className="text-white">Watched</div>
           </motion.div>
           
           <motion.div
@@ -84,7 +84,7 @@ const WatchlistPage = () => {
             className="card text-center"
           >
             <div className="text-2xl font-bold text-accent-blue">{unwatchedCount}</div>
-            <div className="text-cinema-light">To Watch</div>
+            <div className="text-white">To Watch</div>
           </motion.div>
         </div>
 
@@ -92,7 +92,7 @@ const WatchlistPage = () => {
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-8">
           {/* Filter */}
           <div className="flex items-center gap-2">
-            <span className="text-cinema-light">Filter:</span>
+            <span className="text-white">Filter:</span>
             <div className="flex bg-cinema-gray rounded-lg p-1">
               {['all', 'unwatched', 'watched'].map((filterType) => (
                 <motion.button
@@ -103,7 +103,7 @@ const WatchlistPage = () => {
                   className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-all duration-200 ${
                     filter === filterType
                       ? 'bg-accent-red text-white'
-                      : 'text-cinema-light hover:text-white'
+                      : 'text-white hover:text-white'
                   }`}
                 >
                   {getFilterIcon(filterType)}
@@ -192,7 +192,7 @@ const WatchlistPage = () => {
             <h3 className="text-xl font-semibold mb-2">
               {movies.length === 0 ? 'Your watchlist is empty' : 'No movies match your filter'}
             </h3>
-            <p className="text-cinema-light">
+            <p className="text-white">
               {movies.length === 0 
                 ? 'Start adding movies to your watchlist to see them here!'
                 : 'Try changing your filter or add more movies to your watchlist.'
@@ -218,7 +218,7 @@ const WatchlistPage = () => {
               className="bg-cinema-dark border border-cinema-gray rounded-xl p-6 max-w-md w-full"
             >
               <h3 className="text-xl font-semibold mb-4">Clear Watchlist?</h3>
-              <p className="text-cinema-light mb-6">
+              <p className="text-white mb-6">
                 This will permanently remove all {movies.length} movie{movies.length !== 1 ? 's' : ''} from your watchlist. This action cannot be undone.
               </p>
               

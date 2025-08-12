@@ -1,20 +1,18 @@
 import { motion } from 'framer-motion';
 import { List, Home, Info, Menu, X, Sparkles, Code, Mail, ExternalLink, Linkedin, Github, User, LogOut } from 'lucide-react';
-import { useState, useLayoutEffect, useRef } from 'react';
+import { useState, useLayoutEffect, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TripFeatLogo from '../../TripFeatLogo.png';
 import { useAuth } from '../hooks/useAuth';
+import { supabase } from '../lib/supabaseClient';
 
 
-const Header = ({ currentPage, onNavigate }) => {
+const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navRef = useRef(null);
   const { user, isAuthenticated, signOut } = useAuth();
 
   const navigate = useNavigate();
-  
-  // Debug authentication state
-  console.log('Header render - isAuthenticated:', isAuthenticated, 'user:', user);
   
   const leftNavItems = [
     { id: 'home', label: 'Home', icon: Home },
@@ -53,10 +51,8 @@ const Header = ({ currentPage, onNavigate }) => {
   };
 
   const handleSignOut = async () => {
-    console.log('Signing out...');
-    await signOut();
-    console.log('Sign out completed, navigating to home');
-    navigate('/');
+    // Show confirmation popup first
+    onSignOutRequest();
   };
 
   const renderNavButton = (item) => {
@@ -239,7 +235,6 @@ const Header = ({ currentPage, onNavigate }) => {
                   whileHover={{}}
                   whileTap={{}}
                   onClick={() => {
-                    console.log('Sign In button clicked, navigating to /auth');
                     navigate('/auth');
                   }}
                   className="relative inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium border trace-snake trace-snake--rb transition-colors transition-shadow duration-300 bg-cinema-gray text-white border-cinema-light hover:bg-accent-blue hover:border-accent-blue"
@@ -347,6 +342,35 @@ const Header = ({ currentPage, onNavigate }) => {
                     </motion.button>
                   );
                 })}
+              </div>
+            </div>
+
+            {/* Authentication Section */}
+            <div>
+              <h4 className="text-xs font-semibold text-cinema-light uppercase tracking-wider mb-2">Account</h4>
+              <div className="space-y-1">
+                {isAuthenticated ? (
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={handleSignOut}
+                    className="flex items-center gap-2 w-full px-2 py-2 rounded text-sm font-medium text-cinema-light hover:text-white hover:bg-cinema-gray/50"
+                  >
+                    <LogOut size={16} />
+                    Sign Out
+                  </motion.button>
+                ) : (
+                  <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={() => {
+                      navigate('/auth');
+                      setIsMobileMenuOpen(false);
+                    }}
+                    className="flex items-center gap-2 w-full px-2 py-2 rounded text-sm font-medium text-cinema-light hover:text-white hover:bg-cinema-gray/50"
+                  >
+                    <User size={16} />
+                    Sign In
+                  </motion.button>
+                )}
               </div>
             </div>
           </nav>

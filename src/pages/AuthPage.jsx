@@ -21,17 +21,39 @@ const AuthPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Debug component mount
+  useEffect(() => {
+    // Component mounted successfully
+  }, [location]);
+
   // Check if user is already authenticated
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        // Ensure profile exists for authenticated user
-        await ensureProfileExists(session.user.id);
-        navigate('/');
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('AuthPage: Error checking session:', error);
+          return;
+        }
+        
+        // Only redirect if there's a confirmed active session with a valid user
+        if (session && session.user && session.user.id) {
+          // Ensure profile exists for authenticated user
+          await ensureProfileExists(session.user.id);
+          navigate('/');
+        }
+      } catch (error) {
+        console.error('AuthPage: Error in checkAuth:', error);
       }
     };
-    checkAuth();
+    
+    // Add a small delay to ensure any pending auth state changes have settled
+    const timer = setTimeout(() => {
+      checkAuth();
+    }, 100);
+    
+    return () => clearTimeout(timer);
   }, [navigate]);
 
   // Listen for auth state changes to handle profile creation after email confirmation
@@ -140,14 +162,23 @@ const AuthPage = () => {
   const validateForm = () => {
     const errors = {};
 
-    if (!firstName.trim()) {
-      errors.firstName = 'First name is required';
+    // Only validate firstName and lastName for Sign Up mode
+    if (isSignUp) {
+      if (!firstName.trim()) {
+        errors.firstName = 'First name is required';
+      }
+
+      if (!lastName.trim()) {
+        errors.lastName = 'Last name is required';
+      }
+
+      // Phone validation (optional) - only for Sign Up
+      if (phone.trim() && !/^[\+]?[1-9][\d]{0,15}$/.test(phone.trim())) {
+        errors.phone = 'Please enter a valid phone number (e.g., +1234567890 or 1234567890)';
+      }
     }
 
-    if (!lastName.trim()) {
-      errors.lastName = 'Last name is required';
-    }
-
+    // Email and password validation for both modes
     if (!email.trim()) {
       errors.email = 'Email is required';
     } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
@@ -158,11 +189,6 @@ const AuthPage = () => {
       errors.password = 'Password is required';
     } else if (password.length < 6) {
       errors.password = 'Password must be at least 6 characters';
-    }
-
-    // Phone validation (optional)
-    if (phone.trim() && !/^[\+]?[1-9][\d]{0,15}$/.test(phone.trim())) {
-      errors.phone = 'Please enter a valid phone number (e.g., +1234567890 or 1234567890)';
     }
 
     setFieldErrors(errors);
@@ -285,7 +311,13 @@ const AuthPage = () => {
 
         if (error) {
           console.error('Signin error:', error);
-          throw error;
+          // Provide a more user-friendly error message for common auth errors
+          if (error.message === 'Invalid login credentials') {
+            setError('Invalid email or password. Please check your credentials and try again.');
+          } else {
+            setError(error.message);
+          }
+          return;
         }
 
         console.log('Signin successful:', data);
@@ -528,6 +560,11 @@ const AuthPage = () => {
           {error && (
             <div className="p-4 bg-red-500/20 border border-red-500/40 rounded-lg text-red-200 text-sm backdrop-blur-sm">
               {error}
+              {error.includes('Invalid email or password') && (
+                <div className="mt-2 text-xs text-red-300">
+                  💡 Make sure you're using the correct email and password combination.
+                </div>
+              )}
             </div>
           )}
 

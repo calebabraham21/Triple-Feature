@@ -12,12 +12,33 @@ import { useAuth } from './hooks/useAuth';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loading } = useAuth();
   
+  // Debug logging
+  console.log('ProtectedRoute:', { isAuthenticated, loading });
+  
+  // Show loading state while authentication is being determined
+  if (loading) {
+    console.log('ProtectedRoute: Showing loading state');
+    return (
+      <div className="min-h-screen cinema-gradient flex items-center justify-center">
+        <div className="text-center">
+          <div className="text-6xl mb-4">⏳</div>
+          <h3 className="text-xl font-semibold mb-2 text-white">Loading...</h3>
+          <p className="text-white">Please wait while we verify your account.</p>
+        </div>
+      </div>
+    );
+  }
+  
+  // Redirect to auth if not authenticated
   if (!isAuthenticated) {
+    console.log('ProtectedRoute: Redirecting to auth');
     return <Navigate to="/auth" replace />;
   }
   
+  // Show protected content if authenticated
+  console.log('ProtectedRoute: Showing protected content');
   return children;
 };
 

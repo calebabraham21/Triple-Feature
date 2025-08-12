@@ -17,10 +17,10 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
   const leftNavItems = [
     { id: 'home', label: 'Home', icon: Home },
     { id: 'top-picks', label: 'Top Picks', icon: Sparkles },
+    { id: 'about-me', label: 'About Me', icon: Info },
   ];
 
   const rightNavItems = [
-    { id: 'about-me', label: 'About Me', icon: Info },
     { id: 'projects', label: 'Projects', icon: Code },
     { id: 'contact', label: 'Contact', icon: Mail },
   ];
@@ -323,7 +323,7 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
           <nav className="flex flex-col space-y-3">
             {/* Movie App Section */}
             <div>
-                             <h4 className="text-xs font-semibold text-white uppercase tracking-wider mb-2">Movie App</h4>
+              <h4 className="text-xs font-semibold text-white uppercase tracking-wider mb-2">App & About</h4>
               <div className="space-y-1">
                 {leftNavItems.map((item) => {
                   const Icon = item.icon;
@@ -350,7 +350,7 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
 
             {/* Personal Section */}
             <div>
-              <h4 className="text-xs font-semibold text-white uppercase tracking-wider mb-2">Personal</h4>
+              <h4 className="text-xs font-semibold text-white uppercase tracking-wider mb-2">Portfolio</h4>
               <div className="space-y-1">
                 {rightNavItems.map((item) => {
                   const Icon = item.icon;

@@ -1,0 +1,5 @@
+[33m4967890[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Fix watchlist navigation glitch: add loading states and proper authentication flow management
+[33m610c4da[m Fix watchlist functionality: integrate as subpage under My Account, use Supabase hook, add authentication protection
+[33m105e626[m Update text colors site-wide: change gray text to white for better readability on desktop and mobile
+[33m78f032c[m Move movie-posters.jpg to public folder for production deployment
+[33mc40ef0c[m fixes to auth

@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Sparkles, Clock, Play, Home, AlertTriangle }
 import GlowButton from '../components/GlowButton';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 
 // Using public asset path for reliability in dev/prod
 
@@ -77,19 +78,38 @@ const HomePage = () => {
   const runtimeOptions = getRuntimeOptions();
 
   const renderStep1 = () => (
-    <div className="max-w-4xl mx-auto">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.8 }}
+      className="max-w-4xl mx-auto"
+      data-step="1"
+    >
       {/* Step indicator */}
-      <div className="text-center mb-6">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.9 }}
+        className="text-center mb-6"
+      >
         <div className="text-sm text-white/70 mb-2">Step 1 of 5</div>
         <h2 className="text-2xl font-bold mb-2">Genre Selection</h2>
         <p className="text-white/80 text-sm">Choose up to 2 genres</p>
-      </div>
+      </motion.div>
 
       {/* Genres */}
-      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-6">
-        {genres.map((genre) => (
-          <button
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.0 }}
+        className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-6"
+      >
+        {genres.map((genre, index) => (
+          <motion.button
             key={genre.id}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 1.1 + (index * 0.05) }}
             onClick={() => toggleGenre(genre.id)}
             className={`p-2 rounded-lg font-medium text-sm trace-snake ${
               selectedGenres.includes(genre.id)
@@ -103,12 +123,17 @@ const HomePage = () => {
             <span className="trace-line trace-line--r" />
             <span className="trace-line trace-line--b" />
             <span className="trace-line trace-line--l" />
-          </button>
+          </motion.button>
         ))}
-      </div>
+      </motion.div>
 
       {/* Next button */}
-      <div className="flex justify-center">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.3 }}
+        className="flex justify-center"
+      >
         <GlowButton
           onClick={nextStep}
           disabled={!selectedGenres.length}
@@ -117,8 +142,8 @@ const HomePage = () => {
           Continue
           <ChevronRight size={18} />
         </GlowButton>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 
   const renderStep2 = () => (
@@ -485,39 +510,44 @@ const HomePage = () => {
         {progressMessage}
       </div>
       
-      {/* Hero Section */}
+      {/* Intro Section */}
       {currentStep === 1 && (
-        <div className="relative overflow-hidden">
-          {/* Static poster collage background (hero only) */}
-          <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-            <img
-              src={'/movie-posters.jpg'}
-              alt="Movie posters background"
-              className="w-full h-full object-cover blur-sm opacity-20 scale-110 brightness-100"
-              loading="lazy"
-              decoding="async"
-            />
-            <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/40 to-black/60" />
-          </div>
-          {/* Background Pattern */}
-          <div className="absolute inset-0 opacity-10">
-            <div className="absolute inset-0 bg-gradient-to-br from-accent-red/20 via-accent-purple/20 to-accent-blue/20" />
-            <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(255,68,68,0.1)_0%,transparent_50%)]" />
-          </div>
-
-          <div className="relative z-10 max-w-4xl mx-auto px-4 pt-8 md:pt-16 text-center">
-            <div>
-              {/* Tagline */}
-              <div className="max-w-4xl mx-auto mb-8 text-white">
-                <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
-                  Stop scrolling.<br />Start watching.
-                </h1>
-              </div>
-
-              <div className="flex justify-center mb-8">
+        <div className="max-w-4xl mx-auto px-4 pt-6 md:pt-8">
+          {/* Mission Statement Container */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="relative bg-cinema-dark/20 border border-cinema-light/20 rounded-xl p-6 mb-4 overflow-hidden"
+          >
+            {/* Background Image */}
+            <div className="absolute inset-0 z-0">
+              <img
+                src="/movie-posters.jpg"
+                alt="Movie posters background"
+                className="w-full h-full object-cover blur-sm opacity-20"
+                loading="lazy"
+                decoding="async"
+              />
+              <div className="absolute inset-0 bg-cinema-dark/40" />
+            </div>
+            
+            {/* Content */}
+            <div className="relative z-10">
+              <h1 className="text-2xl md:text-3xl font-bold text-white mb-3">
+                Stop scrolling, start watching
+              </h1>
+              <p className="text-base md:text-lg text-white/90 leading-relaxed mb-6">
+                Triple Feature helps you pick a movie and just watch it. No more scrolling forever on Netflix or HBO. Tell us what you are in the mood for, we crunch the options, and give you three solid picks.
+              </p>
+              
+              {/* Start Button */}
+              <div className="text-center">
                 <GlowButton
                   onClick={() => {
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    const step1Element = document.querySelector('[data-step="1"]');
+                    if (step1Element) {
+                      step1Element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
                   }}
                   onMouseMove={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
@@ -526,23 +556,82 @@ const HomePage = () => {
                     e.currentTarget.style.setProperty('--x', `${x}%`);
                     e.currentTarget.style.setProperty('--y', `${y}%`);
                   }}
-                  className="px-6 py-4 text-sm gradient-button spotlight-button text-white border-0 shadow-lg hover:shadow-xl"
+                  className="px-6 py-3 text-sm gradient-button spotlight-button text-white border-0 shadow-lg hover:shadow-xl"
                 >
-                  <b>START WATCHING</b>
+                  <b>Start</b>
                 </GlowButton>
               </div>
             </div>
-          </div>
+          </motion.div>
+
+          {/* Fun Stats Strip */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="mb-4"
+          >
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.3 }}
+                className="bg-cinema-dark/30 border border-cinema-light/20 rounded-lg p-4 text-center hover:bg-cinema-dark/40 transition-colors cursor-pointer"
+              >
+                <div className="text-3xl md:text-4xl font-bold text-accent-red mb-1">80</div>
+                <div className="text-xs text-white/70">hours saved from scrolling*</div>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4 }}
+                className="bg-cinema-dark/30 border border-cinema-light/20 rounded-lg p-4 text-center hover:bg-cinema-dark/40 transition-colors cursor-pointer"
+              >
+                <div className="text-3xl md:text-4xl font-bold text-accent-blue mb-1">5</div>
+                <div className="text-xs text-white/70">arguments prevented for couples*</div>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5 }}
+                className="bg-cinema-dark/30 border border-cinema-light/20 rounded-lg p-4 text-center hover:bg-cinema-dark/40 transition-colors cursor-pointer"
+              >
+                <div className="text-3xl md:text-4xl font-bold text-accent-purple mb-1">3</div>
+                <div className="text-xs text-white/70">picks, zero decision fatigue</div>
+              </motion.div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.6 }}
+                className="bg-cinema-dark/30 border border-cinema-light/20 rounded-lg p-4 text-center hover:bg-cinema-dark/40 transition-colors cursor-pointer"
+              >
+                <div className="text-3xl md:text-4xl font-bold text-accent-gold mb-1">90</div>
+                <div className="text-xs text-white/70">seconds from open to play</div>
+              </motion.div>
+            </div>
+            <div className="text-xs text-white/50 mt-2 text-center">*fun, fake stats</div>
+          </motion.div>
         </div>
       )}
 
       {/* Recommendation Flow */}
-      <div className="px-4 pt-8">
+      <div className="px-4 pt-4 md:pt-8">
         {/* Step Progress Indicator */}
-        <div className="max-w-4xl mx-auto mb-8">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="max-w-4xl mx-auto mb-8"
+        >
           <div className="flex items-center justify-center space-x-3">
             {[1, 2, 3, 4, 5].map((step) => (
-              <div key={step} className="flex items-center">
+              <motion.div
+                key={step}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.2 + (step * 0.1) }}
+                className="flex items-center"
+              >
                 <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-300 ${
                   currentStep >= step 
                     ? 'bg-accent-blue text-white' 
@@ -555,17 +644,22 @@ const HomePage = () => {
                     currentStep > step ? 'bg-accent-blue' : 'bg-cinema-gray'
                   }`} />
                 )}
-              </div>
+              </motion.div>
             ))}
           </div>
-          <div className="text-center mt-2 text-xs text-white/70">
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.7 }}
+            className="text-center mt-2 text-xs text-white/70"
+          >
             {currentStep === 1 && 'Genre Selection'}
             {currentStep === 2 && 'Decade Selection'}
             {currentStep === 3 && 'Content Preferences'}
             {currentStep === 4 && 'Runtime & Streaming'}
             {currentStep === 5 && (loading ? 'Loading Recommendations...' : 'Recommendations')}
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
         
         {currentStep === 1 && renderStep1()}
         {currentStep === 2 && renderStep2()}

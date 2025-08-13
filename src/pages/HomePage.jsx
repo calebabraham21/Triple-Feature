@@ -1,5 +1,7 @@
 import { useRecommendations } from '../hooks/useRecommendations';
 import MovieCard from '../components/MovieCard';
+import MovieCardSkeleton from '../components/MovieCardSkeleton';
+import LoadingOverlay from '../components/LoadingOverlay';
 import { ChevronLeft, ChevronRight, Sparkles, Clock, Play } from 'lucide-react';
 import GlowButton from '../components/GlowButton';
 import { useEffect } from 'react';
@@ -18,6 +20,7 @@ const HomePage = () => {
     recommendations,
     loading,
     error,
+    progressMessage,
     currentStep,
     setSelectedDecades,
     setSelectedRuntimes,
@@ -214,7 +217,7 @@ const HomePage = () => {
       {/* Language Preference */}
       <div className="mb-5 p-4 rounded-xl border border-cinema-light/20 bg-cinema-gray/20">
         <h3 className="text-base font-semibold mb-2 text-white">Language Preference</h3>
-        <p className="text-xs text-white/70 mb-3 italic">Hey c'mon, some of the best movies ever are non-English! Subtitles broooo 😎</p>
+        <p className="text-xs text-white/70 mb-3">Try a non-English movie — it’s like travel, without the TSA.</p>
         <div className="space-y-2">
           {[
             { value: 'english', label: 'English only' },
@@ -328,11 +331,19 @@ const HomePage = () => {
           Back
         </GlowButton>
 
-        <GlowButton onClick={generateRecommendations} disabled={loading} className="text-sm px-4 py-2">
+        <GlowButton 
+          onClick={generateRecommendations} 
+          disabled={loading} 
+          className="text-sm px-4 py-2"
+          aria-busy={loading}
+          aria-describedby={loading ? "loading-status" : undefined}
+          aria-controls="progress-announcement"
+        >
           {loading ? (
             <>
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
               Finding Movies...
+              <span id="loading-status" className="sr-only">Loading recommendations, please wait</span>
             </>
           ) : (
             <>
@@ -358,11 +369,21 @@ const HomePage = () => {
       )}
 
       <div className="grid md:grid-cols-3 gap-6 mb-8">
-        {recommendations.map((movie) => (
-          <div key={movie.id}>
-            <MovieCard movie={movie} />
-          </div>
-        ))}
+        {loading ? (
+          // Show skeleton cards while loading
+          <>
+            <MovieCardSkeleton />
+            <MovieCardSkeleton />
+            <MovieCardSkeleton />
+          </>
+        ) : (
+          // Show actual recommendations when loaded
+          recommendations.map((movie) => (
+            <div key={movie.id}>
+              <MovieCard movie={movie} />
+            </div>
+          ))
+        )}
       </div>
 
       <div className="flex justify-center gap-4">
@@ -378,7 +399,27 @@ const HomePage = () => {
   );
 
   return (
-    <div className="min-h-screen cinema-gradient">
+    <div 
+      className="min-h-screen cinema-gradient"
+      aria-busy={loading}
+      aria-live="polite"
+    >
+      {/* Loading Overlay */}
+      <LoadingOverlay 
+        isVisible={loading} 
+        message={progressMessage || "Finding your perfect movies..."}
+      />
+      
+      {/* Screen reader live region for progress updates */}
+      <div 
+        aria-live="polite" 
+        aria-atomic="true" 
+        className="sr-only"
+        id="progress-announcement"
+      >
+        {progressMessage}
+      </div>
+      
       {/* Hero Section */}
       {currentStep === 1 && (
         <div className="relative overflow-hidden">
@@ -437,11 +478,11 @@ const HomePage = () => {
           <div className="flex items-center justify-center space-x-3">
             {[1, 2, 3, 4, 5].map((step) => (
               <div key={step} className="flex items-center">
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium ${
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-300 ${
                   currentStep >= step 
                     ? 'bg-accent-blue text-white' 
                     : 'bg-cinema-gray text-white'
-                }`}>
+                } ${currentStep === 5 && loading && step === 5 ? 'animate-pulse' : ''}`}>
                   {step}
                 </div>
                 {step < 5 && (
@@ -457,7 +498,7 @@ const HomePage = () => {
             {currentStep === 2 && 'Decade Selection'}
             {currentStep === 3 && 'Content Preferences'}
             {currentStep === 4 && 'Runtime & Streaming'}
-            {currentStep === 5 && 'Recommendations'}
+            {currentStep === 5 && (loading ? 'Loading Recommendations...' : 'Recommendations')}
           </div>
         </div>
         

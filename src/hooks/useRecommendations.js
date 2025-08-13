@@ -25,6 +25,7 @@ export const useRecommendations = () => {
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [progressMessage, setProgressMessage] = useState(null);
   const [currentStep, setCurrentStep] = useState(1);
   
   // Track recently shown movies to avoid repetition
@@ -72,32 +73,66 @@ export const useRecommendations = () => {
       const baseFilters = {
         genres: selectedGenres,
         decades: selectedDecades,
-        runtimes: selectedRuntimes,
         streamingOnly,
         sortBy: 'popularity.desc',
-        minRating: 6.5,
+        minRating: 6.0,
         includeAdult: includeAdult,
         languagePreference: languagePreference,
       };
 
-      // Fetch a larger pool by sampling multiple random pages
+      // Fetch ALL available pages to create a comprehensive pool
+      console.log('Fetching comprehensive movie pool from TMDB...');
+      setProgressMessage('Fetching comprehensive movie database... This may take a moment.');
+      
       const firstPage = await getMoviesByFilters({ ...baseFilters, page: 1 });
-      const totalPages = Math.max(1, Math.min(firstPage?.total_pages || 1, 15)); // cap for perf
+      const totalPages = Math.min(firstPage?.total_pages || 1, 500); // TMDB max is 500 pages
+      console.log(`Found ${totalPages} total pages of results (${firstPage?.total_results || 0} total movies)`);
+      
+      // Start with first page results
       const pool = [...(firstPage?.results || [])];
-
-      // Choose up to 4 additional random distinct pages among available pages
-      const pagesToFetch = new Set();
-      while (pagesToFetch.size < 4 && pagesToFetch.size < totalPages - 1) {
-        const randomPage = Math.floor(Math.random() * totalPages) + 1; // 1..totalPages
-        if (randomPage !== 1) pagesToFetch.add(randomPage);
+      
+      // Fetch all remaining pages in parallel (with rate limiting consideration)
+      if (totalPages > 1) {
+        console.log(`Fetching ${totalPages - 1} additional pages...`);
+        setProgressMessage(`Fetching ${totalPages - 1} additional pages... Building comprehensive database...`);
+        
+        // Create array of page numbers to fetch (2 through totalPages)
+        const pagesToFetch = Array.from({ length: totalPages - 1 }, (_, i) => i + 2);
+        
+        // Fetch pages in batches to avoid overwhelming the API
+        const batchSize = 10; // Process 10 pages at a time
+        const allResponses = [];
+        
+        for (let i = 0; i < pagesToFetch.length; i += batchSize) {
+          const batch = pagesToFetch.slice(i, i + batchSize);
+          const currentBatch = Math.floor(i / batchSize) + 1;
+          const totalBatches = Math.ceil(pagesToFetch.length / batchSize);
+          const progressPercent = Math.round((i / pagesToFetch.length) * 100);
+          console.log(`Fetching batch ${currentBatch}/${totalBatches}: pages ${batch[0]}-${batch[batch.length - 1]} (${progressPercent}% complete)`);
+          setProgressMessage(`Fetching batch ${currentBatch}/${totalBatches} of ${totalBatches}... ${progressPercent}% complete... Building movie database...`);
+          
+          const batchResponses = await Promise.all(
+            batch.map((page) => getMoviesByFilters({ ...baseFilters, page }))
+          );
+          
+          allResponses.push(...batchResponses);
+          
+          // Small delay between batches to be respectful to the API
+          if (i + batchSize < pagesToFetch.length) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+        }
+        
+        // Add all results to the pool
+        allResponses.forEach((response) => {
+          if (response?.results) {
+            pool.push(...response.results);
+          }
+        });
       }
-
-      const additionalResponses = await Promise.all(
-        Array.from(pagesToFetch).map((p) => getMoviesByFilters({ ...baseFilters, page: p }))
-      );
-      additionalResponses.forEach((r) => {
-        if (r?.results) pool.push(...r.results);
-      });
+      
+      console.log(`Total movies in pool before deduplication: ${pool.length}`);
+      setProgressMessage(`Processing ${pool.length} movies... Building final recommendations...`);
 
       // Deduplicate by id
       const seenIds = new Set();
@@ -107,23 +142,85 @@ export const useRecommendations = () => {
         seenIds.add(m.id);
         return true;
       });
+      
+      console.log(`Total unique movies after deduplication: ${movies.length}`);
 
       // If a subset of decades was selected, filter client-side to include only those decades
       if (selectedDecades && selectedDecades.length > 0 && selectedDecades.length < getAllDecades().length) {
+        const beforeCount = movies.length;
         movies = movies.filter((movie) => {
           const year = movie.release_date ? parseInt(movie.release_date.slice(0, 4), 10) : null;
           if (!year) return false;
           const decade = Math.floor(year / 10) * 10;
           return selectedDecades.includes(decade);
         });
+        console.log(`Decade filtering: ${beforeCount} movies before, ${movies.length} after`);
       }
 
       // Filter based on runtime preferences
       if (selectedRuntimes && selectedRuntimes.length > 0 && selectedRuntimes.length < 3) {
-        console.log(`Filtering by runtime preferences: ${selectedRuntimes.join(', ')}`);
-        const beforeCount = movies.length;
+        console.log(`Runtime filtering will be applied after fetching detailed movie information`);
+        console.log(`Runtime preferences: ${selectedRuntimes.join(', ')}`);
+      } else {
+        console.log('No runtime filtering applied - all runtime categories selected');
+      }
+
+      // Filter out recently shown movies to avoid repetition
+      const beforeRecentFilter = movies.length;
+      movies = movies.filter(movie => !recentlyShown.has(movie.id));
+      console.log(`Recent movie filtering: ${beforeRecentFilter} movies before, ${movies.length} after`);
+
+      // Note: Runtime filtering is now applied after fetching detailed movie information
+      // Streaming availability filtering is not yet implemented
+      // TMDB doesn't provide reliable streaming data in the discover endpoint
+      // This would require additional API calls to watch providers for each movie
+      if (streamingOnly) {
+        console.log('Streaming availability filtering requested but not yet implemented');
+        console.log('Note: This would require additional API calls to watch providers for each movie');
+      }
+
+      // Complete random shuffle of the entire pool
+      console.log(`Shuffling ${movies.length} movies completely randomly...`);
+      const shuffled = [...movies];
+      
+      // Fisher-Yates shuffle for true randomness
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+
+      // Pick 3 random movies from the shuffled pool
+      const picks = shuffled.slice(0, 3);
+      console.log(`Selected 3 random movies from shuffled pool of ${shuffled.length} movies`);
+      console.log(`🎬 Comprehensive movie database built: ${pool.length} total movies fetched, ${movies.length} unique movies after filtering, ${shuffled.length} movies in final randomized pool`);
+      setProgressMessage(null); // Clear progress messages
+      setError(null); // Clear any error messages
+
+      // Get detailed information for selected movies
+      const detailedMovies = await Promise.all(
+        picks.map(async (movie) => {
+          try {
+            const details = await getMovieDetails(movie.id);
+            return {
+              ...movie,
+              ...details, // Include all details including runtime
+              director: details.credits?.crew?.find(person => person.job === 'Director')?.name || 'Unknown',
+              cast: details.credits?.cast?.slice(0, 3).map(actor => actor.name) || [],
+            };
+          } catch (err) {
+            console.error(`Error getting details for movie ${movie.id}:`, err);
+            return movie;
+          }
+        })
+      );
+
+      // Apply runtime filtering AFTER getting detailed movie information
+      let finalMovies = detailedMovies;
+      if (selectedRuntimes && selectedRuntimes.length > 0 && selectedRuntimes.length < 3) {
+        console.log(`Applying runtime filtering to detailed movies: ${selectedRuntimes.join(', ')}`);
+        const beforeCount = finalMovies.length;
         
-        movies = movies.filter((movie) => {
+        finalMovies = finalMovies.filter((movie) => {
           if (!movie.runtime) {
             console.log(`Movie ${movie.title} has no runtime data, excluding from runtime filtering`);
             return false;
@@ -147,106 +244,59 @@ export const useRecommendations = () => {
           return matches;
         });
         
-        console.log(`Runtime filtering: ${beforeCount} movies before, ${movies.length} after`);
-      } else {
-        console.log('No runtime filtering applied - all runtime categories selected');
-      }
-
-      // Filter out recently shown movies to avoid repetition
-      movies = movies.filter(movie => !recentlyShown.has(movie.id));
-
-      // Note: Streaming availability filtering is not yet implemented
-      // TMDB doesn't provide reliable streaming data in the discover endpoint
-      // This would require additional API calls to watch providers for each movie
-      if (streamingOnly) {
-        console.log('Streaming availability filtering requested but not yet implemented');
-        console.log('Note: This would require additional API calls to watch providers for each movie');
-      }
-
-      // Advanced shuffling with multiple randomization passes
-      const advancedShuffle = (arr) => {
-        let a = [...arr];
+        console.log(`Runtime filtering: ${beforeCount} movies before, ${finalMovies.length} after`);
         
-        // First pass: Standard Fisher-Yates shuffle
-        for (let i = a.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [a[i], a[j]] = [a[j], a[i]];
-        }
-        
-        // Second pass: Random chunk swapping for extra randomness
-        const chunkSize = Math.max(1, Math.floor(a.length / 8));
-        for (let i = 0; i < 3; i++) {
-          const start1 = Math.floor(Math.random() * (a.length - chunkSize));
-          const start2 = Math.floor(Math.random() * (a.length - chunkSize));
+        // If we filtered out all movies, try to get more recommendations
+        if (finalMovies.length === 0) {
+          console.log('All movies were filtered out by runtime preferences, trying to get more recommendations...');
           
-          if (start1 !== start2) {
-            const chunk1 = a.slice(start1, start1 + chunkSize);
-            const chunk2 = a.slice(start2, start2 + chunkSize);
-            
-            // Swap chunks
-            a.splice(start1, chunkSize, ...chunk2);
-            a.splice(start2, chunkSize, ...chunk1);
+          // Get more movies from the pool and try again
+          const additionalPicks = [];
+          const remainingMovies = shuffled.filter(movie => !picks.some(p => p.id === movie.id));
+          
+          for (let i = 0; i < Math.min(6, remainingMovies.length) && additionalPicks.length < 3; i++) {
+            const movie = remainingMovies[i];
+            try {
+              const details = await getMovieDetails(movie.id);
+              const movieWithDetails = {
+                ...movie,
+                ...details,
+                director: details.credits?.crew?.find(person => person.job === 'Director')?.name || 'Unknown',
+                cast: details.credits?.cast?.slice(0, 3).map(actor => actor.name) || [],
+              };
+              
+              // Check if this movie matches runtime preferences
+              if (movieWithDetails.runtime) {
+                const runtime = movieWithDetails.runtime;
+                const isShort = runtime < 90;
+                const isMedium = runtime >= 90 && runtime <= 120;
+                const isLong = runtime > 120;
+                
+                const matches = (
+                  (isShort && selectedRuntimes.includes('short')) ||
+                  (isMedium && selectedRuntimes.includes('medium')) ||
+                  (isLong && selectedRuntimes.includes('long'))
+                );
+                
+                if (matches) {
+                  additionalPicks.push(movieWithDetails);
+                }
+              }
+            } catch (err) {
+              console.error(`Error getting details for additional movie ${movie.id}:`, err);
+            }
           }
+          
+          finalMovies = additionalPicks;
+          console.log(`Found ${finalMovies.length} additional movies that match runtime preferences`);
         }
-        
-        // Third pass: Random individual swaps
-        for (let i = 0; i < Math.floor(a.length / 2); i++) {
-          const idx1 = Math.floor(Math.random() * a.length);
-          const idx2 = Math.floor(Math.random() * a.length);
-          [a[idx1], a[idx2]] = [a[idx2], a[idx1]];
-        }
-        
-        return a;
-      };
-      
-      const randomized = advancedShuffle(movies);
-
-      // Use weighted selection for final picks to avoid always picking from the start
-      const picks = [];
-      const availableMovies = [...randomized];
-      
-      for (let i = 0; i < 3 && availableMovies.length > 0; i++) {
-        // Weighted selection: higher chance for earlier indices, but still random
-        const weights = availableMovies.map((_, idx) => Math.pow(0.8, idx));
-        const totalWeight = weights.reduce((sum, w) => sum + w, 0);
-        
-        let random = Math.random() * totalWeight;
-        let selectedIndex = 0;
-        
-        for (let j = 0; j < weights.length; j++) {
-          random -= weights[j];
-          if (random <= 0) {
-            selectedIndex = j;
-            break;
-          }
-        }
-        
-        picks.push(availableMovies[selectedIndex]);
-        availableMovies.splice(selectedIndex, 1);
       }
 
-      // Get detailed information for selected movies
-      const detailedMovies = await Promise.all(
-        picks.map(async (movie) => {
-          try {
-            const details = await getMovieDetails(movie.id);
-            return {
-              ...movie,
-              director: details.credits?.crew?.find(person => person.job === 'Director')?.name || 'Unknown',
-              cast: details.credits?.cast?.slice(0, 3).map(actor => actor.name) || [],
-            };
-          } catch (err) {
-            console.error(`Error getting details for movie ${movie.id}:`, err);
-            return movie;
-          }
-        })
-      );
-
-      setRecommendations(detailedMovies);
+      setRecommendations(finalMovies);
       
       // Track these movies as recently shown
       const newRecentlyShown = new Set(recentlyShown);
-      detailedMovies.forEach(movie => newRecentlyShown.add(movie.id));
+      finalMovies.forEach(movie => newRecentlyShown.add(movie.id));
       
       // Keep only the last 30 movies to prevent the set from growing too large
       if (newRecentlyShown.size > 30) {
@@ -276,6 +326,7 @@ export const useRecommendations = () => {
     setLanguagePreference('both');
     setRecommendations([]);
     setError(null);
+    setProgressMessage(null);
     setCurrentStep(1);
     // Optionally clear recently shown movies on reset (uncomment if desired)
     // setRecentlyShown(new Set());
@@ -358,6 +409,7 @@ export const useRecommendations = () => {
     recommendations,
     loading,
     error,
+    progressMessage,
     currentStep,
     
     // Actions

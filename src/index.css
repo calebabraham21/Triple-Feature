@@ -11,6 +11,16 @@
 }
 
 @layer components {
+  /* Shimmer animation for skeleton loading */
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+  
   /* 4-span snake outline effect: fast, clean, no scale/color change */
   .trace-snake {
     position: relative;

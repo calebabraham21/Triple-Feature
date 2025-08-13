@@ -1,8 +1,8 @@
-import { motion } from 'framer-motion';
 import { useRecommendations } from '../hooks/useRecommendations';
 import MovieCard from '../components/MovieCard';
 import { ChevronLeft, ChevronRight, Sparkles, Clock, Users, Heart } from 'lucide-react';
 import GlowButton from '../components/GlowButton';
+import { useEffect } from 'react';
 
 // Using public asset path for reliability in dev/prod
 
@@ -18,7 +18,6 @@ const HomePage = () => {
     loading,
     error,
     currentStep,
-    setSelectedGenres,
     setSelectedDecades,
     setSelectedMood,
     setIncludeAdult,
@@ -33,17 +32,19 @@ const HomePage = () => {
     getMoodOptions,
   } = useRecommendations();
 
+  useEffect(() => {
+    if (currentStep > 1) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [currentStep]);
 
 
   const moodOptions = getMoodOptions();
   const decadeOptions = getDecadeOptions();
 
   const renderStep1 = () => (
-    <motion.div
+    <div
       id="preferences"
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
       className="relative max-w-4xl mx-auto"
     >
       <div className="text-center mb-8">
@@ -59,7 +60,7 @@ const HomePage = () => {
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
           {genres.map((genre) => (
-                         <motion.button
+                         <button
                key={genre.id}
                onClick={() => toggleGenre(genre.id)}
               className={`p-3 rounded-lg font-medium trace-snake ${
@@ -74,7 +75,7 @@ const HomePage = () => {
               <span className="trace-line trace-line--r" />
               <span className="trace-line trace-line--b" />
               <span className="trace-line trace-line--l" />
-            </motion.button>
+            </button>
           ))}
         </div>
       </div>
@@ -104,7 +105,7 @@ const HomePage = () => {
           {decadeOptions.map((decade) => {
             const isSelected = selectedDecades.includes(decade.value);
             return (
-                             <motion.button
+                             <button
                  key={decade.value}
                  onClick={() => toggleDecade(decade.value)}
                 className={`py-2 px-3 rounded-md text-sm border trace-snake ${
@@ -118,7 +119,7 @@ const HomePage = () => {
                 <span className="trace-line trace-line--r" />
                 <span className="trace-line trace-line--b" />
                 <span className="trace-line trace-line--l" />
-              </motion.button>
+              </button>
             );
           })}
         </div>
@@ -136,32 +137,29 @@ const HomePage = () => {
           <ChevronRight size={20} />
         </GlowButton>
       </div>
-    </motion.div>
+    </div>
   );
 
   const renderStep2 = () => (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
+    <div
       className="max-w-4xl mx-auto"
     >
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold mb-4">Content Preferences</h2>
+      <div className="text-center mb-6">
+        <h2 className="text-3xl font-bold mb-3">Content Preferences</h2>
         <p className="text-white">Customize your viewing experience</p>
       </div>
 
-             {/* Adult Content Preference */}
-       <div className="mb-8 p-6 rounded-xl border border-cinema-light/20 bg-cinema-gray/20">
-        <h3 className="text-xl font-semibold mb-2 text-white">Content Rating Preference</h3>
-        <p className="text-sm text-white mb-4">Choose your content comfort level</p>
-        <div className="space-y-3">
+      {/* Adult Content Preference */}
+      <div className="mb-6 p-4 sm:p-5 rounded-xl border border-cinema-light/20 bg-cinema-gray/20">
+        <h3 className="text-lg sm:text-xl font-semibold mb-2 text-white">Content Rating Preference</h3>
+        <p className="text-xs sm:text-sm text-white mb-3">Choose your content comfort level</p>
+        <div className="space-y-2 sm:space-y-3">
           {[
             { value: false, label: 'Family-friendly', description: 'G, PG, PG-13 only' },
             { value: true, label: 'Adult-rated', description: 'R, NC-17, X only' },
             { value: null, label: 'Any rating', description: 'No rating restrictions' }
           ].map((option) => (
-                         <label key={option.value === null ? 'any' : option.value.toString()} className="flex items-center cursor-pointer p-4 rounded-lg hover:bg-cinema-gray/30 transition-colors duration-150">
+            <label key={option.value === null ? 'any' : option.value.toString()} className="flex items-center cursor-pointer p-3 sm:p-4 rounded-lg hover:bg-cinema-gray/30 transition-colors duration-150">
               <input
                 type="radio"
                 name="includeAdult"
@@ -177,35 +175,35 @@ const HomePage = () => {
                 }}
                 className="sr-only"
               />
-              <div className={`w-5 h-5 rounded-full border-2 mr-4 flex items-center justify-center transition-colors ${
+              <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 mr-3 sm:mr-4 flex items-center justify-center transition-colors ${
                 includeAdult === option.value 
                   ? 'border-accent-blue' 
                   : 'border-cinema-light'
               }`}>
                 {includeAdult === option.value && (
-                  <div className="w-2.5 h-2.5 rounded-full bg-accent-blue"></div>
+                  <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-accent-blue"></div>
                 )}
               </div>
               <div className="flex-1">
-                <div className="text-white font-medium text-lg">{option.label}</div>
-                <div className="text-sm text-white">{option.description}</div>
+                <div className="text-white font-medium text-base sm:text-lg">{option.label}</div>
+                <div className="text-xs sm:text-sm text-white">{option.description}</div>
               </div>
             </label>
           ))}
         </div>
       </div>
 
-             {/* Language Preference */}
-       <div className="mb-8 p-6 rounded-xl border border-cinema-light/20 bg-cinema-gray/20">
-        <h3 className="text-xl font-semibold mb-2 text-white">Language Preference</h3>
-        <p className="text-sm text-white mb-4 italic">Hey c'mon, some of the best movies ever are non-English! Subtitles broooo 😎</p>
-        <div className="space-y-3">
+      {/* Language Preference */}
+      <div className="mb-6 p-4 sm:p-5 rounded-xl border border-cinema-light/20 bg-cinema-gray/20">
+        <h3 className="text-lg sm:text-xl font-semibold mb-2 text-white">Language Preference</h3>
+        <p className="text-xs sm:text-sm text-white mb-3 italic">Hey c'mon, some of the best movies ever are non-English! Subtitles broooo 😎</p>
+        <div className="space-y-2 sm:space-y-3">
           {[
             { value: 'english', label: 'English only' },
             { value: 'non-english', label: 'Non-English only' },
             { value: 'both', label: 'Both' }
           ].map((option) => (
-                         <label key={option.value} className="flex items-center cursor-pointer p-4 rounded-lg hover:bg-cinema-gray/30 transition-colors duration-150">
+            <label key={option.value} className="flex items-center cursor-pointer p-3 sm:p-4 rounded-lg hover:bg-cinema-gray/30 transition-colors duration-150">
               <input
                 type="radio"
                 name="languagePreference"
@@ -214,16 +212,16 @@ const HomePage = () => {
                 onChange={(e) => setLanguagePreference(e.target.value)}
                 className="sr-only"
               />
-              <div className={`w-5 h-5 rounded-full border-2 mr-4 flex items-center justify-center transition-colors ${
+              <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 mr-3 sm:mr-4 flex items-center justify-center transition-colors ${
                 languagePreference === option.value 
                   ? 'border-accent-blue' 
                   : 'border-cinema-light'
               }`}>
                 {languagePreference === option.value && (
-                  <div className="w-2.5 h-2.5 rounded-full bg-accent-blue"></div>
+                  <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-accent-blue"></div>
                 )}
               </div>
-              <span className="text-white font-medium text-lg">{option.label}</span>
+              <span className="text-white font-medium text-base sm:text-lg">{option.label}</span>
             </label>
           ))}
         </div>
@@ -240,14 +238,11 @@ const HomePage = () => {
           <ChevronRight size={20} />
         </GlowButton>
       </div>
-    </motion.div>
+    </div>
   );
 
   const renderStep3 = () => (
-    <motion.div
-      initial={{ opacity: 0, x: 20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -20 }}
+    <div
       className="max-w-4xl mx-auto"
     >
       <div className="text-center mb-8">
@@ -257,7 +252,7 @@ const HomePage = () => {
 
       <div className="grid md:grid-cols-3 gap-6 mb-8">
         {moodOptions.map((mood) => (
-                     <motion.div
+                     <div
              key={mood.value}
              onClick={() => setSelectedMood(mood.value)}
             className={`card cursor-pointer transition-all duration-300 ${
@@ -275,7 +270,7 @@ const HomePage = () => {
               <h3 className="text-xl font-semibold mb-2">{mood.label}</h3>
               <p className="text-sm text-white">{mood.description}</p>
             </div>
-          </motion.div>
+          </div>
         ))}
       </div>
 
@@ -299,13 +294,11 @@ const HomePage = () => {
           )}
         </GlowButton>
       </div>
-    </motion.div>
+    </div>
   );
 
   const renderStep4 = () => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+    <div
       className="max-w-7xl mx-auto"
     >
       <div className="text-center mb-8">
@@ -319,36 +312,31 @@ const HomePage = () => {
       )}
 
       <div className="grid md:grid-cols-3 gap-6 mb-8">
-        {recommendations.map((movie, index) => (
-          <motion.div
+        {recommendations.map((movie) => (
+          <div
             key={movie.id}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-                         transition={{ delay: index * 0.05 }}
           >
             <MovieCard movie={movie} />
-          </motion.div>
+          </div>
         ))}
       </div>
 
       <div className="flex justify-center gap-4">
-                 <motion.button
+                 <button
            onClick={resetFlow}
           className="btn-secondary"
         >
           Start Over
-        </motion.button>
+        </button>
       </div>
-    </motion.div>
+    </div>
   );
 
   return (
     <div className="min-h-screen cinema-gradient">
       {/* Hero Section */}
       {currentStep === 1 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+        <div
           className="relative overflow-hidden"
         >
           {/* Static poster collage background (hero only) */}
@@ -369,10 +357,7 @@ const HomePage = () => {
           </div>
 
           <div className="relative z-10 max-w-4xl mx-auto px-4 pt-8 md:pt-16 text-center">
-            <motion.div
-              initial={{ y: 50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.2 }}
+            <div
             >
               {/* Tagline */}
               <div className="max-w-4xl mx-auto mb-8 text-white">
@@ -400,9 +385,9 @@ const HomePage = () => {
           
                 </GlowButton>
               </div>
-            </motion.div>
+            </div>
           </div>
-        </motion.div>
+        </div>
       )}
 
 

@@ -16,7 +16,7 @@ export const useRecommendations = () => {
   const [selectedMood, setSelectedMood] = useState(null);
   
   // New consent state variables
-  const [includeAdult, setIncludeAdult] = useState(false);
+  const [includeAdult, setIncludeAdult] = useState(null);
   const [languagePreference, setLanguagePreference] = useState('both'); // 'english', 'non-english', 'both'
   
   const [recommendations, setRecommendations] = useState([]);
@@ -264,7 +264,7 @@ export const useRecommendations = () => {
     setSelectedGenres([]);
     setSelectedDecades(getAllDecades());
     setSelectedMood(null);
-    setIncludeAdult(false);
+    setIncludeAdult(null);
     setLanguagePreference('both');
     setRecommendations([]);
     setError(null);

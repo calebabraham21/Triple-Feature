@@ -1,6 +1,6 @@
 import { useRecommendations } from '../hooks/useRecommendations';
 import MovieCard from '../components/MovieCard';
-import { ChevronLeft, ChevronRight, Sparkles, Clock, Users, Heart } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, Clock, Play } from 'lucide-react';
 import GlowButton from '../components/GlowButton';
 import { useEffect } from 'react';
 
@@ -11,7 +11,8 @@ const HomePage = () => {
     genres,
     selectedGenres,
     selectedDecades,
-    selectedMood,
+    selectedRuntimes,
+    streamingOnly,
     includeAdult,
     languagePreference,
     recommendations,
@@ -19,7 +20,8 @@ const HomePage = () => {
     error,
     currentStep,
     setSelectedDecades,
-    setSelectedMood,
+    setSelectedRuntimes,
+    setStreamingOnly,
     setIncludeAdult,
     setLanguagePreference,
     generateRecommendations,
@@ -28,8 +30,9 @@ const HomePage = () => {
     prevStep,
     toggleGenre,
     toggleDecade,
+    toggleRuntime,
     getDecadeOptions,
-    getMoodOptions,
+    getRuntimeOptions,
   } = useRecommendations();
 
   useEffect(() => {
@@ -38,77 +41,91 @@ const HomePage = () => {
     }
   }, [currentStep]);
 
-
-  const moodOptions = getMoodOptions();
   const decadeOptions = getDecadeOptions();
+  const runtimeOptions = getRuntimeOptions();
 
   const renderStep1 = () => (
-    <div
-      id="preferences"
-      className="relative max-w-4xl mx-auto"
-    >
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold mb-4">Choose Your Preferences</h2>
-        <p className="text-white">Select genres and decade to get personalized recommendations</p>
+    <div className="max-w-4xl mx-auto">
+      {/* Step indicator */}
+      <div className="text-center mb-6">
+        <div className="text-sm text-white/70 mb-2">Step 1 of 5</div>
+        <h2 className="text-2xl font-bold mb-2">Genre Selection</h2>
+        <p className="text-white/80 text-sm">Choose up to 2 genres</p>
       </div>
 
       {/* Genres */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-xl font-semibold select-none">Genres</h3>
-          <p className="text-sm text-white">Choose up to 2 genres</p>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-          {genres.map((genre) => (
-                         <button
-               key={genre.id}
-               onClick={() => toggleGenre(genre.id)}
-              className={`p-3 rounded-lg font-medium trace-snake ${
-                selectedGenres.includes(genre.id)
-                  ? 'bg-accent-red text-white shadow-lg'
-                  : `${selectedGenres.length >= 2 ? 'opacity-50 cursor-not-allowed' : ''} bg-cinema-gray text-white border border-cinema-light`
-              }`}
-              disabled={!selectedGenres.includes(genre.id) && selectedGenres.length >= 2}
-            >
-              <span className="relative z-10">{genre.name}</span>
-              <span className="trace-line trace-line--t" />
-              <span className="trace-line trace-line--r" />
-              <span className="trace-line trace-line--b" />
-              <span className="trace-line trace-line--l" />
-            </button>
-          ))}
-        </div>
+      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-6">
+        {genres.map((genre) => (
+          <button
+            key={genre.id}
+            onClick={() => toggleGenre(genre.id)}
+            className={`p-2 rounded-lg font-medium text-sm trace-snake ${
+              selectedGenres.includes(genre.id)
+                ? 'bg-accent-red text-white shadow-lg'
+                : `${selectedGenres.length >= 2 ? 'opacity-50 cursor-not-allowed' : ''} bg-cinema-gray text-white border border-cinema-light`
+            }`}
+            disabled={!selectedGenres.includes(genre.id) && selectedGenres.length >= 2}
+          >
+            <span className="relative z-10">{genre.name}</span>
+            <span className="trace-line trace-line--t" />
+            <span className="trace-line trace-line--r" />
+            <span className="trace-line trace-line--b" />
+            <span className="trace-line trace-line--l" />
+          </button>
+        ))}
+      </div>
+
+      {/* Next button */}
+      <div className="flex justify-center">
+        <GlowButton
+          onClick={nextStep}
+          disabled={!selectedGenres.length}
+          className="text-base px-6 py-3"
+        >
+          Continue
+          <ChevronRight size={18} />
+        </GlowButton>
+      </div>
+    </div>
+  );
+
+  const renderStep2 = () => (
+    <div className="max-w-4xl mx-auto">
+      {/* Step indicator */}
+      <div className="text-center mb-6">
+        <div className="text-sm text-white/70 mb-2">Step 2 of 5</div>
+        <h2 className="text-2xl font-bold mb-2">Decade Selection</h2>
+        <p className="text-white/80 text-sm">Optional - defaults to all decades</p>
       </div>
 
       {/* Decades */}
-      <div className="mb-8">
-        <div className="flex items-center justify-between mb-4 gap-3 flex-wrap">
-          <h3 className="text-xl font-semibold">Decades</h3>
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
           <div className="flex items-center gap-2">
             <GlowButton
               variant="secondary"
               onClick={() => setSelectedDecades(decadeOptions.map(d => d.value))}
-              className="py-2 px-3 text-sm"
+              className="py-1.5 px-3 text-xs"
             >
               Select All
             </GlowButton>
             <GlowButton
               variant="secondary"
               onClick={() => setSelectedDecades([])}
-              className="py-2 px-3 text-sm"
+              className="py-1.5 px-3 text-xs"
             >
               Clear All
             </GlowButton>
           </div>
         </div>
-        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 gap-2">
+        <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
           {decadeOptions.map((decade) => {
             const isSelected = selectedDecades.includes(decade.value);
             return (
-                             <button
-                 key={decade.value}
-                 onClick={() => toggleDecade(decade.value)}
-                className={`py-2 px-3 rounded-md text-sm border trace-snake ${
+              <button
+                key={decade.value}
+                onClick={() => toggleDecade(decade.value)}
+                className={`py-2 px-2 rounded-md text-xs border trace-snake ${
                   isSelected
                     ? 'bg-accent-blue/20 text-white border-accent-blue'
                     : 'bg-cinema-gray text-white border-cinema-light'
@@ -123,43 +140,44 @@ const HomePage = () => {
             );
           })}
         </div>
-        <p className="text-xs text-white mt-2">By default, all decades are selected.</p>
+        <p className="text-xs text-white/70 mt-2 text-center">By default, all decades are selected.</p>
       </div>
 
-      {/* Next button */}
-      <div className="flex justify-center">
-        <GlowButton
-          onClick={nextStep}
-          disabled={!selectedGenres.length || (!selectedDecades || selectedDecades.length === 0)}
-          className="text-lg px-8 py-4"
-        >
+      {/* Navigation */}
+      <div className="flex justify-between">
+        <GlowButton variant="secondary" onClick={prevStep} className="text-sm px-4 py-2">
+          <ChevronLeft size={16} />
+          Back
+        </GlowButton>
+
+        <GlowButton onClick={nextStep} className="text-sm px-4 py-2">
           Continue
-          <ChevronRight size={20} />
+          <ChevronRight size={16} />
         </GlowButton>
       </div>
     </div>
   );
 
-  const renderStep2 = () => (
-    <div
-      className="max-w-4xl mx-auto"
-    >
+  const renderStep3 = () => (
+    <div className="max-w-4xl mx-auto">
+      {/* Step indicator */}
       <div className="text-center mb-6">
-        <h2 className="text-3xl font-bold mb-3">Content Preferences</h2>
-        <p className="text-white">Customize your viewing experience</p>
+        <div className="text-sm text-white/70 mb-2">Step 3 of 5</div>
+        <h2 className="text-2xl font-bold mb-2">Content Preferences</h2>
+        <p className="text-white/80 text-sm">Customize your viewing experience</p>
       </div>
 
       {/* Adult Content Preference */}
-      <div className="mb-6 p-4 sm:p-5 rounded-xl border border-cinema-light/20 bg-cinema-gray/20">
-        <h3 className="text-lg sm:text-xl font-semibold mb-2 text-white">Content Rating Preference</h3>
-        <p className="text-xs sm:text-sm text-white mb-3">Choose your content comfort level</p>
-        <div className="space-y-2 sm:space-y-3">
+      <div className="mb-5 p-4 rounded-xl border border-cinema-light/20 bg-cinema-gray/20">
+        <h3 className="text-base font-semibold mb-2 text-white">Content Rating Preference</h3>
+        <p className="text-xs text-white/70 mb-3">Choose your content comfort level</p>
+        <div className="space-y-2">
           {[
             { value: false, label: 'Family-friendly', description: 'G, PG, PG-13 only' },
             { value: true, label: 'Adult-rated', description: 'R, NC-17, X only' },
             { value: null, label: 'Any rating', description: 'No rating restrictions' }
           ].map((option) => (
-            <label key={option.value === null ? 'any' : option.value.toString()} className="flex items-center cursor-pointer p-3 sm:p-4 rounded-lg hover:bg-cinema-gray/30 transition-colors duration-150">
+            <label key={option.value === null ? 'any' : option.value.toString()} className="flex items-center cursor-pointer p-2 rounded-lg hover:bg-cinema-gray/30 transition-colors duration-150">
               <input
                 type="radio"
                 name="includeAdult"
@@ -175,18 +193,18 @@ const HomePage = () => {
                 }}
                 className="sr-only"
               />
-              <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 mr-3 sm:mr-4 flex items-center justify-center transition-colors ${
+              <div className={`w-4 h-4 rounded-full border-2 mr-3 flex items-center justify-center transition-colors ${
                 includeAdult === option.value 
                   ? 'border-accent-blue' 
                   : 'border-cinema-light'
               }`}>
                 {includeAdult === option.value && (
-                  <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-accent-blue"></div>
+                  <div className="w-2 h-2 rounded-full bg-accent-blue"></div>
                 )}
               </div>
               <div className="flex-1">
-                <div className="text-white font-medium text-base sm:text-lg">{option.label}</div>
-                <div className="text-xs sm:text-sm text-white">{option.description}</div>
+                <div className="text-white font-medium text-sm">{option.label}</div>
+                <div className="text-xs text-white/70">{option.description}</div>
               </div>
             </label>
           ))}
@@ -194,16 +212,16 @@ const HomePage = () => {
       </div>
 
       {/* Language Preference */}
-      <div className="mb-6 p-4 sm:p-5 rounded-xl border border-cinema-light/20 bg-cinema-gray/20">
-        <h3 className="text-lg sm:text-xl font-semibold mb-2 text-white">Language Preference</h3>
-        <p className="text-xs sm:text-sm text-white mb-3 italic">Hey c'mon, some of the best movies ever are non-English! Subtitles broooo 😎</p>
-        <div className="space-y-2 sm:space-y-3">
+      <div className="mb-5 p-4 rounded-xl border border-cinema-light/20 bg-cinema-gray/20">
+        <h3 className="text-base font-semibold mb-2 text-white">Language Preference</h3>
+        <p className="text-xs text-white/70 mb-3 italic">Hey c'mon, some of the best movies ever are non-English! Subtitles broooo 😎</p>
+        <div className="space-y-2">
           {[
             { value: 'english', label: 'English only' },
             { value: 'non-english', label: 'Non-English only' },
             { value: 'both', label: 'Both' }
           ].map((option) => (
-            <label key={option.value} className="flex items-center cursor-pointer p-3 sm:p-4 rounded-lg hover:bg-cinema-gray/30 transition-colors duration-150">
+            <label key={option.value} className="flex items-center cursor-pointer p-2 rounded-lg hover:bg-cinema-gray/30 transition-colors duration-150">
               <input
                 type="radio"
                 name="languagePreference"
@@ -212,84 +230,114 @@ const HomePage = () => {
                 onChange={(e) => setLanguagePreference(e.target.value)}
                 className="sr-only"
               />
-              <div className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full border-2 mr-3 sm:mr-4 flex items-center justify-center transition-colors ${
+              <div className={`w-4 h-4 rounded-full border-2 mr-3 flex items-center justify-center transition-colors ${
                 languagePreference === option.value 
                   ? 'border-accent-blue' 
                   : 'border-cinema-light'
               }`}>
                 {languagePreference === option.value && (
-                  <div className="w-2 h-2 sm:w-2.5 sm:h-2.5 rounded-full bg-accent-blue"></div>
+                  <div className="w-2 h-2 rounded-full bg-accent-blue"></div>
                 )}
               </div>
-              <span className="text-white font-medium text-base sm:text-lg">{option.label}</span>
+              <span className="text-white font-medium text-sm">{option.label}</span>
             </label>
           ))}
         </div>
       </div>
 
+      {/* Navigation */}
       <div className="flex justify-between">
-        <GlowButton variant="secondary" onClick={prevStep}>
-          <ChevronLeft size={20} />
+        <GlowButton variant="secondary" onClick={prevStep} className="text-sm px-4 py-2">
+          <ChevronLeft size={16} />
           Back
         </GlowButton>
 
-        <GlowButton onClick={nextStep} disabled={loading}>
+        <GlowButton onClick={nextStep} className="text-sm px-4 py-2">
           Continue
-          <ChevronRight size={20} />
+          <ChevronRight size={16} />
         </GlowButton>
       </div>
     </div>
   );
 
-  const renderStep3 = () => (
-    <div
-      className="max-w-4xl mx-auto"
-    >
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold mb-4">What's Your Mood?</h2>
-        <p className="text-white">Choose your viewing context for better recommendations</p>
+  const renderStep4 = () => (
+    <div className="max-w-4xl mx-auto">
+      {/* Step indicator */}
+      <div className="text-center mb-6">
+        <div className="text-sm text-white/70 mb-2">Step 4 of 5</div>
+        <h2 className="text-2xl font-bold mb-2">Runtime & Streaming</h2>
+        <p className="text-white/80 text-sm">Finalize your preferences</p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-6 mb-8">
-        {moodOptions.map((mood) => (
-                     <div
-             key={mood.value}
-             onClick={() => setSelectedMood(mood.value)}
-            className={`card cursor-pointer transition-all duration-300 ${
-              selectedMood === mood.value
-                ? 'border-accent-red bg-cinema-gray/50'
-                : 'hover:border-accent-blue'
-            }`}
-          >
-            <div className="text-center">
-              <div className="mb-4">
-                {mood.value === 'solo' && <Sparkles size={48} className="mx-auto text-accent-purple" />}
-                {mood.value === 'date' && <Heart size={48} className="mx-auto text-accent-red" />}
-                {mood.value === 'group' && <Users size={48} className="mx-auto text-accent-blue" />}
-              </div>
-              <h3 className="text-xl font-semibold mb-2">{mood.label}</h3>
-              <p className="text-sm text-white">{mood.description}</p>
-            </div>
-          </div>
-        ))}
+      {/* Runtime Selector */}
+      <div className="mb-5 p-4 rounded-xl border border-cinema-light/20 bg-cinema-gray/20">
+        <h3 className="text-base font-semibold mb-3 text-white flex items-center gap-2">
+          <Clock size={18} />
+          Runtime Preferences
+        </h3>
+        <p className="text-xs text-white/70 mb-3">Select your preferred movie lengths</p>
+        <div className="grid grid-cols-3 gap-2">
+          {runtimeOptions.map((runtime) => {
+            const isSelected = selectedRuntimes.includes(runtime.value);
+            return (
+              <button
+                key={runtime.value}
+                onClick={() => toggleRuntime(runtime.value)}
+                className={`p-3 rounded-lg border text-center transition-all duration-200 ${
+                  isSelected
+                    ? 'bg-accent-blue/20 text-white border-accent-blue'
+                    : 'bg-cinema-gray text-white border-cinema-light hover:border-accent-blue/50'
+                }`}
+              >
+                <div className="font-medium text-sm mb-1">{runtime.label}</div>
+                <div className="text-xs text-white/70">{runtime.description}</div>
+              </button>
+            );
+          })}
+        </div>
+        <p className="text-xs text-white/70 mt-2 text-center">Multiple selections allowed</p>
       </div>
 
+      {/* Streaming Availability Filter */}
+      <div className="mb-6 p-4 rounded-xl border border-cinema-light/20 bg-cinema-gray/20">
+        <h3 className="text-base font-semibold mb-3 text-white flex items-center gap-2">
+          <Play size={18} />
+          Streaming Availability
+        </h3>
+        <p className="text-xs text-white/70 mb-3">Filter for movies available on streaming platforms</p>
+        <label className="flex items-center cursor-pointer p-3 rounded-lg hover:bg-cinema-gray/30 transition-colors duration-150">
+          <input
+            type="checkbox"
+            checked={streamingOnly}
+            onChange={(e) => setStreamingOnly(e.target.checked)}
+            className="w-4 h-4 rounded border-2 border-cinema-light text-accent-blue focus:ring-accent-blue focus:ring-2"
+          />
+          <span className="ml-3 text-white text-sm">
+            Only show movies available via subscription or free streaming
+          </span>
+        </label>
+        <p className="text-xs text-white/70 mt-2 text-center">
+          When enabled, excludes movies only available for rent/purchase
+        </p>
+      </div>
+
+      {/* Navigation */}
       <div className="flex justify-between">
-        <GlowButton variant="secondary" onClick={prevStep}>
-          <ChevronLeft size={20} />
+        <GlowButton variant="secondary" onClick={prevStep} className="text-sm px-4 py-2">
+          <ChevronLeft size={16} />
           Back
         </GlowButton>
 
-        <GlowButton onClick={generateRecommendations} disabled={!selectedMood || loading}>
+        <GlowButton onClick={generateRecommendations} disabled={loading} className="text-sm px-4 py-2">
           {loading ? (
             <>
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2" />
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
               Finding Movies...
             </>
           ) : (
             <>
               Get Recommendations
-              <Sparkles size={20} />
+              <Sparkles size={16} />
             </>
           )}
         </GlowButton>
@@ -297,10 +345,8 @@ const HomePage = () => {
     </div>
   );
 
-  const renderStep4 = () => (
-    <div
-      className="max-w-7xl mx-auto"
-    >
+  const renderStep5 = () => (
+    <div className="max-w-7xl mx-auto">
       <div className="text-center mb-8">
         <p className="text-white">Congratulations, you've successfully outsourced your decision-making to an <i>algorithm</i></p>
       </div>
@@ -313,21 +359,20 @@ const HomePage = () => {
 
       <div className="grid md:grid-cols-3 gap-6 mb-8">
         {recommendations.map((movie) => (
-          <div
-            key={movie.id}
-          >
+          <div key={movie.id}>
             <MovieCard movie={movie} />
           </div>
         ))}
       </div>
 
       <div className="flex justify-center gap-4">
-                 <button
-           onClick={resetFlow}
-          className="btn-secondary"
+        <GlowButton
+          variant="secondary"
+          onClick={resetFlow}
+          className="text-sm px-6 py-3"
         >
           Start Over
-        </button>
+        </GlowButton>
       </div>
     </div>
   );
@@ -336,9 +381,7 @@ const HomePage = () => {
     <div className="min-h-screen cinema-gradient">
       {/* Hero Section */}
       {currentStep === 1 && (
-        <div
-          className="relative overflow-hidden"
-        >
+        <div className="relative overflow-hidden">
           {/* Static poster collage background (hero only) */}
           <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
             <img
@@ -357,8 +400,7 @@ const HomePage = () => {
           </div>
 
           <div className="relative z-10 max-w-4xl mx-auto px-4 pt-8 md:pt-16 text-center">
-            <div
-            >
+            <div>
               {/* Tagline */}
               <div className="max-w-4xl mx-auto mb-8 text-white">
                 <h1 className="text-4xl md:text-6xl lg:text-7xl font-bold leading-tight">
@@ -369,8 +411,7 @@ const HomePage = () => {
               <div className="flex justify-center mb-8">
                 <GlowButton
                   onClick={() => {
-                    const el = document.getElementById('preferences');
-                    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                   }}
                   onMouseMove={(e) => {
                     const rect = e.currentTarget.getBoundingClientRect();
@@ -382,7 +423,6 @@ const HomePage = () => {
                   className="px-6 py-4 text-sm gradient-button spotlight-button text-white border-0 shadow-lg hover:shadow-xl"
                 >
                   <b>START WATCHING</b>
-          
                 </GlowButton>
               </div>
             </div>
@@ -390,44 +430,42 @@ const HomePage = () => {
         </div>
       )}
 
-
-
       {/* Recommendation Flow */}
-       <div className="px-4 pt-8">
-         {/* Step Progress Indicator */}
+      <div className="px-4 pt-8">
+        {/* Step Progress Indicator */}
         <div className="max-w-4xl mx-auto mb-8">
-          <div className="flex items-center justify-center space-x-4">
-            {[1, 2, 3, 4].map((step) => (
+          <div className="flex items-center justify-center space-x-3">
+            {[1, 2, 3, 4, 5].map((step) => (
               <div key={step} className="flex items-center">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium ${
                   currentStep >= step 
                     ? 'bg-accent-blue text-white' 
                     : 'bg-cinema-gray text-white'
                 }`}>
                   {step}
                 </div>
-                {step < 4 && (
-                  <div className={`w-12 h-0.5 mx-2 ${
+                {step < 5 && (
+                  <div className={`w-10 h-0.5 mx-1.5 ${
                     currentStep > step ? 'bg-accent-blue' : 'bg-cinema-gray'
                   }`} />
                 )}
               </div>
             ))}
           </div>
-          <div className="text-center mt-2 text-sm text-white">
-            {currentStep === 1 && 'Genres & Decades'}
-            {currentStep === 2 && 'Content Preferences'}
-            {currentStep === 3 && 'Mood Selection'}
-            {currentStep === 4 && 'Recommendations'}
+          <div className="text-center mt-2 text-xs text-white/70">
+            {currentStep === 1 && 'Genre Selection'}
+            {currentStep === 2 && 'Decade Selection'}
+            {currentStep === 3 && 'Content Preferences'}
+            {currentStep === 4 && 'Runtime & Streaming'}
+            {currentStep === 5 && 'Recommendations'}
           </div>
         </div>
-        
-
         
         {currentStep === 1 && renderStep1()}
         {currentStep === 2 && renderStep2()}
         {currentStep === 3 && renderStep3()}
         {currentStep === 4 && renderStep4()}
+        {currentStep === 5 && renderStep5()}
       </div>
     </div>
   );

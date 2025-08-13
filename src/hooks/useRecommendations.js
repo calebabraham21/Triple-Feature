@@ -13,7 +13,10 @@ export const useRecommendations = () => {
     return decades;
   };
   const [selectedDecades, setSelectedDecades] = useState(getAllDecades());
-  const [selectedMood, setSelectedMood] = useState(null);
+  
+  // New runtime and streaming filters
+  const [selectedRuntimes, setSelectedRuntimes] = useState(['short', 'medium', 'long']); // Default to all
+  const [streamingOnly, setStreamingOnly] = useState(false); // Default to false (all movies)
   
   // New consent state variables
   const [includeAdult, setIncludeAdult] = useState(null);
@@ -50,7 +53,8 @@ export const useRecommendations = () => {
     console.log('generateRecommendations called with:', {
       selectedGenres,
       selectedDecades,
-      selectedMood,
+      selectedRuntimes,
+      streamingOnly,
       includeAdult,
       languagePreference
     });
@@ -68,6 +72,8 @@ export const useRecommendations = () => {
       const baseFilters = {
         genres: selectedGenres,
         decades: selectedDecades,
+        runtimes: selectedRuntimes,
+        streamingOnly,
         sortBy: 'popularity.desc',
         minRating: 6.5,
         includeAdult: includeAdult,
@@ -112,13 +118,50 @@ export const useRecommendations = () => {
         });
       }
 
-      // Filter based on mood/context
-      if (selectedMood) {
-        movies = filterByMood(movies, selectedMood);
+      // Filter based on runtime preferences
+      if (selectedRuntimes && selectedRuntimes.length > 0 && selectedRuntimes.length < 3) {
+        console.log(`Filtering by runtime preferences: ${selectedRuntimes.join(', ')}`);
+        const beforeCount = movies.length;
+        
+        movies = movies.filter((movie) => {
+          if (!movie.runtime) {
+            console.log(`Movie ${movie.title} has no runtime data, excluding from runtime filtering`);
+            return false;
+          }
+          
+          const runtime = movie.runtime;
+          const isShort = runtime < 90;
+          const isMedium = runtime >= 90 && runtime <= 120;
+          const isLong = runtime > 120;
+          
+          const matches = (
+            (isShort && selectedRuntimes.includes('short')) ||
+            (isMedium && selectedRuntimes.includes('medium')) ||
+            (isLong && selectedRuntimes.includes('long'))
+          );
+          
+          if (!matches) {
+            console.log(`Movie ${movie.title} (${runtime} min) doesn't match runtime preferences ${selectedRuntimes.join(', ')}`);
+          }
+          
+          return matches;
+        });
+        
+        console.log(`Runtime filtering: ${beforeCount} movies before, ${movies.length} after`);
+      } else {
+        console.log('No runtime filtering applied - all runtime categories selected');
       }
 
       // Filter out recently shown movies to avoid repetition
       movies = movies.filter(movie => !recentlyShown.has(movie.id));
+
+      // Note: Streaming availability filtering is not yet implemented
+      // TMDB doesn't provide reliable streaming data in the discover endpoint
+      // This would require additional API calls to watch providers for each movie
+      if (streamingOnly) {
+        console.log('Streaming availability filtering requested but not yet implemented');
+        console.log('Note: This would require additional API calls to watch providers for each movie');
+      }
 
       // Advanced shuffling with multiple randomization passes
       const advancedShuffle = (arr) => {
@@ -214,7 +257,7 @@ export const useRecommendations = () => {
         setRecentlyShown(newRecentlyShown);
       }
       
-      setCurrentStep(4);
+      setCurrentStep(5);
     } catch (err) {
       setError('Failed to generate recommendations');
       console.error('Error generating recommendations:', err);
@@ -223,47 +266,12 @@ export const useRecommendations = () => {
     }
   };
 
-  // Filter movies based on mood/context
-  const filterByMood = (movies, mood) => {
-    switch (mood) {
-      case 'solo':
-        // Prefer critically acclaimed, thought-provoking films
-        return movies
-          .filter(movie => movie.vote_average >= 7.0)
-          .sort((a, b) => b.vote_average - a.vote_average);
-      
-      case 'date':
-        // Prefer romantic, feel-good, or visually stunning films
-        return movies
-          .filter(movie => 
-            movie.vote_average >= 6.5 && 
-            (movie.genre_ids?.includes(10749) || // Romance
-             movie.genre_ids?.includes(35) || // Comedy
-             movie.genre_ids?.includes(14)) // Fantasy
-          )
-          .sort((a, b) => b.popularity - a.popularity);
-      
-      case 'group':
-        // Prefer action, comedy, or crowd-pleasing films
-        return movies
-          .filter(movie => 
-            movie.vote_average >= 6.0 && 
-            (movie.genre_ids?.includes(28) || // Action
-             movie.genre_ids?.includes(35) || // Comedy
-             movie.genre_ids?.includes(12)) // Adventure
-          )
-          .sort((a, b) => b.popularity - a.popularity);
-      
-      default:
-        return movies;
-    }
-  };
-
   // Reset the recommendation flow
   const resetFlow = () => {
     setSelectedGenres([]);
     setSelectedDecades(getAllDecades());
-    setSelectedMood(null);
+    setSelectedRuntimes(['short', 'medium', 'long']);
+    setStreamingOnly(false);
     setIncludeAdult(null);
     setLanguagePreference('both');
     setRecommendations([]);
@@ -275,7 +283,7 @@ export const useRecommendations = () => {
 
   // Navigate to next step
   const nextStep = () => {
-    if (currentStep < 4) {
+    if (currentStep < 5) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -312,6 +320,16 @@ export const useRecommendations = () => {
     });
   };
 
+  // Toggle runtime selection
+  const toggleRuntime = (runtime) => {
+    setSelectedRuntimes((previousSelected) => {
+      if (previousSelected.includes(runtime)) {
+        return previousSelected.filter((r) => r !== runtime);
+      }
+      return [...previousSelected, runtime];
+    });
+  };
+
   // Get decade options (1900s to 2020s)
   const getDecadeOptions = () => {
     const decades = [];
@@ -321,11 +339,11 @@ export const useRecommendations = () => {
     return decades;
   };
 
-  // Get mood options
-  const getMoodOptions = () => [
-    { value: 'solo', label: 'Solo', description: 'Thought-provoking films for personal viewing' },
-    { value: 'date', label: 'Date Night', description: 'Romantic and feel-good movies' },
-    { value: 'group', label: 'Group', description: 'Crowd-pleasing action and comedy' },
+  // Get runtime options
+  const getRuntimeOptions = () => [
+    { value: 'short', label: 'Short', description: '< 90 min' },
+    { value: 'medium', label: 'Medium', description: '90-120 min' },
+    { value: 'long', label: 'Long', description: '120+ min' },
   ];
 
   return {
@@ -333,7 +351,8 @@ export const useRecommendations = () => {
     genres,
     selectedGenres,
     selectedDecades,
-    selectedMood,
+    selectedRuntimes,
+    streamingOnly,
     includeAdult,
     languagePreference,
     recommendations,
@@ -344,7 +363,8 @@ export const useRecommendations = () => {
     // Actions
     setSelectedGenres,
     setSelectedDecades,
-    setSelectedMood,
+    setSelectedRuntimes,
+    setStreamingOnly,
     setIncludeAdult,
     setLanguagePreference,
     generateRecommendations,
@@ -353,9 +373,10 @@ export const useRecommendations = () => {
     prevStep,
     toggleGenre,
     toggleDecade,
+    toggleRuntime,
     
     // Helpers
     getDecadeOptions,
-    getMoodOptions,
+    getRuntimeOptions,
   };
 };

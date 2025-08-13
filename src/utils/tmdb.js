@@ -44,6 +44,8 @@ export const getMoviesByFilters = async (filters = {}) => {
   const {
     genres = [],
     decades = null,
+    runtimes = null,
+    streamingOnly = false,
     page = 1,
     sortBy = 'popularity.desc',
     minRating = 6.0,
@@ -91,8 +93,16 @@ export const getMoviesByFilters = async (filters = {}) => {
     params['primary_release_date.lte'] = `${maxDecade}-12-31`;
   }
 
+  // Note: Runtime filtering will be done client-side for better accuracy
+  // TMDB's with_runtime_gte and with_runtime_lte don't work reliably
+
+  // Note: Streaming availability filtering will be done client-side
+  // TMDB doesn't provide reliable streaming availability data in the discover endpoint
+
   console.log('Making TMDB API call with params:', params);
   console.log(`Adult content preference: ${includeAdult === null ? 'Any rating' : includeAdult ? 'R-rated and above' : 'Family-friendly (up to PG-13)'}`);
+  console.log(`Runtime filters: ${runtimes ? runtimes.join(', ') : 'All'}`);
+  console.log(`Streaming only: ${streamingOnly ? 'Yes' : 'No'}`);
   const response = await makeRequest('/discover/movie', params);
   
   // Apply strict certification filtering if not "any" mode
@@ -179,6 +189,9 @@ export const getMoviesByFilters = async (filters = {}) => {
       );
     }
   }
+
+  // Note: Runtime and streaming filtering will be applied in the useRecommendations hook
+  // after fetching movie details, as TMDB doesn't provide reliable data for these filters
   
   return response;
 };

@@ -1,8 +1,8 @@
 const AboutMe = () => {
   return (
-    <div className="min-h-screen cinema-gradient">
+    <div className="min-h-screen cinema-gradient pt-24">
       <div className="max-w-3xl mx-auto px-4 py-12">
-        <h1 className="text-3xl font-bold mb-4">About Me</h1>
+        <h1 className="text-3xl font-bold mb-4 text-white">About Me</h1>
         <p className="text-white mb-6">
           This is a placeholder for your personal bio. You can share your background, your love for movies,
           and what inspired you to build Triple Feature. Add links or images later if you like.

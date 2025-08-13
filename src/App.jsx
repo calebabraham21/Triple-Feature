@@ -7,6 +7,8 @@ import HomePage from './pages/HomePage';
 import WatchlistPage from './pages/WatchlistPage';
 import AboutMe from './pages/AboutMe';
 import AboutTripleFeature from './pages/AboutTripleFeature';
+import ProjectsPage from './pages/ProjectsPage';
+import EditorsChoicePage from './pages/EditorsChoicePage';
 import AuthPage from './pages/AuthPage';
 import { useAuth } from './hooks/useAuth';
 
@@ -46,6 +48,17 @@ function App() {
   const [currentPage, setCurrentPage] = useState('home');
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   const { signOut } = useAuth();
+
+  // Update current page based on current route
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path === '/') setCurrentPage('home');
+    else if (path === '/editors-choice') setCurrentPage('editors-choice');
+    else if (path === '/about-me') setCurrentPage('about-me');
+    else if (path === '/projects') setCurrentPage('projects');
+    else if (path === '/watchlist') setCurrentPage('watchlist');
+    else if (path === '/auth') setCurrentPage('auth');
+  }, []);
 
   // Prevent background scrolling when modal is open
   useEffect(() => {
@@ -97,6 +110,8 @@ function App() {
             <Route path="/watchlist" element={<ProtectedRoute><WatchlistPage /></ProtectedRoute>} />
             <Route path="/about-me" element={<AboutMe />} />
             <Route path="/about-triple" element={<AboutTripleFeature />} />
+            <Route path="/projects" element={<ProjectsPage />} />
+            <Route path="/editors-choice" element={<EditorsChoicePage />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>

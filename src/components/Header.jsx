@@ -16,7 +16,7 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
   
   const leftNavItems = [
     { id: 'home', label: 'Home', icon: Home },
-    { id: 'top-picks', label: 'Top Picks', icon: Sparkles },
+    { id: 'editors-choice', label: 'Editor\'s Choice', icon: Sparkles },
     { id: 'about-me', label: 'About Me', icon: Info },
   ];
 
@@ -47,6 +47,27 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
   const handleNavigation = (page) => {
     onNavigate(page);
     setIsMobileMenuOpen(false);
+    
+    // Handle navigation to specific routes
+    switch (page) {
+      case 'home':
+        navigate('/');
+        break;
+      case 'editors-choice':
+        navigate('/editors-choice');
+        break;
+      case 'about-me':
+        navigate('/about-me');
+        break;
+      case 'projects':
+        navigate('/projects');
+        break;
+      case 'contact':
+        // Contact is handled by dropdown, no navigation needed
+        break;
+      default:
+        navigate('/');
+    }
   };
 
   const handleSignOut = async () => {

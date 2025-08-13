@@ -2,13 +2,17 @@ import { useRecommendations } from '../hooks/useRecommendations';
 import MovieCard from '../components/MovieCard';
 import MovieCardSkeleton from '../components/MovieCardSkeleton';
 import LoadingOverlay from '../components/LoadingOverlay';
-import { ChevronLeft, ChevronRight, Sparkles, Clock, Play } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, Clock, Play, Home, AlertTriangle } from 'lucide-react';
 import GlowButton from '../components/GlowButton';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 // Using public asset path for reliability in dev/prod
 
 const HomePage = () => {
+  const navigate = useNavigate();
+  const [showNavigationConfirm, setShowNavigationConfirm] = useState(false);
+  
   const {
     genres,
     selectedGenres,
@@ -43,6 +47,31 @@ const HomePage = () => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [currentStep]);
+
+  // Check if user has made selections that would be lost
+  const hasSelections = selectedGenres.length > 0 || 
+    (selectedDecades && selectedDecades.length < 13) || // Less than all decades
+    (selectedRuntimes && selectedRuntimes.length < 3) || // Less than all runtimes
+    streamingOnly || 
+    includeAdult !== null || 
+    languagePreference !== 'both';
+
+  const handleHomeNavigation = () => {
+    if (currentStep > 1 && hasSelections) {
+      setShowNavigationConfirm(true);
+    } else {
+      navigate('/');
+    }
+  };
+
+  const confirmNavigation = () => {
+    setShowNavigationConfirm(false);
+    navigate('/');
+  };
+
+  const cancelNavigation = () => {
+    setShowNavigationConfirm(false);
+  };
 
   const decadeOptions = getDecadeOptions();
   const runtimeOptions = getRuntimeOptions();
@@ -409,6 +438,42 @@ const HomePage = () => {
         isVisible={loading} 
         message={progressMessage || "Finding your perfect movies..."}
       />
+      
+      {/* Navigation Confirmation Modal */}
+      {showNavigationConfirm && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-cinema-dark/95 border border-cinema-light/20 rounded-2xl p-8 max-w-md mx-4 text-center">
+            <div className="mb-6 flex justify-center">
+              <div className="w-16 h-16 bg-accent-red/20 rounded-full flex items-center justify-center">
+                <AlertTriangle size={32} className="text-accent-red" />
+              </div>
+            </div>
+            
+            <h2 className="text-xl font-bold text-white mb-3">
+              Leave Current Selections?
+            </h2>
+            
+            <p className="text-white/80 text-sm mb-6">
+              Are you sure you want to leave? Your current selections will be lost.
+            </p>
+            
+            <div className="flex gap-3">
+              <button
+                onClick={cancelNavigation}
+                className="flex-1 px-4 py-2 bg-cinema-gray hover:bg-cinema-light text-white rounded-lg transition-colors"
+              >
+                Stay
+              </button>
+              <button
+                onClick={confirmNavigation}
+                className="flex-1 px-4 py-2 bg-accent-red hover:bg-accent-red/80 text-white rounded-lg transition-colors"
+              >
+                Leave
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       
       {/* Screen reader live region for progress updates */}
       <div 

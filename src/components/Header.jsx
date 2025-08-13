@@ -67,27 +67,30 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
     onSignOutRequest();
   };
 
-  const renderNavButton = (item) => {
+  const renderNavLink = (item) => {
     const Icon = item.icon;
     const isActive = currentPage === item.id;
     
     return (
-      <motion.button
+      <motion.a
         key={item.id}
-        whileHover={{}}
-        whileTap={{}}
-        onClick={() => handleNavigation(item.id)}
-        className={`relative inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium border trace-snake trace-snake--rb transition-colors transition-shadow duration-300 ${
-          isActive ? 'bg-cinema-gray text-white border-cinema-light' : 'bg-cinema-black text-white border-cinema-light'
-        } hover:bg-white/5 hover:shadow-lg hover:shadow-accent-blue/10`}
+        href="#"
+        onClick={(e) => {
+          e.preventDefault();
+          handleNavigation(item.id);
+        }}
+        className={`relative inline-flex items-center gap-2 px-3 py-2 text-base font-medium transition-all duration-300 cursor-pointer group ${
+          isActive ? 'text-accent-blue' : 'text-white/80'
+        } hover:text-white hover:scale-105`}
+        whileHover={{ y: -2 }}
       >
-        <Icon size={16} />
-        <span className="hidden lg:inline">{item.label}</span>
-        <span className="trace-line trace-line--t" />
-        <span className="trace-line trace-line--r" />
-        <span className="trace-line trace-line--b" />
-        <span className="trace-line trace-line--l" />
-      </motion.button>
+        <Icon size={16} className="transition-transform duration-300 group-hover:rotate-12" />
+        <span className="hidden lg:inline relative">
+          {item.label}
+          {/* Underline effect on hover */}
+          <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-accent-blue to-accent-purple transition-all duration-300 group-hover:w-full"></span>
+        </span>
+      </motion.a>
     );
   };
 
@@ -108,14 +111,14 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
       
       {/* Desktop Navigation - Symmetrical Layout */}
       <div className="hidden md:block py-4 relative z-10">
-        <div className="max-w-5xl mx-auto px-8 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-12 flex items-center justify-center relative">
           {/* Left Navigation - Movie App Links */}
           <motion.nav
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 absolute left-8"
           >
-            {leftNavItems.map(renderNavButton)}
+            {leftNavItems.map(renderNavLink)}
           </motion.nav>
 
           {/* Center Logo */}
@@ -137,9 +140,9 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
           <motion.nav
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 absolute right-8"
           >
-            {rightNavItems.map(renderNavButton)}
+            {rightNavItems.map(renderNavLink)}
             
             {/* Authentication Button */}
             <div className="ml-2">
@@ -274,19 +277,24 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
                   const isActive = currentPage === item.id;
                   
                   return (
-                    <motion.button
+                    <motion.a
                       key={item.id}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => handleNavigation(item.id)}
-                      className={`flex items-center gap-2 w-full px-2 py-2 rounded text-sm font-medium transition-colors ${
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleNavigation(item.id);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className={`flex items-center gap-2 w-full px-2 py-2 rounded text-base font-medium transition-colors ${
                         isActive 
-                          ? 'bg-cinema-gray text-white' 
-                          : 'text-white hover:text-white hover:bg-cinema-gray/50'
+                          ? 'text-accent-blue' 
+                          : 'text-white/80 hover:text-white'
                       }`}
+                      whileHover={{ x: 4 }}
                     >
-                      <Icon size={16} />
+                      <Icon size={16} className="transition-transform duration-300 group-hover:rotate-12" />
                       {item.label}
-                    </motion.button>
+                    </motion.a>
                   );
                 })}
               </div>
@@ -301,19 +309,24 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
                   const isActive = currentPage === item.id;
                   
                   return (
-                    <motion.button
+                    <motion.a
                       key={item.id}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={() => handleNavigation(item.id)}
-                      className={`flex items-center gap-2 w-full px-2 py-2 rounded text-sm font-medium transition-colors ${
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleNavigation(item.id);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className={`flex items-center gap-2 w-full px-2 py-2 rounded text-base font-medium transition-colors ${
                         isActive 
-                          ? 'bg-cinema-gray text-white' 
-                          : 'text-white hover:text-white hover:bg-cinema-gray/50'
+                          ? 'text-accent-blue' 
+                          : 'text-white/80 hover:text-white'
                       }`}
+                      whileHover={{ x: 4 }}
                     >
-                      <Icon size={16} />
+                      <Icon size={16} className="transition-transform duration-300 group-hover:rotate-12" />
                       {item.label}
-                    </motion.button>
+                    </motion.a>
                   );
                 })}
               </div>
@@ -327,7 +340,7 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
                   <motion.button
                     whileTap={{ scale: 0.95 }}
                     disabled
-                    className="flex items-center gap-2 w-full px-2 py-2 rounded text-sm font-medium text-white/50 cursor-not-allowed"
+                    className="flex items-center gap-2 w-full px-2 py-2 rounded text-base font-medium text-white/50 cursor-not-allowed"
                   >
                     <User size={16} />
                     Loading...
@@ -344,7 +357,7 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
                         }
                       }}
                       disabled={loading || !isAuthenticated}
-                      className={`flex items-center gap-2 w-full px-2 py-2 rounded text-sm font-medium transition-colors ${
+                      className={`flex items-center gap-2 w-full px-2 py-2 rounded text-base font-medium transition-colors ${
                         loading || !isAuthenticated 
                           ? 'text-white/50 cursor-not-allowed' 
                           : 'text-white hover:text-white hover:bg-cinema-gray/50'
@@ -356,7 +369,7 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
                     <motion.button
                       whileTap={{ scale: 0.95 }}
                       onClick={handleSignOut}
-                      className="flex items-center gap-2 w-full px-2 py-2 rounded text-sm font-medium text-white hover:text-white hover:bg-cinema-gray/50"
+                      className="flex items-center gap-2 w-full px-2 py-2 rounded text-base font-medium text-white hover:text-white hover:bg-cinema-gray/50"
                     >
                       <LogOut size={16} />
                       Sign Out
@@ -369,7 +382,7 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
                       navigate('/auth');
                       setIsMobileMenuOpen(false);
                     }}
-                    className="flex items-center gap-2 w-full px-2 py-2 rounded text-sm font-medium text-white hover:text-white hover:bg-cinema-gray/50"
+                    className="flex items-center gap-2 w-full px-2 py-2 rounded text-base font-medium text-white hover:text-white hover:bg-cinema-gray/50"
                   >
                     <User size={16} />
                     Sign In

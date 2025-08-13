@@ -30,7 +30,7 @@ const Footer = () => {
               <span>Made by Caleb Abraham</span>
             </div>
             <p className="text-white/50 text-xs mt-1">
-              © 2024 Triple Feature
+              © 2025 Triple Feature
             </p>
           </div>
 
@@ -62,13 +62,6 @@ const Footer = () => {
               <Mail size={18} className="text-white group-hover:text-accent-red transition-colors" />
             </a>
           </div>
-        </div>
-
-        {/* Bottom Bar */}
-        <div className="border-t border-cinema-light/10 mt-6 pt-6 text-center">
-          <p className="text-white/40 text-xs">
-            Discover your next favorite movie with AI-powered recommendations
-          </p>
         </div>
       </div>
     </footer>

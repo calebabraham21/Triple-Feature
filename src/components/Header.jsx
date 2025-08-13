@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { List, Home, Info, Menu, X, Sparkles, Code, Mail, ExternalLink, Linkedin, Github, User, LogOut } from 'lucide-react';
+import { List, Home, Info, Menu, X, Sparkles, User, LogOut } from 'lucide-react';
 import { useState, useLayoutEffect, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TripFeatLogo from '../../TripFeatLogo.png';
@@ -17,12 +17,10 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
   const leftNavItems = [
     { id: 'home', label: 'Home', icon: Home },
     { id: 'editors-choice', label: 'Editor\'s Choice', icon: Sparkles },
-    { id: 'about-me', label: 'About Me', icon: Info },
   ];
 
   const rightNavItems = [
-    { id: 'projects', label: 'Projects', icon: Code },
-    { id: 'contact', label: 'Contact', icon: Mail },
+    { id: 'about-me', label: 'About Me', icon: Info },
   ];
 
   const allNavItems = [...leftNavItems, ...rightNavItems];
@@ -59,12 +57,6 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
       case 'about-me':
         navigate('/about-me');
         break;
-      case 'projects':
-        navigate('/projects');
-        break;
-      case 'contact':
-        // Contact is handled by dropdown, no navigation needed
-        break;
       default:
         navigate('/');
     }
@@ -78,75 +70,6 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
   const renderNavButton = (item) => {
     const Icon = item.icon;
     const isActive = currentPage === item.id;
-    
-    // Special handling for contact button with dropdown
-    if (item.id === 'contact') {
-      return (
-        <div key={item.id} className="relative group">
-          <motion.button
-            whileHover={{}}
-            whileTap={{}}
-            onClick={(e) => e.preventDefault()}
-            className={`relative inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium border trace-snake trace-snake--rb transition-colors transition-shadow duration-300 ${
-              isActive ? 'bg-cinema-gray text-white border-cinema-light' : 'bg-cinema-black text-white border-cinema-light'
-            } hover:bg-white/5 hover:shadow-lg hover:shadow-accent-blue/10`}
-          >
-            <Icon size={16} />
-            <span className="hidden lg:inline">{item.label}</span>
-            <span className="trace-line trace-line--t" />
-            <span className="trace-line trace-line--r" />
-            <span className="trace-line trace-line--b" />
-            <span className="trace-line trace-line--l" />
-          </motion.button>
-          
-          {/* Contact Dropdown */}
-          <div className="absolute right-0 top-full w-64 opacity-0 translate-y-2 pointer-events-none group-hover:opacity-100 group-hover:translate-y-0 group-hover:pointer-events-auto transition-all duration-200 z-50">
-            <div className="bg-black/90 backdrop-blur-md border border-white/20 rounded-lg shadow-xl p-4">
-              <div className="space-y-3">
-                <a
-                  href="mailto:calebabraham21@gmail.com"
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 transition-colors group/item"
-                >
-                  <Mail size={18} className="text-accent-red" />
-                  <div>
-                    <div className="text-sm font-medium text-white group-hover/item:text-accent-red transition-colors">Email</div>
-                    <div className="text-xs text-white/70">calebabraham21@gmail.com</div>
-                  </div>
-                </a>
-                
-                <a
-                  href="https://www.linkedin.com/in/caleb-abraham-3900b9281/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 transition-colors group/item"
-                >
-                  <Linkedin size={18} className="text-accent-blue" />
-                  <div className="flex-1">
-                    <div className="text-sm font-medium text-white group-hover/item:text-accent-blue transition-colors">LinkedIn</div>
-                    <div className="text-xs text-white/70">Professional profile</div>
-                  </div>
-                  <ExternalLink size={14} className="text-white/50" />
-                </a>
-                
-                <a
-                  href="https://github.com/calebabraham21"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-3 p-3 rounded-lg hover:bg-white/10 transition-colors group/item"
-                >
-                  <Github size={18} className="text-accent-purple" />
-                  <div className="flex-1">
-                    <div className="text-sm font-medium text-white group-hover/item:text-accent-purple transition-colors">GitHub</div>
-                    <div className="text-xs text-white/70">Code repositories</div>
-                  </div>
-                  <ExternalLink size={14} className="text-white/50" />
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-      );
-    }
     
     return (
       <motion.button

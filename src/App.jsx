@@ -10,6 +10,7 @@ import AboutTripleFeature from './pages/AboutTripleFeature';
 import ProjectsPage from './pages/ProjectsPage';
 import EditorsChoicePage from './pages/EditorsChoicePage';
 import AuthPage from './pages/AuthPage';
+import Footer from './components/Footer';
 import { useAuth } from './hooks/useAuth';
 
 // Protected Route Component
@@ -115,6 +116,9 @@ function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
+
+        {/* Footer */}
+        <Footer />
 
         {/* Sign Out Confirmation Popup */}
         <AnimatePresence>

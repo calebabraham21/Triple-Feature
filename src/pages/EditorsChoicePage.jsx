@@ -28,7 +28,7 @@ const EditorsChoicePage = () => {
             <h1 className="text-4xl font-bold text-white">Editor's Choice</h1>
           </div>
           <p className="text-xl text-white/80">
-            Weekly curated picks from my personal collection
+          My personal pick of the week
           </p>
         </motion.div>
 
@@ -110,7 +110,6 @@ const EditorsChoicePage = () => {
           className="text-center"
         >
           <div className="bg-cinema-dark/30 border border-cinema-light/20 rounded-xl p-8">
-            <div className="text-4xl mb-4">📝</div>
             <h2 className="text-2xl font-bold text-white mb-4">More Reviews Coming Soon</h2>
             <p className="text-white/70 text-lg mb-6">
               I'll be adding new movie reviews every week. Each pick will be personally selected 

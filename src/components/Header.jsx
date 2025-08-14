@@ -281,7 +281,7 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-30"
+            className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998]"
             onClick={() => setIsMobileMenuOpen(false)}
           />
           
@@ -291,7 +291,7 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="md:hidden fixed top-0 right-0 w-4/5 h-full bg-cinema-dark/95 backdrop-blur-md border-l border-cinema-gray shadow-2xl z-40 overflow-y-auto"
+            className="md:hidden fixed top-0 right-0 w-4/5 h-full bg-cinema-dark/95 backdrop-blur-md border-l border-cinema-gray shadow-2xl z-[9999] overflow-y-auto"
           >
             {/* Close button */}
             <div className="flex justify-end p-4 border-b border-cinema-gray/30">

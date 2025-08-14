@@ -7,12 +7,15 @@ import GlowButton from '../components/GlowButton';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useAuth } from '../hooks/useAuth';
 
 // Using public asset path for reliability in dev/prod
 
 const HomePage = () => {
   const navigate = useNavigate();
   const [showNavigationConfirm, setShowNavigationConfirm] = useState(false);
+  const [userFirstName, setUserFirstName] = useState(null);
+  const { user, getUserProfile } = useAuth();
   
   const {
     genres,
@@ -42,6 +45,29 @@ const HomePage = () => {
     getDecadeOptions,
     getRuntimeOptions,
   } = useRecommendations();
+
+  // Fetch user's first name when user is authenticated
+  useEffect(() => {
+    const fetchUserFirstName = async () => {
+      if (user) {
+        try {
+          const profile = await getUserProfile();
+          if (profile?.first_name) {
+            setUserFirstName(profile.first_name);
+          } else {
+            setUserFirstName(null);
+          }
+        } catch (error) {
+          console.error('Error fetching user profile:', error);
+          setUserFirstName(null);
+        }
+      } else {
+        setUserFirstName(null);
+      }
+    };
+
+    fetchUserFirstName();
+  }, [user, getUserProfile]);
 
   useEffect(() => {
     if (currentStep > 1) {
@@ -537,7 +563,11 @@ const HomePage = () => {
                 Stop scrolling, start watching
               </h1>
               <p className="text-base md:text-lg text-white/90 leading-relaxed mb-6">
-                Triple Feature helps you pick a movie and just watch it. No more scrolling forever on Netflix or HBO. Tell us what you are in the mood for, we crunch the options, and give you three solid picks.
+                {userFirstName ? (
+                  <>Hey {userFirstName}, Triple Feature helps you pick a movie and just watch it. No more scrolling forever on Netflix or HBO. Tell us what you are in the mood for, we crunch the options, and give you three solid picks.</>
+                ) : (
+                  <>Triple Feature helps you pick a movie and just watch it. No more scrolling forever on Netflix or HBO. Tell us what you are in the mood for, we crunch the options, and give you three solid picks.</>
+                )}
               </p>
               
               {/* Start Button */}

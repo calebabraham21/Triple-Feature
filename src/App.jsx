@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { LogOut } from 'lucide-react';
+import { LogOut, CheckCircle, Sparkles } from 'lucide-react';
 import Header from './components/Header';
 import HomePage from './pages/HomePage';
 import WatchlistPage from './pages/WatchlistPage';
@@ -12,6 +12,7 @@ import AuthPage from './pages/AuthPage';
 import ConfirmSuccessPage from './pages/ConfirmSuccessPage';
 import Footer from './components/Footer';
 import { useAuth } from './hooks/useAuth';
+import { supabase } from './lib/supabaseClient';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -48,7 +49,39 @@ const ProtectedRoute = ({ children }) => {
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
+  const [showEmailConfirmSuccess, setShowEmailConfirmSuccess] = useState(false);
   const { signOut } = useAuth();
+
+  // Handle email confirmation success
+  useEffect(() => {
+    const handleEmailConfirmation = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      // Check if user just confirmed their email (has session but email_confirmed_at is recent)
+      if (session?.user) {
+        const emailConfirmedAt = session.user.email_confirmed_at;
+        if (emailConfirmedAt) {
+          // Check if confirmation happened in the last 5 minutes
+          const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
+          if (new Date(emailConfirmedAt) > fiveMinutesAgo) {
+            setShowEmailConfirmSuccess(true);
+          }
+        }
+      }
+    };
+
+    // Check on mount and when URL changes
+    handleEmailConfirmation();
+    
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session?.user?.email_confirmed_at) {
+        setShowEmailConfirmSuccess(true);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   // Update current page based on current route
   useEffect(() => {
@@ -167,6 +200,60 @@ function App() {
                     <span className="trace-line trace-line--l" />
                   </button>
                 </div>
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Email Confirmation Success Popup */}
+        <AnimatePresence>
+          {showEmailConfirmSuccess && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+              className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90"
+            >
+              <motion.div
+                initial={{ scale: 0.9, y: 20 }}
+                animate={{ scale: 1, y: 0 }}
+                exit={{ scale: 0.9, y: 20 }}
+                transition={{ duration: 0.3, ease: "easeOut" }}
+                className="bg-cinema-dark border border-cinema-light/30 rounded-2xl p-8 max-w-md w-full shadow-2xl text-center"
+              >
+                {/* Success Icon */}
+                <div className="relative mb-6">
+                  <CheckCircle size={80} className="mx-auto text-green-400" />
+                  <motion.div
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+                    className="absolute -top-2 -right-2"
+                  >
+                    <Sparkles size={24} className="text-yellow-400" />
+                  </motion.div>
+                </div>
+
+                {/* Success Message */}
+                <h2 className="text-2xl font-bold text-white mb-4">
+                  Welcome to Triple Feature! 🎬
+                </h2>
+                
+                <p className="text-white/90 text-lg mb-6 leading-relaxed">
+                  Your email has been confirmed and your account is now active. 
+                  You're all set to start discovering your next favorite movies!
+                </p>
+
+                {/* Get Started Button */}
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  onClick={() => setShowEmailConfirmSuccess(false)}
+                  className="w-full bg-accent-blue hover:bg-accent-blue/80 text-white font-semibold py-3 px-6 rounded-lg transition-colors shadow-lg hover:shadow-xl"
+                >
+                  Start Exploring
+                </motion.button>
               </motion.div>
             </motion.div>
           )}

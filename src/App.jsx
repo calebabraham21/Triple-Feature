@@ -9,6 +9,7 @@ import AboutMe from './pages/AboutMe';
 import AboutTripleFeature from './pages/AboutTripleFeature';
 import EditorsChoicePage from './pages/EditorsChoicePage';
 import AuthPage from './pages/AuthPage';
+import ConfirmSuccessPage from './pages/ConfirmSuccessPage';
 import Footer from './components/Footer';
 import { useAuth } from './hooks/useAuth';
 
@@ -106,6 +107,7 @@ function App() {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/auth" element={<AuthPage />} />
+            <Route path="/confirm-success" element={<ConfirmSuccessPage />} />
             <Route path="/watchlist" element={<ProtectedRoute><WatchlistPage /></ProtectedRoute>} />
             <Route path="/about-me" element={<AboutMe />} />
             <Route path="/about-triple" element={<AboutTripleFeature />} />

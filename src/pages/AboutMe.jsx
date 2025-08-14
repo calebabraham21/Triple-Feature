@@ -25,7 +25,7 @@ const AboutMe = () => {
         >
           <h1 className="text-3xl font-bold mb-4 text-white">About Me</h1>
           <p className="text-white mb-4 text-base leading-relaxed">
-          Hey there! I built this project for fun because I was tired of the classic "open a streaming app, scroll for an hour, never hit play" routine. I wanted something quick and simple: you tell it what you're in the mood for, and it gives you a few solid picks. Less browsing, more watching.
+          Hey there! My name is Caleb and I built this project for fun because I was tired of the classic "open a streaming app, scroll for an hour, never hit play" routine. I wanted something quick and simple: you tell it what you're in the mood for, and it gives you a few solid picks. Less browsing, more watching.
 
 I'm a big movie fan. David Lynch is the GOAT, I'm a lifelong Twin Peaks fan, and my all-time favorite movie is Mulholland Drive. This app is also a lightweight take on Letterboxd for me, so I can track finds and keep discovering new stuff.
 
@@ -189,22 +189,18 @@ Hope you enjoy it!
           
           <div className="bg-cinema-dark/50 border border-cinema-light/20 rounded-xl p-6">
             <p className="text-white/80 text-base mb-6 text-center">
-              Let's connect! I'm always interested in hearing about new opportunities, 
-              collaborations, or just chatting about films and technology.
+            Let’s connect! I’m open to new opportunities, collaborations, or chats about film and tech.
             </p>
             
             <div className="grid md:grid-cols-2 gap-4">
               {/* Email */}
-              <a
-                href="mailto:calebabraham21@gmail.com"
-                className="flex items-center gap-3 p-3 rounded-lg bg-cinema-gray hover:bg-cinema-light transition-colors group"
-              >
+              <div className="flex items-center gap-3 p-3 rounded-lg bg-cinema-gray">
                 <Mail size={20} className="text-accent-red" />
                 <div>
-                  <div className="text-sm font-medium text-white group-hover:text-accent-red transition-colors">Email</div>
+                  <div className="text-sm font-medium text-white">Email</div>
                   <div className="text-xs text-white/70">calebabraham21@gmail.com</div>
                 </div>
-              </a>
+              </div>
               
               {/* LinkedIn */}
               <a
@@ -219,21 +215,6 @@ Hope you enjoy it!
                   <div className="text-xs text-white/70">Professional profile</div>
                 </div>
                 <ExternalLink size={14} className="text-white/50" />
-              </a>
-              
-              {/* GitHub */}
-              <a
-                href="https://github.com/calebabraham21"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-3 p-3 rounded-lg bg-cinema-gray hover:bg-cinema-light transition-colors group"
-              >
-                <Github size={20} className="text-accent-purple" />
-                <div>
-                  <div className="text-sm font-medium text-white group-hover:text-accent-purple transition-colors">GitHub</div>
-                  <div className="text-xs text-white/70">Code repositories</div>
-                </div>
-                <ExternalLink size={14} className="text-white/60" />
               </a>
             </div>
           </div>

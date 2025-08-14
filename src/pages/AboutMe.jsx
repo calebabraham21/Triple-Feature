@@ -25,9 +25,9 @@ const AboutMe = () => {
         >
           <h1 className="text-3xl font-bold mb-4 text-white">About Me</h1>
           <p className="text-white mb-4 text-base leading-relaxed">
-          Hey there! I built this project for fun because I was tired of the classic “open a streaming app, scroll for an hour, never hit play” routine. I wanted something quick and simple: you tell it what you’re in the mood for, and it gives you a few solid picks. Less browsing, more watching.
+          Hey there! I built this project for fun because I was tired of the classic "open a streaming app, scroll for an hour, never hit play" routine. I wanted something quick and simple: you tell it what you're in the mood for, and it gives you a few solid picks. Less browsing, more watching.
 
-I’m a big movie fan. David Lynch is the GOAT, I’m a lifelong Twin Peaks fan, and my all-time favorite movie is Mulholland Drive. This app is also a lightweight take on Letterboxd for me, so I can track finds and keep discovering new stuff.
+I'm a big movie fan. David Lynch is the GOAT, I'm a lifelong Twin Peaks fan, and my all-time favorite movie is Mulholland Drive. This app is also a lightweight take on Letterboxd for me, so I can track finds and keep discovering new stuff.
 
 <br></br>
 <br></br>
@@ -38,6 +38,85 @@ Hope you enjoy it!
             <p className="text-white text-center italic">
             "Life is very, very complicated, and so films should be allowed to be, too." — David Lynch
             </p>
+          </div>
+        </motion.div>
+
+        {/* Tech Stack Section */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="mb-16"
+        >
+          <div className="flex items-center gap-3 mb-6">
+            <div className="w-8 h-8 bg-gradient-to-r from-accent-blue to-accent-purple rounded-lg flex items-center justify-center">
+              <Code size={20} className="text-white" />
+            </div>
+            <h2 className="text-2xl font-bold text-white">Tech Stack</h2>
+          </div>
+          
+          <div className="bg-cinema-dark/50 border border-cinema-light/20 rounded-xl p-6">
+            <p className="text-white/80 text-base mb-6 text-center">
+            Powered by modern web tech like Next.js, Supabase, and Tailwind… and, let’s be honest, Cursor carried the team.
+            </p>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {/* Frontend */}
+              <div className="bg-cinema-dark/30 border border-cinema-light/20 rounded-lg p-4 text-center hover:bg-cinema-dark/40 transition-colors">
+                <div className="text-2xl mb-2">⚛️</div>
+                <h3 className="text-sm font-semibold text-white mb-1">React</h3>
+                <p className="text-xs text-white/60">Frontend framework</p>
+              </div>
+
+              {/* Styling */}
+              <div className="bg-cinema-dark/30 border border-cinema-light/20 rounded-lg p-4 text-center hover:bg-cinema-dark/40 transition-colors">
+                <div className="text-2xl mb-2">🎨</div>
+                <h3 className="text-sm font-semibold text-white mb-1">Tailwind CSS</h3>
+                <p className="text-xs text-white/60">Utility-first CSS</p>
+              </div>
+
+              {/* Backend */}
+              <div className="bg-cinema-dark/30 border border-cinema-light/20 rounded-lg p-4 text-center hover:bg-cinema-dark/40 transition-colors">
+                <div className="text-2xl mb-2">🚀</div>
+                <h3 className="text-sm font-semibold text-white mb-1">Supabase</h3>
+                <p className="text-xs text-white/60">Backend & auth</p>
+              </div>
+
+              {/* API */}
+              <div className="bg-cinema-dark/30 border border-cinema-light/20 rounded-lg p-4 text-center hover:bg-cinema-dark/40 transition-colors">
+                <div className="text-2xl mb-2">🎬</div>
+                <h3 className="text-sm font-semibold text-white mb-1">TMDB API</h3>
+                <p className="text-xs text-white/60">Movie database</p>
+              </div>
+
+              {/* Animations */}
+              <div className="bg-cinema-dark/30 border border-cinema-light/20 rounded-lg p-4 text-center hover:bg-cinema-dark/40 transition-colors">
+                <div className="text-2xl mb-2">✨</div>
+                <h3 className="text-sm font-semibold text-white mb-1">Framer Motion</h3>
+                <p className="text-xs text-white/60">Smooth animations</p>
+              </div>
+
+              {/* Build Tool */}
+              <div className="bg-cinema-dark/30 border border-cinema-light/20 rounded-lg p-4 text-center hover:bg-cinema-dark/40 transition-colors">
+                <div className="text-2xl mb-2">⚡</div>
+                <h3 className="text-sm font-semibold text-white mb-1">Vite</h3>
+                <p className="text-xs text-white/60">Fast build tool</p>
+              </div>
+
+              {/* Icons */}
+              <div className="bg-cinema-dark/30 border border-cinema-light/20 rounded-lg p-4 text-center hover:bg-cinema-dark/40 transition-colors">
+                <div className="text-2xl mb-2">🔧</div>
+                <h3 className="text-sm font-semibold text-white mb-1">Lucide React</h3>
+                <p className="text-xs text-white/60">Icon library</p>
+              </div>
+
+              {/* Deployment */}
+              <div className="bg-cinema-dark/30 border border-cinema-light/20 rounded-lg p-4 text-center hover:bg-cinema-dark/40 transition-colors">
+                <div className="text-2xl mb-2">🌐</div>
+                <h3 className="text-sm font-semibold text-white mb-1">Vercel</h3>
+                <p className="text-xs text-white/60">Hosting platform</p>
+              </div>
+            </div>
           </div>
         </motion.div>
 

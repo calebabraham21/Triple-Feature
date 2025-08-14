@@ -57,26 +57,53 @@ function App() {
     const handleEmailConfirmation = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
-      // Check if user just confirmed their email (has session but email_confirmed_at is recent)
+      // Only show popup if user just confirmed their email (not on regular sign-ins)
       if (session?.user) {
         const emailConfirmedAt = session.user.email_confirmed_at;
-        if (emailConfirmedAt) {
-          // Check if confirmation happened in the last 5 minutes
-          const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000);
-          if (new Date(emailConfirmedAt) > fiveMinutesAgo) {
-            setShowEmailConfirmSuccess(true);
+        const lastSignInAt = session.user.last_sign_in_at;
+        
+        if (emailConfirmedAt && lastSignInAt) {
+          // Check if confirmation and sign-in happened very recently (within 2 minutes)
+          // This indicates they just confirmed their email and signed in
+          const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+          const emailConfirmedTime = new Date(emailConfirmedAt);
+          const lastSignInTime = new Date(lastSignInAt);
+          
+          if (emailConfirmedTime > twoMinutesAgo && lastSignInTime > twoMinutesAgo) {
+            // Only show if this is the first time we're detecting this confirmation
+            const confirmationKey = `email_confirmed_${session.user.id}_${emailConfirmedAt}`;
+            if (!localStorage.getItem(confirmationKey)) {
+              localStorage.setItem(confirmationKey, 'true');
+              setShowEmailConfirmSuccess(true);
+            }
           }
         }
       }
     };
 
-    // Check on mount and when URL changes
+    // Check on mount
     handleEmailConfirmation();
     
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session?.user?.email_confirmed_at) {
-        setShowEmailConfirmSuccess(true);
+        // Only show for new email confirmations, not regular sign-ins
+        const emailConfirmedAt = session.user.email_confirmed_at;
+        const lastSignInAt = session.user.last_sign_in_at;
+        
+        if (emailConfirmedAt && lastSignInAt) {
+          const twoMinutesAgo = new Date(Date.now() - 2 * 60 * 1000);
+          const emailConfirmedTime = new Date(emailConfirmedAt);
+          const lastSignInTime = new Date(lastSignInAt);
+          
+          if (emailConfirmedTime > twoMinutesAgo && lastSignInTime > twoMinutesAgo) {
+            const confirmationKey = `email_confirmed_${session.user.id}_${emailConfirmedAt}`;
+            if (!localStorage.getItem(confirmationKey)) {
+              localStorage.setItem(confirmationKey, 'true');
+              setShowEmailConfirmSuccess(true);
+            }
+          }
+        }
       }
     });
 

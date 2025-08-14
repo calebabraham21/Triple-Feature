@@ -46,14 +46,55 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
   // Prevent body scroll when mobile menu is open
   useEffect(() => {
     if (isMobileMenuOpen) {
+      // Store current scroll position
+      const scrollY = window.scrollY;
+      
+      // Prevent body scroll
       document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = '100%';
+      
+      // Prevent scroll on all scrollable elements
+      const scrollableElements = document.querySelectorAll('*');
+      scrollableElements.forEach(element => {
+        if (getComputedStyle(element).overflow === 'auto' || getComputedStyle(element).overflow === 'scroll') {
+          element.style.overflow = 'hidden';
+        }
+      });
     } else {
-      document.body.style.overflow = 'unset';
+      // Restore scroll position and body styles
+      const scrollY = document.body.style.top;
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      
+      // Restore scroll on all elements
+      const scrollableElements = document.querySelectorAll('*');
+      scrollableElements.forEach(element => {
+        if (element.style.overflow === 'hidden') {
+          element.style.overflow = '';
+        }
+      });
+      
+      // Restore scroll position
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      }
     }
 
     // Cleanup function to restore scroll when component unmounts
     return () => {
-      document.body.style.overflow = 'unset';
+      const scrollY = document.body.style.top;
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.top = '';
+      document.body.style.width = '';
+      
+      if (scrollY) {
+        window.scrollTo(0, parseInt(scrollY || '0') * -1);
+      }
     };
   }, [isMobileMenuOpen]);
 

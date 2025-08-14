@@ -273,7 +273,7 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
         </motion.button>
       </div>
 
-      {/* Mobile Menu - Absolutely positioned overlay */}
+      {/* Mobile Sidebar Menu - Slide in from right */}
       {isMobileMenuOpen && (
         <>
           {/* Backdrop overlay */}
@@ -281,22 +281,36 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-sm z-30"
+            className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-30"
             onClick={() => setIsMobileMenuOpen(false)}
           />
           
-          {/* Menu content */}
+          {/* Sidebar menu */}
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="md:hidden absolute top-full left-0 right-0 bg-cinema-dark/95 backdrop-blur-md border-b border-cinema-gray shadow-xl p-4 z-40"
+            initial={{ x: '100%' }}
+            animate={{ x: 0 }}
+            exit={{ x: '100%' }}
+            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+            className="md:hidden fixed top-0 right-0 w-4/5 h-full bg-cinema-dark/95 backdrop-blur-md border-l border-cinema-gray shadow-2xl z-40 overflow-y-auto"
           >
-            <nav className="flex flex-col space-y-3">
+            {/* Close button */}
+            <div className="flex justify-end p-4 border-b border-cinema-gray/30">
+              <motion.button
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
+                onClick={() => setIsMobileMenuOpen(false)}
+                className="p-2 bg-cinema-gray/50 hover:bg-cinema-gray/70 rounded-lg text-white transition-colors"
+              >
+                <X size={20} />
+              </motion.button>
+            </div>
+            
+            {/* Menu content */}
+            <nav className="flex flex-col space-y-6 p-4">
               {/* Movie App Section */}
               <div>
-                <h4 className="text-xs font-semibold text-white uppercase tracking-wider mb-2">App & About</h4>
-                <div className="space-y-1">
+                <h4 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-3 px-2">App & About</h4>
+                <div className="space-y-2">
                   {leftNavItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = currentPage === item.id;
@@ -310,14 +324,15 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
                           handleNavigation(item.id);
                           setIsMobileMenuOpen(false);
                         }}
-                        className={`flex items-center gap-2 w-full px-2 py-2 rounded text-base font-medium transition-colors ${
+                        className={`flex items-center gap-3 w-full px-3 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
                           isActive 
-                            ? 'text-accent-blue' 
-                            : 'text-white/80 hover:text-white'
+                            ? 'text-accent-blue bg-accent-blue/10 border border-accent-blue/20' 
+                            : 'text-white/80 hover:text-white hover:bg-white/5'
                         }`}
                         whileHover={{ x: 4 }}
+                        whileTap={{ scale: 0.98 }}
                       >
-                        <Icon size={16} className="transition-transform duration-300 group-hover:rotate-12" />
+                        <Icon size={18} className="transition-transform duration-300 group-hover:rotate-12" />
                         {item.label}
                       </motion.a>
                     );
@@ -327,8 +342,8 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
 
               {/* Personal Section */}
               <div>
-                <h4 className="text-xs font-semibold text-white uppercase tracking-wider mb-2">Portfolio</h4>
-                <div className="space-y-1">
+                <h4 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-3 px-2">Portfolio</h4>
+                <div className="space-y-2">
                   {rightNavItems.map((item) => {
                     const Icon = item.icon;
                     const isActive = currentPage === item.id;
@@ -342,14 +357,15 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
                           handleNavigation(item.id);
                           setIsMobileMenuOpen(false);
                         }}
-                        className={`flex items-center gap-2 w-full px-2 py-2 rounded text-base font-medium transition-colors ${
+                        className={`flex items-center gap-3 w-full px-3 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
                           isActive 
-                            ? 'text-accent-blue' 
-                            : 'text-white/80 hover:text-white'
+                            ? 'text-accent-blue bg-accent-blue/10 border border-accent-blue/20' 
+                            : 'text-white/80 hover:text-white hover:bg-white/5'
                         }`}
                         whileHover={{ x: 4 }}
+                        whileTap={{ scale: 0.98 }}
                       >
-                        <Icon size={16} className="transition-transform duration-300 group-hover:rotate-12" />
+                        <Icon size={18} className="transition-transform duration-300 group-hover:rotate-12" />
                         {item.label}
                       </motion.a>
                     );
@@ -359,21 +375,21 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
 
               {/* Authentication Section */}
               <div>
-                <h4 className="text-xs font-semibold text-white uppercase tracking-wider mb-2">Account</h4>
-                <div className="space-y-1">
+                <h4 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-3 px-2">Account</h4>
+                <div className="space-y-2">
                   {loading ? (
                     <motion.button
-                      whileTap={{ scale: 0.95 }}
+                      whileTap={{ scale: 0.98 }}
                       disabled
-                      className="flex items-center gap-2 w-full px-2 py-2 rounded text-base font-medium text-white/50 cursor-not-allowed"
+                      className="flex items-center gap-3 w-full px-3 py-3 rounded-lg text-base font-medium text-white/50 cursor-not-allowed bg-white/5"
                     >
-                      <User size={16} />
+                      <User size={18} />
                       Loading...
                     </motion.button>
                   ) : isAuthenticated ? (
                     <>
                       <motion.button
-                        whileTap={{ scale: 0.95 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={() => {
                           if (!loading && isAuthenticated) {
                             handleNavigation('watchlist');
@@ -382,37 +398,37 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
                           }
                         }}
                         disabled={loading || !isAuthenticated}
-                        className={`flex items-center gap-2 w-full px-2 py-2 rounded text-base font-medium transition-colors ${
+                        className={`flex items-center gap-3 w-full px-3 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
                           loading || !isAuthenticated 
-                            ? 'text-white/50 cursor-not-allowed' 
-                            : 'text-white hover:text-white hover:bg-cinema-gray/50'
+                            ? 'text-white/50 cursor-not-allowed bg-white/5' 
+                            : 'text-white hover:text-white hover:bg-white/10'
                         }`}
                       >
-                        <List size={16} className="text-accent-gold" />
+                        <List size={18} className="text-accent-gold" />
                         My Watchlist
                       </motion.button>
                       <motion.button
-                        whileTap={{ scale: 0.95 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={() => {
                           handleSignOut();
                           setIsMobileMenuOpen(false);
                         }}
-                        className="flex items-center gap-2 w-full px-2 py-2 rounded text-base font-medium text-white hover:text-white hover:bg-cinema-gray/50"
+                        className="flex items-center gap-3 w-full px-3 py-3 rounded-lg text-base font-medium text-white hover:text-white hover:bg-white/10 transition-all duration-200"
                       >
-                        <LogOut size={16} />
+                        <LogOut size={18} />
                         Sign Out
                       </motion.button>
                     </>
                   ) : (
                     <motion.button
-                      whileTap={{ scale: 0.95 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={() => {
                         navigate('/auth');
                         setIsMobileMenuOpen(false);
                       }}
-                      className="flex items-center gap-2 w-full px-2 py-2 rounded text-base font-medium text-white hover:text-white hover:bg-cinema-gray/50"
+                      className="flex items-center gap-3 w-full px-3 py-3 rounded-lg text-base font-medium text-white hover:text-white hover:bg-white/10 transition-all duration-200"
                     >
-                      <User size={16} />
+                      <User size={18} />
                       Sign In
                     </motion.button>
                   )}

@@ -15,7 +15,7 @@ const AboutMe = () => {
   }, []);
 
   return (
-    <div className="min-h-screen cinema-gradient pt-24">
+    <div className="min-h-screen cinema-gradient ">
       <div className="max-w-4xl mx-auto px-4 py-12">
         {/* About Me Section */}
         <motion.div

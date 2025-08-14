@@ -407,11 +407,12 @@ const AuthPage = () => {
 
   if (emailSent) {
     return (
-      <div className="min-h-screen cinema-gradient flex items-center justify-center p-4">
+      <div className="min-h-screen cinema-gradient flex items-start justify-center pt-20 p-4 pb-8" style={{ willChange: 'auto' }}>
         <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="max-w-md w-full bg-cinema-dark rounded-2xl border border-cinema-light/30 p-8 text-center shadow-2xl backdrop-blur-sm"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.3, ease: "easeOut" }}
+          className="max-w-md w-full bg-cinema-dark rounded-2xl border border-cinema-light/30 p-8 text-center shadow-2xl"
         >
           <CheckCircle size={64} className="mx-auto text-green-400 mb-6" />
           <h2 className="text-2xl font-bold text-white mb-4">Check Your Email!</h2>
@@ -441,17 +442,14 @@ const AuthPage = () => {
   }
 
   return (
-    <div className="min-h-screen cinema-gradient flex items-center justify-center p-4">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0 bg-gradient-to-br from-accent-red/20 via-accent-purple/20 to-accent-blue/20" />
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_50%,rgba(255,68,68,0.1)_0%,transparent_50%)]" />
-      </div>
+    <div className="min-h-screen cinema-gradient flex items-start justify-center pt-20 p-4 pb-8" style={{ willChange: 'auto' }}>
+
 
       <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="relative max-w-md w-full bg-cinema-dark rounded-2xl border border-cinema-light/30 p-8 shadow-2xl backdrop-blur-sm"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.3, ease: "easeOut" }}
+        className="relative max-w-md w-full bg-cinema-dark rounded-2xl border border-cinema-light/30 p-8 shadow-2xl"
       >
         {/* Back Button */}
         <button
@@ -478,16 +476,16 @@ const AuthPage = () => {
               {/* First Name */}
               <div className="relative">
                 <User size={18} className="absolute left-3 top-3 text-white" />
-                <input
-                  type="text"
-                  placeholder="First Name *"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                  className={`w-full pl-10 pr-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:bg-white/15 transition-all duration-200 shadow-inner ${
-                    fieldErrors.firstName ? 'border-red-400' : 'border-white/20 focus:border-accent-blue'
-                  }`}
-                  required
-                />
+                                 <input
+                   type="text"
+                   placeholder="First Name *"
+                   value={firstName}
+                   onChange={(e) => setFirstName(e.target.value)}
+                   className={`w-full pl-10 pr-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:bg-white/15 transition-colors duration-200 ${
+                     fieldErrors.firstName ? 'border-red-400' : 'border-white/20 focus:border-accent-blue'
+                   }`}
+                   required
+                 />
                 {fieldErrors.firstName && (
                   <p className="text-red-400 text-xs mt-1 ml-1">{fieldErrors.firstName}</p>
                 )}
@@ -501,9 +499,9 @@ const AuthPage = () => {
                   placeholder="Last Name *"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className={`w-full pl-10 pr-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:bg-white/15 transition-all duration-200 shadow-inner ${
-                    fieldErrors.lastName ? 'border-red-400' : 'border-white/20 focus:border-accent-blue'
-                  }`}
+                                     className={`w-full pl-10 pr-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:bg-white/15 transition-colors duration-200 ${
+                     fieldErrors.lastName ? 'border-red-400' : 'border-white/20 focus:border-accent-blue'
+                   }`}
                   required
                 />
                 {fieldErrors.lastName && (
@@ -519,9 +517,9 @@ const AuthPage = () => {
                   placeholder="Phone (optional)"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className={`w-full pl-10 pr-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:bg-white/15 transition-all duration-200 shadow-inner ${
-                    fieldErrors.phone ? 'border-red-400' : 'border-white/20 focus:border-accent-blue'
-                  }`}
+                                     className={`w-full pl-10 pr-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:bg-white/15 transition-colors duration-200 ${
+                     fieldErrors.phone ? 'border-red-400' : 'border-white/20 focus:border-accent-blue'
+                   }`}
                 />
                 {fieldErrors.phone && (
                   <p className="text-red-400 text-xs mt-1 ml-1">{fieldErrors.phone}</p>
@@ -538,9 +536,9 @@ const AuthPage = () => {
               placeholder="Email *"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className={`w-full pl-10 pr-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:bg-white/15 transition-all duration-200 shadow-inner ${
-                fieldErrors.email ? 'border-red-400' : 'border-white/20 focus:border-accent-blue'
-              }`}
+                             className={`w-full pl-10 pr-4 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:bg-white/15 transition-colors duration-200 ${
+                 fieldErrors.email ? 'border-red-400' : 'border-white/20 focus:border-accent-blue'
+               }`}
               required
             />
             {fieldErrors.email && (
@@ -556,9 +554,9 @@ const AuthPage = () => {
               placeholder="Password *"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className={`w-full pl-10 pr-12 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:bg-white/15 transition-all duration-200 shadow-inner ${
-                fieldErrors.password ? 'border-red-400' : 'border-white/20 focus:border-accent-blue'
-              }`}
+                             className={`w-full pl-10 pr-12 py-3 bg-white/10 border rounded-lg text-white placeholder-gray-400 focus:outline-none focus:bg-white/15 transition-colors duration-200 ${
+                 fieldErrors.password ? 'border-red-400' : 'border-white/20 focus:border-accent-blue'
+               }`}
               required
             />
             <button
@@ -595,7 +593,7 @@ const AuthPage = () => {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-accent-blue hover:bg-accent-blue/80 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-colors shadow-lg hover:shadow-xl transform hover:scale-[1.02] active:scale-[0.98]"
+            className="relative w-full bg-accent-blue hover:bg-accent-blue/80 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-4 rounded-lg transition-colors shadow-lg hover:shadow-xl trace-snake trace-snake--rb"
           >
             {loading ? (
               <div className="flex items-center justify-center">
@@ -605,6 +603,10 @@ const AuthPage = () => {
             ) : (
               isSignUp ? 'Create Account' : 'Sign In'
             )}
+            <span className="trace-line trace-line--t" />
+            <span className="trace-line trace-line--r" />
+            <span className="trace-line trace-line--b" />
+            <span className="trace-line trace-line--l" />
           </button>
         </form>
 

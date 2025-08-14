@@ -8,7 +8,7 @@ import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabaseClient';
 
 
-const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
+const Header = ({ currentPage, currentStep, onNavigate, onSignOutRequest, onHomeNavigation }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navRef = useRef(null);
   const { user, isAuthenticated, loading } = useAuth();
@@ -99,6 +99,14 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
   }, [isMobileMenuOpen]);
 
   const handleNavigation = (page) => {
+    // Special handling for home navigation
+    if (page === 'home') {
+      if (onHomeNavigation) {
+        onHomeNavigation();
+        return;
+      }
+    }
+    
     onNavigate(page);
     setIsMobileMenuOpen(false);
     
@@ -182,7 +190,13 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
             className="cursor-pointer"
-            onClick={() => handleNavigation('home')}
+            onClick={() => {
+              if (onHomeNavigation) {
+                onHomeNavigation();
+              } else {
+                handleNavigation('home');
+              }
+            }}
             whileHover={{ scale: 1.05 }}
           >
             <img
@@ -292,7 +306,13 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           className="cursor-pointer"
-          onClick={() => handleNavigation('home')}
+          onClick={() => {
+            if (onHomeNavigation) {
+              onHomeNavigation();
+            } else {
+              handleNavigation('home');
+            }
+          }}
           whileHover={{ scale: 1.05 }}
         >
           <img

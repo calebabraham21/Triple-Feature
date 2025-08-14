@@ -11,7 +11,7 @@ import { useAuth } from '../hooks/useAuth';
 
 // Using public asset path for reliability in dev/prod
 
-const HomePage = () => {
+const HomePage = ({ onStepChange }) => {
   const navigate = useNavigate();
   const [showNavigationConfirm, setShowNavigationConfirm] = useState(false);
   const [userFirstName, setUserFirstName] = useState(null);
@@ -68,6 +68,13 @@ const HomePage = () => {
 
     fetchUserFirstName();
   }, [user, getUserProfile]);
+
+  // Notify parent component of step changes
+  useEffect(() => {
+    if (onStepChange) {
+      onStepChange(currentStep);
+    }
+  }, [currentStep, onStepChange]);
 
   useEffect(() => {
     if (currentStep > 1) {

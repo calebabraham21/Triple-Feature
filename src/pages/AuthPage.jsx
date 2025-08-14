@@ -247,12 +247,19 @@ const AuthPage = () => {
     try {
       if (isSignUp) {
         console.log('Starting signup process...');
+        console.log('Signup parameters:', {
+          email: email.trim(),
+          passwordLength: password.length,
+          supabaseUrl: import.meta.env.VITE_SUPABASE_URL
+        });
         
         // Sign up with Supabase Auth
         const { data, error } = await supabase.auth.signUp({
           email: email.trim(),
           password: password,
         });
+        
+        console.log('Raw signup response:', { data, error });
 
         if (error) {
           console.error('Signup error:', error);
@@ -260,8 +267,18 @@ const AuthPage = () => {
             message: error.message,
             status: error.status,
             name: error.name,
-            details: error.details
+            details: error.details,
+            stack: error.stack,
+            cause: error.cause,
+            // Additional Supabase-specific error fields
+            statusCode: error.statusCode,
+            error_description: error.error_description,
+            error_code: error.error_code
           });
+          
+          // Log the full error object for debugging
+          console.error('Full error object:', JSON.stringify(error, null, 2));
+          
           throw error;
         }
 

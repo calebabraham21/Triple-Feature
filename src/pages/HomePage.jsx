@@ -173,16 +173,31 @@ const HomePage = () => {
   );
 
   const renderStep2 = () => (
-    <div className="max-w-4xl mx-auto">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.3 }}
+      className="max-w-4xl mx-auto"
+    >
       {/* Step indicator */}
-      <div className="text-center mb-6">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="text-center mb-6"
+      >
         <div className="text-sm text-white/70 mb-2">Step 2 of 5</div>
         <h2 className="text-2xl font-bold mb-2">Decade Selection</h2>
         <p className="text-white/80 text-sm">Optional - defaults to all decades</p>
-      </div>
+      </motion.div>
 
       {/* Decades */}
-      <div className="mb-6">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="mb-6"
+      >
         <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
           <div className="flex items-center gap-2">
             <GlowButton
@@ -202,11 +217,14 @@ const HomePage = () => {
           </div>
         </div>
         <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-          {decadeOptions.map((decade) => {
+          {decadeOptions.map((decade, index) => {
             const isSelected = selectedDecades.includes(decade.value);
             return (
-              <button
+              <motion.button
                 key={decade.value}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.6 + (index * 0.03) }}
                 onClick={() => toggleDecade(decade.value)}
                 className={`py-2 px-2 rounded-md text-xs border trace-snake ${
                   isSelected
@@ -219,15 +237,20 @@ const HomePage = () => {
                 <span className="trace-line trace-line--r" />
                 <span className="trace-line trace-line--b" />
                 <span className="trace-line trace-line--l" />
-              </button>
+              </motion.button>
             );
           })}
         </div>
         <p className="text-xs text-white/70 mt-2 text-center">By default, all decades are selected.</p>
-      </div>
+      </motion.div>
 
       {/* Navigation */}
-      <div className="flex justify-between">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8 }}
+        className="flex justify-between"
+      >
         <GlowButton variant="secondary" onClick={prevStep} className="text-sm px-4 py-2">
           <ChevronLeft size={16} />
           Back
@@ -237,21 +260,36 @@ const HomePage = () => {
           Continue
           <ChevronRight size={16} />
         </GlowButton>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 
   const renderStep3 = () => (
-    <div className="max-w-4xl mx-auto">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.3 }}
+      className="max-w-4xl mx-auto"
+    >
       {/* Step indicator */}
-      <div className="text-center mb-6">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="text-center mb-6"
+      >
         <div className="text-sm text-white/70 mb-2">Step 3 of 5</div>
         <h2 className="text-2xl font-bold mb-2">Content Preferences</h2>
         <p className="text-white/80 text-sm">Customize your viewing experience</p>
-      </div>
+      </motion.div>
 
       {/* Adult Content Preference */}
-      <div className="mb-5 p-4 rounded-xl border border-cinema-light/20 bg-cinema-gray/20">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="mb-5 p-4 rounded-xl border border-cinema-light/20 bg-cinema-gray/20"
+      >
         <h3 className="text-base font-semibold mb-2 text-white">Content Rating Preference</h3>
         <p className="text-xs text-white/70 mb-3">Choose your content comfort level</p>
         <div className="space-y-2">
@@ -259,8 +297,14 @@ const HomePage = () => {
             { value: false, label: 'Family-friendly', description: 'G, PG, PG-13 only' },
             { value: true, label: 'Adult-rated', description: 'R, NC-17, X only' },
             { value: null, label: 'Any rating', description: 'No rating restrictions' }
-          ].map((option) => (
-            <label key={option.value === null ? 'any' : option.value.toString()} className="flex items-center cursor-pointer p-2 rounded-lg hover:bg-cinema-gray/30 transition-colors duration-150">
+          ].map((option, index) => (
+            <motion.label
+              key={option.value === null ? 'any' : option.value.toString()}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.6 + (index * 0.05) }}
+              className="flex items-center cursor-pointer p-2 rounded-lg hover:bg-cinema-gray/30 transition-colors duration-150"
+            >
               <input
                 type="radio"
                 name="includeAdult"
@@ -289,22 +333,33 @@ const HomePage = () => {
                 <div className="text-white font-medium text-sm">{option.label}</div>
                 <div className="text-xs text-white/70">{option.description}</div>
               </div>
-            </label>
+            </motion.label>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       {/* Language Preference */}
-      <div className="mb-5 p-4 rounded-xl border border-cinema-light/20 bg-cinema-gray/20">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.7 }}
+        className="mb-5 p-4 rounded-xl border border-cinema-light/20 bg-cinema-gray/20"
+      >
         <h3 className="text-base font-semibold mb-2 text-white">Language Preference</h3>
-        <p className="text-xs text-white/70 mb-3">Try a non-English movie — it’s like travel, without the TSA.</p>
+        <p className="text-xs text-white/70 mb-3">Try a non-English movie — it's like travel, without the TSA.</p>
         <div className="space-y-2">
           {[
             { value: 'english', label: 'English only' },
             { value: 'non-english', label: 'Non-English only' },
             { value: 'both', label: 'Both' }
-          ].map((option) => (
-            <label key={option.value} className="flex items-center cursor-pointer p-2 rounded-lg hover:bg-cinema-gray/30 transition-colors duration-150">
+          ].map((option, index) => (
+            <motion.label
+              key={option.value}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.8 + (index * 0.05) }}
+              className="flex items-center cursor-pointer p-2 rounded-lg hover:bg-cinema-gray/30 transition-colors duration-150"
+            >
               <input
                 type="radio"
                 name="languagePreference"
@@ -323,13 +378,18 @@ const HomePage = () => {
                 )}
               </div>
               <span className="text-white font-medium text-sm">{option.label}</span>
-            </label>
+            </motion.label>
           ))}
         </div>
-      </div>
+      </motion.div>
 
       {/* Navigation */}
-      <div className="flex justify-between">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.9 }}
+        className="flex justify-between"
+      >
         <GlowButton variant="secondary" onClick={prevStep} className="text-sm px-4 py-2">
           <ChevronLeft size={16} />
           Back
@@ -339,32 +399,50 @@ const HomePage = () => {
           Continue
           <ChevronRight size={16} />
         </GlowButton>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 
   const renderStep4 = () => (
-    <div className="max-w-4xl mx-auto">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.3 }}
+      className="max-w-4xl mx-auto"
+    >
       {/* Step indicator */}
-      <div className="text-center mb-6">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="text-center mb-6"
+      >
         <div className="text-sm text-white/70 mb-2">Step 4 of 5</div>
         <h2 className="text-2xl font-bold mb-2">Runtime & Streaming</h2>
         <p className="text-white/80 text-sm">Finalize your preferences</p>
-      </div>
+      </motion.div>
 
       {/* Runtime Selector */}
-      <div className="mb-5 p-4 rounded-xl border border-cinema-light/20 bg-cinema-gray/20">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="mb-5 p-4 rounded-xl border border-cinema-light/20 bg-cinema-gray/20"
+      >
         <h3 className="text-base font-semibold mb-3 text-white flex items-center gap-2">
           <Clock size={18} />
           Runtime Preferences
         </h3>
         <p className="text-xs text-white/70 mb-3">Select your preferred movie lengths</p>
         <div className="grid grid-cols-3 gap-2">
-          {runtimeOptions.map((runtime) => {
+          {runtimeOptions.map((runtime, index) => {
             const isSelected = selectedRuntimes.includes(runtime.value);
             return (
-              <button
+              <motion.button
                 key={runtime.value}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.6 + (index * 0.05) }}
                 onClick={() => toggleRuntime(runtime.value)}
                 className={`p-3 rounded-lg border text-center transition-all duration-200 ${
                   isSelected
@@ -374,21 +452,31 @@ const HomePage = () => {
               >
                 <div className="font-medium text-sm mb-1">{runtime.label}</div>
                 <div className="text-xs text-white/70">{runtime.description}</div>
-              </button>
+              </motion.button>
             );
           })}
         </div>
         <p className="text-xs text-white/70 mt-2 text-center">Multiple selections allowed</p>
-      </div>
+      </motion.div>
 
       {/* Streaming Availability Filter */}
-      <div className="mb-6 p-4 rounded-xl border border-cinema-light/20 bg-cinema-gray/20">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8 }}
+        className="mb-6 p-4 rounded-xl border border-cinema-light/20 bg-cinema-gray/20"
+      >
         <h3 className="text-base font-semibold mb-3 text-white flex items-center gap-2">
           <Play size={18} />
           Streaming Availability
         </h3>
         <p className="text-xs text-white/70 mb-3">Filter for movies available on streaming platforms</p>
-        <label className="flex items-center cursor-pointer p-3 rounded-lg hover:bg-cinema-gray/30 transition-colors duration-150">
+        <motion.label
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.9 }}
+          className="flex items-center cursor-pointer p-3 rounded-lg hover:bg-cinema-gray/30 transition-colors duration-150"
+        >
           <input
             type="checkbox"
             checked={streamingOnly}
@@ -398,14 +486,19 @@ const HomePage = () => {
           <span className="ml-3 text-white text-sm">
             Only show movies available via subscription or free streaming
           </span>
-        </label>
+        </motion.label>
         <p className="text-xs text-white/70 mt-2 text-center">
           When enabled, excludes movies only available for rent/purchase
         </p>
-      </div>
+      </motion.div>
 
       {/* Navigation */}
-      <div className="flex justify-between">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.0 }}
+        className="flex justify-between"
+      >
         <GlowButton variant="secondary" onClick={prevStep} className="text-sm px-4 py-2">
           <ChevronLeft size={16} />
           Back
@@ -432,8 +525,8 @@ const HomePage = () => {
             </>
           )}
         </GlowButton>
-      </div>
-    </div>
+      </motion.div>
+    </motion.div>
   );
 
   const renderStep5 = () => (

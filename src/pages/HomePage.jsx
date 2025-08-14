@@ -587,7 +587,7 @@ const HomePage = () => {
                 transition={{ delay: 0.4 }}
                 className="bg-cinema-dark/30 border border-cinema-light/20 rounded-lg p-4 text-center hover:bg-cinema-dark/40 transition-colors cursor-pointer"
               >
-                <div className="text-3xl md:text-4xl font-bold text-accent-blue mb-1">5</div>
+                <div className="text-3xl md:text-4xl font-bold text-accent-blue mb-1">38</div>
                 <div className="text-xs text-white/70">arguments prevented for couples*</div>
               </motion.div>
               <motion.div

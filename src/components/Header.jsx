@@ -2,6 +2,7 @@ import { motion } from 'framer-motion';
 import { List, Home, Info, Menu, X, Sparkles, User, LogOut } from 'lucide-react';
 import { useState, useLayoutEffect, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { createPortal } from 'react-dom';
 import TripFeatLogo from '../../TripFeatLogo.png';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabaseClient';
@@ -274,14 +275,14 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
       </div>
 
       {/* Mobile Sidebar Menu - Slide in from right */}
-      {isMobileMenuOpen && (
+      {isMobileMenuOpen && createPortal(
         <>
           {/* Backdrop overlay */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998]"
+            className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[99998]"
             onClick={() => setIsMobileMenuOpen(false)}
           />
           
@@ -291,7 +292,7 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="md:hidden fixed top-0 right-0 w-4/5 h-full bg-cinema-dark/95 backdrop-blur-md border-l border-cinema-gray shadow-2xl z-[9999] overflow-y-auto"
+            className="md:hidden fixed top-0 right-0 w-4/5 h-full bg-cinema-dark/95 backdrop-blur-md border-l border-cinema-gray shadow-2xl z-[99999] overflow-y-auto"
           >
             {/* Close button */}
             <div className="flex justify-end p-4 border-b border-cinema-gray/30">
@@ -436,7 +437,8 @@ const Header = ({ currentPage, onNavigate, onSignOutRequest }) => {
               </div>
             </nav>
           </motion.div>
-        </>
+        </>,
+        document.body
       )}
 
     </header>

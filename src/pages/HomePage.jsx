@@ -158,7 +158,7 @@ const HomePage = () => {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 1.3 }}
-        className="flex justify-center"
+        className="flex justify-center pb-4"
       >
         <GlowButton
           onClick={nextStep}

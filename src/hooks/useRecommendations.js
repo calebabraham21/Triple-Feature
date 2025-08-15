@@ -69,16 +69,46 @@ export const useRecommendations = () => {
       setLoading(true);
       setError(null);
 
-      // Build base filters
-      const baseFilters = {
-        genres: selectedGenres,
-        decades: selectedDecades,
-        streamingOnly,
-        sortBy: 'popularity.desc',
-        minRating: 6.0,
-        includeAdult: includeAdult,
-        languagePreference: languagePreference,
-      };
+        // Build base filters
+  const baseFilters = {
+    genres: selectedGenres,
+    decades: selectedDecades,
+    streamingOnly,
+    sortBy: 'popularity.desc',
+    minRating: 6.0,
+    includeAdult: includeAdult,
+    languagePreference: languagePreference,
+  };
+
+  // Add runtime filtering to the TMDB query if specific runtime preferences are selected
+  if (selectedRuntimes && selectedRuntimes.length > 0 && selectedRuntimes.length < 3) {
+    console.log(`Adding runtime filtering to TMDB query: ${selectedRuntimes.join(', ')}`);
+    
+    // Convert runtime preferences to TMDB parameters
+    if (selectedRuntimes.includes('long') && !selectedRuntimes.includes('short') && !selectedRuntimes.includes('medium')) {
+      // Only long movies (over 2 hours)
+      baseFilters['with_runtime.gte'] = 120;
+      console.log('TMDB will filter for movies 120+ minutes');
+    } else if (selectedRuntimes.includes('short') && !selectedRuntimes.includes('medium') && !selectedRuntimes.includes('long')) {
+      // Only short movies (under 90 minutes)
+      baseFilters['with_runtime.lte'] = 89;
+      console.log('TMDB will filter for movies under 90 minutes');
+    } else if (selectedRuntimes.includes('medium') && !selectedRuntimes.includes('short') && !selectedRuntimes.includes('long')) {
+      // Only medium movies (90-120 minutes)
+      baseFilters['with_runtime.gte'] = 90;
+      baseFilters['with_runtime.lte'] = 120;
+      console.log('TMDB will filter for movies 90-120 minutes');
+    } else if (selectedRuntimes.includes('short') && selectedRuntimes.includes('medium') && !selectedRuntimes.includes('long')) {
+      // Short and medium (under 120 minutes)
+      baseFilters['with_runtime.lte'] = 120;
+      console.log('TMDB will filter for movies under 120 minutes');
+    } else if (selectedRuntimes.includes('medium') && selectedRuntimes.includes('long') && !selectedRuntimes.includes('short')) {
+      // Medium and long (90+ minutes)
+      baseFilters['with_runtime.gte'] = 90;
+      console.log('TMDB will filter for movies 90+ minutes');
+    }
+    // If all three are selected or none are selected, no runtime filtering is applied
+  }
 
       // Fetch ALL available pages to create a comprehensive pool
       console.log('Fetching comprehensive movie pool from TMDB...');
@@ -157,20 +187,19 @@ export const useRecommendations = () => {
         console.log(`Decade filtering: ${beforeCount} movies before, ${movies.length} after`);
       }
 
-      // Filter based on runtime preferences
-      if (selectedRuntimes && selectedRuntimes.length > 0 && selectedRuntimes.length < 3) {
-        console.log(`Runtime filtering will be applied after fetching detailed movie information`);
-        console.log(`Runtime preferences: ${selectedRuntimes.join(', ')}`);
-      } else {
-        console.log('No runtime filtering applied - all runtime categories selected');
-      }
+             // TMDB's runtime filtering is unreliable, so we need to do it ourselves
+       if (selectedRuntimes && selectedRuntimes.length > 0 && selectedRuntimes.length < 3) {
+         console.log(`TMDB runtime filtering is unreliable - we'll filter client-side: ${selectedRuntimes.join(', ')}`);
+       } else {
+         console.log('No runtime filtering applied - all runtime categories selected');
+       }
 
       // Filter out recently shown movies to avoid repetition
       const beforeRecentFilter = movies.length;
       movies = movies.filter(movie => !recentlyShown.has(movie.id));
       console.log(`Recent movie filtering: ${beforeRecentFilter} movies before, ${movies.length} after`);
 
-      // Note: Runtime filtering is now applied after fetching detailed movie information
+      // Note: Runtime filtering will be applied after fetching detailed movie information
       // Streaming availability filtering is not yet implemented
       // TMDB doesn't provide reliable streaming data in the discover endpoint
       // This would require additional API calls to watch providers for each movie
@@ -179,9 +208,130 @@ export const useRecommendations = () => {
         console.log('Note: This would require additional API calls to watch providers for each movie');
       }
 
-      // Complete random shuffle of the entire pool
-      console.log(`Shuffling ${movies.length} movies completely randomly...`);
-      const shuffled = [...movies];
+             // TMDB's runtime filtering is unreliable, so we need to filter client-side
+       // The movies array contains all movies from the initial search, we'll filter by runtime now
+       console.log(`TMDB returned ${movies.length} movies, but we need to filter by runtime ourselves.`);
+       
+              // Debug: Let's check a few movies from TMDB response
+       if (selectedRuntimes && selectedRuntimes.length > 0 && selectedRuntimes.length < 3) {
+         console.log('🔍 Debug: Checking first few movies from TMDB response...');
+         const sampleMovies = movies.slice(0, 5);
+         sampleMovies.forEach(movie => {
+           console.log(`  - ${movie.title}: ${movie.runtime || 'No runtime'} min`);
+         });
+       }
+       
+       // Apply runtime filtering BEFORE fetching detailed info (since TMDB can't be trusted)
+       if (selectedRuntimes && selectedRuntimes.length > 0 && selectedRuntimes.length < 3) {
+         console.log(`Applying runtime filtering to initial movie pool: ${selectedRuntimes.join(', ')}`);
+         const beforeCount = movies.length;
+         
+         // We need to fetch runtime data for all movies to filter them
+         // This is more efficient than fetching full details for movies we'll discard
+         console.log('Fetching runtime data for all movies to apply runtime filtering...');
+         setProgressMessage('Fetching runtime data to filter movies...');
+         
+         const moviesWithRuntime = [];
+         for (let i = 0; i < movies.length; i++) {
+           try {
+             const movie = movies[i];
+             // Get movie details to check runtime
+             const movieData = await getMovieDetails(movie.id);
+             
+             if (movieData.runtime) {
+               const runtime = movieData.runtime;
+               const isShort = runtime < 90;
+               const isMedium = runtime >= 90 && runtime <= 120;
+               const isLong = runtime >= 120; // Changed from > 120 to >= 120
+               
+               const matches = (
+                 (isShort && selectedRuntimes.includes('short')) ||
+                 (isMedium && selectedRuntimes.includes('medium')) ||
+                 (isLong && selectedRuntimes.includes('long'))
+               );
+               
+               if (matches) {
+                 moviesWithRuntime.push({
+                   ...movie,
+                   runtime: movieData.runtime
+                 });
+               } else {
+                 console.log(`Filtered out ${movie.title} (${runtime} min) - doesn't match runtime preferences`);
+               }
+             } else {
+               console.log(`Filtered out ${movie.title} - no runtime data available`);
+             }
+             
+             // Add small delay between requests to respect rate limits
+             if (i < movies.length - 1) {
+               await new Promise(resolve => setTimeout(resolve, 100));
+             }
+           } catch (err) {
+             console.error(`Error getting runtime for movie ${movies[i].id}:`, err);
+             // Continue with other movies even if one fails
+           }
+         }
+         
+         movies = moviesWithRuntime;
+         console.log(`Runtime filtering: ${beforeCount} movies before, ${movies.length} after`);
+         
+         if (movies.length < 3) {
+           console.log(`Only ${movies.length} movies found matching runtime criteria.`);
+           setError(`Only found ${movies.length} movie(s) matching your runtime preferences. Please try different filters.`);
+           return;
+         }
+       }
+       
+       if (movies.length < 3) {
+         console.log(`Only ${movies.length} movies found matching all criteria.`);
+         setError(`Only found ${movies.length} movie(s) matching your criteria. Please try different filters.`);
+         return;
+       }
+       
+       // Sample up to 50 movies for detailed info (now that we've filtered by runtime)
+       const sampleSize = Math.min(movies.length, 50);
+      console.log(`Fetching detailed information for ${sampleSize} movies (sampled from ${movies.length} total)...`);
+      setProgressMessage(`Fetching detailed movie information... This may take a moment.`);
+      
+      // Take a random sample of movies to get detailed info for
+      const shuffledForSampling = [...movies];
+      for (let i = shuffledForSampling.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffledForSampling[i], shuffledForSampling[j]] = [shuffledForSampling[j], shuffledForSampling[i]];
+      }
+      const sampleMovies = shuffledForSampling.slice(0, sampleSize);
+      
+      // Fetch details for the sample with rate limiting
+      const detailedMovies = [];
+      for (let i = 0; i < sampleMovies.length; i++) {
+        try {
+          const movie = sampleMovies[i];
+          const details = await getMovieDetails(movie.id);
+          detailedMovies.push({
+            ...movie,
+            ...details, // Include all details including runtime
+            director: details.credits?.crew?.find(person => person.job === 'Director')?.name || 'Unknown',
+            cast: details.credits?.cast?.slice(0, 3).map(actor => actor.name) || [],
+          });
+          
+          // Add small delay between requests to respect rate limits
+          if (i < sampleMovies.length - 1) {
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+        } catch (err) {
+          console.error(`Error getting details for movie ${sampleMovies[i].id}:`, err);
+          // Continue with other movies even if one fails
+        }
+      }
+      
+      console.log(`Successfully fetched details for ${detailedMovies.length} movies`);
+      
+       // All movies in detailedMovies already meet runtime criteria (we filtered them earlier)
+       const filteredMovies = detailedMovies;
+
+      // Complete random shuffle of the FILTERED pool
+      console.log(`Shuffling ${filteredMovies.length} movies completely randomly...`);
+      const shuffled = [...filteredMovies];
       
       // Fisher-Yates shuffle for true randomness
       for (let i = shuffled.length - 1; i > 0; i--) {
@@ -189,108 +339,15 @@ export const useRecommendations = () => {
         [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
       }
 
-      // Pick 3 random movies from the shuffled pool
+      // Pick 3 random movies from the filtered and shuffled pool
       const picks = shuffled.slice(0, 3);
-      console.log(`Selected 3 random movies from shuffled pool of ${shuffled.length} movies`);
-      console.log(`🎬 Comprehensive movie database built: ${pool.length} total movies fetched, ${movies.length} unique movies after filtering, ${shuffled.length} movies in final randomized pool`);
+      console.log(`Selected 3 random movies from filtered pool of ${shuffled.length} movies`);
+      console.log(`🎬 Perfect! We filtered ${pool.length} total movies down to ${movies.length} that meet your criteria, then randomly selected 3 from ${filteredMovies.length} detailed movies`);
       setProgressMessage(null); // Clear progress messages
       setError(null); // Clear any error messages
 
-      // Get detailed information for selected movies
-      const detailedMovies = await Promise.all(
-        picks.map(async (movie) => {
-          try {
-            const details = await getMovieDetails(movie.id);
-            return {
-              ...movie,
-              ...details, // Include all details including runtime
-              director: details.credits?.crew?.find(person => person.job === 'Director')?.name || 'Unknown',
-              cast: details.credits?.cast?.slice(0, 3).map(actor => actor.name) || [],
-            };
-          } catch (err) {
-            console.error(`Error getting details for movie ${movie.id}:`, err);
-            return movie;
-          }
-        })
-      );
-
-      // Apply runtime filtering AFTER getting detailed movie information
-      let finalMovies = detailedMovies;
-      if (selectedRuntimes && selectedRuntimes.length > 0 && selectedRuntimes.length < 3) {
-        console.log(`Applying runtime filtering to detailed movies: ${selectedRuntimes.join(', ')}`);
-        const beforeCount = finalMovies.length;
-        
-        finalMovies = finalMovies.filter((movie) => {
-          if (!movie.runtime) {
-            console.log(`Movie ${movie.title} has no runtime data, excluding from runtime filtering`);
-            return false;
-          }
-          
-          const runtime = movie.runtime;
-          const isShort = runtime < 90;
-          const isMedium = runtime >= 90 && runtime <= 120;
-          const isLong = runtime > 120;
-          
-          const matches = (
-            (isShort && selectedRuntimes.includes('short')) ||
-            (isMedium && selectedRuntimes.includes('medium')) ||
-            (isLong && selectedRuntimes.includes('long'))
-          );
-          
-          if (!matches) {
-            console.log(`Movie ${movie.title} (${runtime} min) doesn't match runtime preferences ${selectedRuntimes.join(', ')}`);
-          }
-          
-          return matches;
-        });
-        
-        console.log(`Runtime filtering: ${beforeCount} movies before, ${finalMovies.length} after`);
-        
-        // If we filtered out all movies, try to get more recommendations
-        if (finalMovies.length === 0) {
-          console.log('All movies were filtered out by runtime preferences, trying to get more recommendations...');
-          
-          // Get more movies from the pool and try again
-          const additionalPicks = [];
-          const remainingMovies = shuffled.filter(movie => !picks.some(p => p.id === movie.id));
-          
-          for (let i = 0; i < Math.min(6, remainingMovies.length) && additionalPicks.length < 3; i++) {
-            const movie = remainingMovies[i];
-            try {
-              const details = await getMovieDetails(movie.id);
-              const movieWithDetails = {
-                ...movie,
-                ...details,
-                director: details.credits?.crew?.find(person => person.job === 'Director')?.name || 'Unknown',
-                cast: details.credits?.cast?.slice(0, 3).map(actor => actor.name) || [],
-              };
-              
-              // Check if this movie matches runtime preferences
-              if (movieWithDetails.runtime) {
-                const runtime = movieWithDetails.runtime;
-                const isShort = runtime < 90;
-                const isMedium = runtime >= 90 && runtime <= 120;
-                const isLong = runtime > 120;
-                
-                const matches = (
-                  (isShort && selectedRuntimes.includes('short')) ||
-                  (isMedium && selectedRuntimes.includes('medium')) ||
-                  (isLong && selectedRuntimes.includes('long'))
-                );
-                
-                if (matches) {
-                  additionalPicks.push(movieWithDetails);
-                }
-              }
-            } catch (err) {
-              console.error(`Error getting details for additional movie ${movie.id}:`, err);
-            }
-          }
-          
-          finalMovies = additionalPicks;
-          console.log(`Found ${finalMovies.length} additional movies that match runtime preferences`);
-        }
-      }
+      // Set final recommendations
+      const finalMovies = picks;
 
       setRecommendations(finalMovies);
       

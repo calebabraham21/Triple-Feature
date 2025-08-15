@@ -1,6 +1,6 @@
 # Triple-Feature
 
-AI-powered movie recommendations for your perfect movie night.
+Movie recommendations for your perfect movie night.
 
 ## Setup
 
@@ -44,7 +44,7 @@ CREATE POLICY "Users can update own profile" ON profiles
 
 ## Features
 
-- **Smart Movie Recommendations**: AI-powered suggestions based on your preferences
+- **Smart Movie Recommendations**: Film suggestions based on your preferences
 - **User Authentication**: Secure signup/signin with Supabase Auth
 - **Profile Management**: Store and manage your personal information
 - **Responsive Design**: Beautiful UI that works on all devices

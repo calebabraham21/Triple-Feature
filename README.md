@@ -1,6 +1,6 @@
 # Triple-Feature
 
-AI-powered movie recommendations for your perfect movie night.
+Movie recommendations for your perfect movie night.
 
 ## Setup
 

@@ -1,5 +1,7 @@
 import { motion } from 'framer-motion';
 import { Sparkles, Star, Calendar, Clock, User } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { searchMovieByTitle, getPosterUrl } from '../utils/tmdb';
 
 const EditorsChoicePage = () => {
   // Placeholder data for the weekly movie
@@ -13,6 +15,35 @@ const EditorsChoicePage = () => {
     review: "Weekly movie reviews are coming soon. Each week I’ll share quick thoughts on a movie I watched for the first time. Honestly this is just to keep me motivated to watch at least one new one every week.",
     whyPick: "Who knows just yet!"
   };
+
+  const [favorites, setFavorites] = useState([]);
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      try {
+        const queries = [
+          { title: 'Mulholland Drive', year: 2001 },
+          { title: 'Paris, Texas', year: 1984 },
+          { title: 'The Big Lebowski', year: 1998 },
+        ];
+        const results = await Promise.all(
+          queries.map(async (q) => {
+            const r = await searchMovieByTitle(q.title, q.year);
+            const m = r?.results?.[0];
+            return m ? { id: m.id, title: m.title, poster_path: m.poster_path, year: q.year } : null;
+          })
+        );
+        if (!active) return;
+        setFavorites(results.filter(Boolean));
+      } catch (e) {
+        if (!active) return;
+        setFavorites([]);
+      }
+    };
+    load();
+    return () => { active = false; };
+  }, []);
 
   return (
     <div className="min-h-screen app-gradient">
@@ -111,21 +142,36 @@ const EditorsChoicePage = () => {
           </div>
         </motion.div>
 
-        {/* Coming Soon Section */}
+        {/* Favorites mini section */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8 }}
-          className="text-center"
+          transition={{ delay: 0.6 }}
+          className="bg-cinema-dark/40 border border-cinema-light/20 rounded-xl p-4 md:p-5 mb-8 side-rails"
         >
-          <div className="bg-cinema-dark/30 border border-cinema-light/20 rounded-lg p-6">
-            <h2 className="text-xl font-bold text-white mb-3">More Reviews Coming Soon</h2>
-            <div className="flex items-center justify-center gap-2 text-white/60">
-              <User size={14} />
-              <span className="text-sm">Personal curation by Caleb Abraham</span>
-            </div>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-lg font-semibold text-white">My all‑time favorites</h3>
+            <span className="text-xs text-white/60">Top 3</span>
+          </div>
+          <div className="grid grid-cols-3 gap-3">
+            {favorites.map((m, idx) => (
+              <div key={m.id} className="bg-cinema-dark/40 border border-cinema-light/20 rounded-lg p-2 text-center">
+                <div className="relative aspect-[2/3] w-full overflow-hidden rounded-md mb-2">
+                  {m.poster_path ? (
+                    <img src={getPosterUrl(m.poster_path)} alt={m.title} className="absolute inset-0 w-full h-full object-cover" />
+                  ) : (
+                    <div className="absolute inset-0 bg-cinema-gray flex items-center justify-center text-white/60">No poster</div>
+                  )}
+                  <div className="absolute bottom-1 left-1 bg-cinema-black/80 text-white text-[10px] px-1.5 py-0.5 rounded">#{idx + 1}</div>
+                </div>
+                <div className="text-xs text-white line-clamp-2">{m.title}</div>
+                <div className="text-[10px] text-white/70">{m.year}</div>
+              </div>
+            ))}
           </div>
         </motion.div>
+
+  
       </div>
     </div>
   );

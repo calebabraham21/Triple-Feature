@@ -238,6 +238,15 @@ export const getTopRatedMovies = async (page = 1) => {
   return makeRequest('/movie/top_rated', { page });
 };
 
+// Search for a movie by title (optionally by year) – returns TMDB results array
+export const searchMovieByTitle = async (title, year) => {
+  return makeRequest('/search/movie', {
+    query: title,
+    include_adult: false,
+    year,
+  });
+};
+
 // Helper function to get image URL
 export const getImageUrl = (path, size = 'w500') => {
   if (!path) return null;

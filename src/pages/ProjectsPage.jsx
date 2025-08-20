@@ -28,7 +28,7 @@ const ProjectsPage = () => {
           <div className="text-6xl mb-6">🚧</div>
           <h2 className="text-2xl font-bold text-white mb-4">Projects – TBD</h2>
           <p className="text-white/70 text-lg mb-6">
-            I'm currently working on some exciting projects. Check back soon for updates!
+            Projects in the works… they’ll show up here soon.
           </p>
           
           {/* GitHub Link */}

@@ -17,28 +17,40 @@ const AboutMe = () => {
   return (
     <div className="min-h-screen app-gradient ">
       <div className="max-w-4xl mx-auto px-4 py-12">
-        {/* About Me Section */}
+        {/* About Triple Feature */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="mb-16"
         >
-          <h1 className="text-3xl font-bold mb-4 text-white">About Me</h1>
+          <h1 className="text-3xl font-bold mb-4 text-white">About Triple Feature</h1>
           <p className="text-white mb-4 text-base leading-relaxed">
-          Hey there! My name is Caleb and I built this project for fun because I was tired of the classic "open a streaming app, scroll for an hour, never hit play" routine. I wanted something quick and simple: you tell it what you're in the mood for, and it gives you a few solid picks. Less browsing, more watching.
-
-I'm a big movie fan. David Lynch is the GOAT, I'm a lifelong Twin Peaks fan, and my all-time favorite movie is Mulholland Drive. This app is also a lightweight take on Letterboxd for me, so I can track finds and keep discovering new stuff.
-
-<br></br>
-<br></br>
-
-Hope you enjoy it!
+            Triple Feature exists to end the eternal scroll. Tell it a vibe (genre, decade, a couple preferences) and it hands you three strong picks. No 45-minute debates, no "maybe later," just press play.
+          </p>
+          <p className="text-white/90 mb-4 text-base leading-relaxed">
+            The app leans on TMDB data, some sensible filtering, and a bit of taste. It's intentionally small and fast, closer to a friend with good recs than a firehose of thumbnails. Also doubles as my sandbox for trying out UI ideas and seeing what actually feels good to use.
           </p>
           <div className="bg-cinema-dark border border-cinema-gray rounded-lg p-6">
             <p className="text-white text-center italic">
             "Life is very, very complicated, and so films should be allowed to be, too." — David Lynch
             </p>
           </div>
+        </motion.div>
+
+        {/* Who I Am */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+          className="mb-16"
+        >
+          <h2 className="text-2xl font-bold mb-4 text-white">Who I Am</h2>
+          <p className="text-white mb-3 text-base leading-relaxed">
+            I work in lifecycle marketing focused on retention and engagement. I use SQL to segment audiences and query behavioral data, then feed those insights into campaigns. I've primarily worked with Salesforce Marketing Cloud and use AMPscript for personalization at scale. I work across email, push, and in-app and track performance to optimize messaging.
+          </p>
+          <p className="text-white/90 text-base leading-relaxed">
+            On the side I'm studying software engineering, especially front-end and UX. I care about building clean, responsive interfaces that are easy to use and reliable. This app is where I prototype and learn, with a focus on simple, fast flows.
+          </p>
         </motion.div>
 
         {/* Tech Stack Section */}
@@ -135,10 +147,8 @@ Hope you enjoy it!
           
           <div className="bg-cinema-dark/50 border border-cinema-light/20 rounded-xl p-6 text-center mb-6">
             <div className="text-4xl mb-4">🚧</div>
-            <h3 className="text-xl font-bold text-white mb-3">Projects – TBD</h3>
             <p className="text-white/70 text-base mb-4">
-              I'm currently working on some exciting projects. Check back soon for updates!
-            </p>
+            Projects in the works… they’ll show up here soon.            </p>
             
             {/* GitHub Link */}
             <div className="flex justify-center">

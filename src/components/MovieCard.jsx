@@ -1,11 +1,11 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Plus, Check, Calendar, User, Globe, Heart, Clock } from 'lucide-react';
+import { Star, Plus, Check, Calendar, User, Globe, Heart, Clock, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useWatchlist } from '../hooks/useWatchlist';
 import { useAuth } from '../hooks/useAuth';
-import { getPosterUrl, getBackdropUrl, truncateText, formatRating, getLanguageName, getWatchProviders, tmdbConfig, getMovieDetails } from '../utils/tmdb';
+import { getPosterUrl, getBackdropUrl, formatRating, getLanguageName, getWatchProviders, tmdbConfig, getMovieDetails } from '../utils/tmdb';
 import GlowButton from './GlowButton';
 
 const MovieCard = ({ movie, showAddButton = true, showDirector = true }) => {
@@ -113,85 +113,65 @@ const MovieCard = ({ movie, showAddButton = true, showDirector = true }) => {
           }}
         />
 
-        {/* Rating badge */}
+        {/* Rating badge (top-right) */}
         {movie.vote_average && (
-          <div className="absolute top-2 right-2 z-20 bg-cinema-dark/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1 text-sm">
-            <Star size={14} className="text-accent-gold fill-current" />
+          <div className="absolute top-2 right-2 z-20 bg-cinema-dark/90 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1.5 text-sm shadow-md">
+            <Star size={16} className="text-accent-gold fill-current" />
             <span className="font-semibold">{formatRating(movie.vote_average)}</span>
           </div>
         )}
-        {/* Language badge */}
+        {/* Language badge (top-left) */}
         {originalLanguage && (
-          <div className="absolute top-2 left-2 z-20 bg-cinema-dark/90 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1 text-xs text-white">
-            <Globe size={12} className="opacity-80" />
+          <div className="absolute top-2 left-2 z-20 bg-cinema-dark/90 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1.5 text-sm text-white shadow-md">
+            <Globe size={14} className="opacity-80" />
             <span className="font-medium">{getLanguageName(originalLanguage)}</span>
+          </div>
+        )}
+        {/* Year badge (bottom-left) */}
+        {releaseDate && (
+          <div className="absolute bottom-2 left-2 z-20 bg-cinema-dark/90 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1.5 text-sm text-white shadow-md">
+            <Calendar size={14} className="opacity-80" />
+            <span className="font-medium">{getYear(releaseDate)}</span>
+          </div>
+        )}
+        {/* Runtime badge (bottom-right) */}
+        {movie.runtime && (
+          <div className="absolute bottom-2 right-2 z-20 bg-cinema-dark/90 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1.5 text-sm text-white shadow-md">
+            <Clock size={14} className="opacity-80" />
+            <span className="font-medium">
+              {movie.runtime >= 60 
+                ? `${Math.floor(movie.runtime / 60)}h ${movie.runtime % 60}m`
+                : `${movie.runtime}m`}
+            </span>
           </div>
         )}
       </div>
 
       {/* Content */}
       <div className="p-4">
-        {/* Title, Year, and Runtime */}
-        <div className="flex items-start justify-between gap-2 mb-2">
-          <h3 className="font-semibold text-lg leading-tight group-hover:text-accent-red transition-colors text-white">
-            {movie.title}
-          </h3>
-          <div className="flex items-center gap-3 text-sm flex-shrink-0 text-white">
-            <div className="flex items-center gap-1">
-              <Calendar size={14} className="text-white" />
-              <span className="font-medium">{getYear(releaseDate)}</span>
-            </div>
-            {movie.runtime && (
-              <div className="flex items-center gap-1">
-                <Clock size={14} className="text-white" />
-                <span className="font-medium">
-                  {movie.runtime >= 60 
-                    ? `${Math.floor(movie.runtime / 60)}h ${movie.runtime % 60}m`
-                    : `${movie.runtime}m`
-                  }
-                </span>
-              </div>
-            )}
-          </div>
+        {/* Title only with single-line clamp */}
+        <div className="mb-5">
+          <h3 className="font-semibold text-lg leading-tight text-white line-clamp-1">{movie.title}</h3>
         </div>
 
         {/* Director */}
         {showDirector && movie.director && (
-          <div className="flex items-center gap-2 text-sm text-white mb-2">
+          <div className="flex items-center gap-2 text-sm text-white mb-4">
             <User size={14} className="text-white" />
             <span className="font-medium">Dir. {movie.director}</span>
           </div>
         )}
 
         {/* Overview */}
-        <p className="text-sm text-white mb-4 leading-relaxed">
-          {truncateText(movie.overview, 120)}
-        </p>
-
-        {/* Cast (if available) */}
-        {movie.cast && movie.cast.length > 0 && (
-          <div className="mb-4">
-            <p className="text-xs text-white mb-1">Cast:</p>
-            <p className="text-sm text-white">
-              {movie.cast.slice(0, 2).join(', ')}
-              {movie.cast.length > 2 && '...'}
-            </p>
-          </div>
-        )}
+        <p className="text-sm text-white mb-4 leading-relaxed line-clamp-3">{movie.overview}</p>
 
         {/* Action buttons */}
         <div className="flex gap-2">
           {showAddButton && (
-            <motion.button
-              whileHover={{}}
-              whileTap={{}}
+            <GlowButton
               onClick={handleAddToWatchlist}
               disabled={watchlistLoading}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg font-medium transition-all duration-200 ${
-                isInList
-                  ? 'bg-accent-gold text-cinema-black hover:bg-accent-gold/80'
-                  : 'bg-cinema-gray text-white hover:bg-cinema-light border border-cinema-light hover:border-accent-blue'
-              } ${watchlistLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`flex-1 text-sm py-2.5 px-3 md:px-4 gradient-button spotlight-button text-white border-0 shadow-lg hover:shadow-xl ${watchlistLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {watchlistLoading ? (
                 <>
@@ -209,16 +189,15 @@ const MovieCard = ({ movie, showAddButton = true, showDirector = true }) => {
                   {isAuthenticated ? 'Add to Watchlist' : 'Sign in to Save'}
                 </>
               )}
-            </motion.button>
+            </GlowButton>
           )}
-          <motion.button
-            whileHover={{}}
-            whileTap={{}}
-            className="flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg font-medium bg-cinema-dark text-white border border-cinema-light hover:bg-cinema-gray"
+          <GlowButton
+            variant="secondary"
+            className="flex-1 text-sm py-2.5 px-3 md:px-4 hover:border-accent-blue/60"
             onClick={() => setShowDetails(true)}
           >
             View Details
-          </motion.button>
+          </GlowButton>
         </div>
       </div>
 
@@ -230,50 +209,117 @@ const MovieCard = ({ movie, showAddButton = true, showDirector = true }) => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.18, ease: 'easeOut' }}
             className="fixed inset-0 z-50 flex items-center justify-center"
+            style={{ willChange: 'opacity' }}
           >
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute inset-0 bg-black/65"
+            {/* No backdrop blur for performance */}
+            {/* Faded tint layer (click to close) */}
+            <div
+              className="absolute inset-0 bg-black/80"
               onClick={() => setShowDetails(false)}
             />
+            
+            {/* Modal wrapper */}
             <motion.div
-              initial={{ opacity: 0, scale: 0.98, y: 10 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.98, y: 10 }}
-              transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="relative z-10 w-[min(980px,95vw)] max-h-[90vh] overflow-auto overscroll-contain bg-cinema-dark border border-cinema-gray rounded-xl p-3 sm:p-6"
-              style={{ willChange: 'transform, opacity', contain: 'content' }}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 12 }}
+              transition={{ duration: 0.18, ease: 'easeOut' }}
+              className="relative z-10 w-[min(980px,95vw)] max-h-[90vh] rounded-xl border border-cinema-gray/30 bg-cinema-dark overflow-hidden"
+              style={{ willChange: 'transform, opacity' }}
             >
-                            <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-3 md:gap-4 will-change-transform">
-                {/* Left column - Poster + additional content on desktop */}
-                <div className="space-y-3 md:space-y-6">
-                  {/* Poster - smaller on mobile, centered on mobile, left-aligned on desktop */}
-                  <div className="flex items-start justify-center md:justify-start">
+              {/* Scrollable content (header included so it scrolls away) */}
+              <div className="relative overflow-y-auto will-change-transform" style={{ maxHeight: '90vh', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}>
+                {/* Floating close button (pinned) */}
+                <button
+                  onClick={() => setShowDetails(false)}
+                  aria-label="Close"
+                  className="absolute top-2 left-2 sm:top-3 sm:left-3 z-50 p-2 rounded-full bg-cinema-dark/80 border border-cinema-light/30 text-white hover:bg-cinema-gray/80 shadow-md"
+                >
+                  <X size={18} />
+                </button>
+                {/* Header: Backdrop + Poster (use CSS mask to avoid border seam) */}
+                <div className="relative h-48 sm:h-56 overflow-hidden" style={{ backgroundColor: '#1a1a1a' }}>
+                  {/* Backdrop image */}
+                  <div 
+                    className="absolute -inset-1 bg-cover bg-center bg-no-repeat"
+                    style={{
+                      backgroundImage: `url(${backdropPath ? getBackdropUrl(backdropPath, 'original') : (posterPath ? getPosterUrl(posterPath, 'original') : '')})`,
+                      transform: 'scale(1.05)'
+                    }}
+                  />
+                  {/* Subtle dark veil to improve text contrast */}
+                  <div className="absolute inset-0 bg-black/70 pointer-events-none" aria-hidden="true" />
+                  {/* Progressive fade overlay to base grey */}
+                  <div
+                    className="absolute -inset-1 pointer-events-none"
+                    style={{
+                      background: 'linear-gradient(to bottom, rgba(26,26,26,0) 0%, rgba(26,26,26,0) 68%, rgba(26,26,26,0.55) 84%, rgba(26,26,26,0.85) 94%, rgba(26,26,26,1) 100%)'
+                    }}
+                  />
+                  {/* Poster over backdrop */}
+                  <div className="absolute top-4 right-4 z-50">
                     <img 
                       src={getPosterUrl(posterPath)} 
                       alt={movie.title} 
-                      className="w-32 h-48 sm:w-40 sm:h-60 md:w-auto md:h-auto md:max-w-[280px] object-contain rounded-lg bg-cinema-black" 
+                      className="w-28 h-42 sm:w-32 sm:h-48 object-cover rounded-lg shadow-2xl border-2 border-white/40" 
                       loading="lazy" 
                       decoding="async" 
                     />
                   </div>
-                  
-                  {/* Desktop-only content under poster */}
-                  <div className="hidden md:block space-y-6">
-                    {/* Cast section - moved to left column on desktop */}
+                  {/* Overlayed heading & meta */}
+                  <div className="absolute inset-x-4 bottom-3 sm:bottom-4 z-40 pr-28 sm:pr-0">
+                    <div className="flex items-baseline gap-2 flex-wrap">
+                      <h2 className="text-xl md:text-2xl font-bold text-white drop-shadow leading-tight line-clamp-3">{movie.title}</h2>
+                      {releaseDate && (
+                        <span className="text-white/85">{getYear(releaseDate)}</span>
+                      )}
+                    </div>
+                    {movie.director && (
+                      <p className="text-sm text-white/90 leading-snug">Directed by <span className="font-medium">{movie.director}</span></p>
+                    )}
+                    <div className="flex flex-wrap gap-2 text-xs text-white/80 mt-1">
+                      {(details?.runtime || movie.runtime) && (
+                        <span>{details?.runtime || movie.runtime} min</span>
+                      )}
+                      {originalLanguage && (details?.runtime || movie.runtime) && (<span>•</span>)}
+                      {originalLanguage && (
+                        <span>{getLanguageName(originalLanguage)}</span>
+                      )}
+                      {Array.isArray(details?.genres) && details.genres.length > 0 && originalLanguage && (<span>•</span>)}
+                      {Array.isArray(details?.genres) && details.genres.length > 0 && (
+                        <span>{details.genres.map(g => g.name).slice(0, 3).join(', ')}</span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="p-4 sm:p-6 pt-4 sm:pt-6">
+                {/* Letterboxd-style vertical layout */}
+                <div className="space-y-4">
+                  {/* Title/meta moved over backdrop */}
+
+                  {/* Description */}
+                  {movie.overview && (
+                    <div className="space-y-2">
+                      <p className="text-sm text-white leading-relaxed">
+                        {movie.overview}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Cast section */}
+                  <div className="space-y-3">
                     {(() => {
-                      const castNames = details?.credits?.cast?.slice(0, 4)?.map(c => c.name)
-                        || (Array.isArray(movie.cast) ? movie.cast.slice(0, 4) : []);
+                      const castNames = details?.credits?.cast?.slice(0, 6)?.map(c => c.name)
+                        || (Array.isArray(movie.cast) ? movie.cast.slice(0, 6) : []);
                       if (!castNames || castNames.length === 0) return null;
                       return (
-                        <div className="space-y-3">
-                          <p className="text-sm text-white font-medium">Cast:</p>
-                          <div className="flex flex-wrap gap-1.5 max-w-[280px]">
+                        <div className="space-y-2">
+                          <p className="text-sm text-white font-medium">Cast</p>
+                          <div className="flex flex-wrap gap-1.5">
                             {castNames.map((name) => (
-                              <span key={name} className="px-2.5 py-1.5 rounded-full bg-cinema-gray/50 border border-cinema-light text-xs text-white whitespace-nowrap">
+                              <span key={name} className="px-2.5 py-1 rounded-full bg-cinema-gray/50 border border-cinema-light text-xs text-white">
                                 {name}
                               </span>
                             ))}
@@ -282,98 +328,34 @@ const MovieCard = ({ movie, showAddButton = true, showDirector = true }) => {
                       );
                     })()}
                   </div>
-                </div>
-                
-                {/* Right column - Main content */}
-                <div className="flex flex-col h-full">
-                  {/* Content area - takes up available space */}
-                  <div className="flex-1 space-y-3 md:space-y-6">
-                    {/* Title and key info row for desktop */}
-                    <div className="space-y-3 md:space-y-4">
-                      {/* Title with year */}
-                      <h2 className="text-xl md:text-2xl font-bold mb-1 md:mb-3">
-                        {movie.title} {releaseDate ? `(${getYear(releaseDate)})` : ''}
-                      </h2>
 
-                      {/* Key Info Blocks - horizontal layout on desktop */}
-                      <div className="flex flex-wrap gap-1.5 md:gap-3 mb-3 md:mb-0">
-                        {originalLanguage && (
-                          <div className="px-2 py-1 md:px-4 md:py-2 rounded-full bg-cinema-gray/60 border border-cinema-light text-xs md:text-xs text-white">
-                            Language: {getLanguageName(originalLanguage)}
-                          </div>
-                        )}
-                        {movie.director && (
-                          <div className="px-2 py-1 md:px-4 md:py-2 rounded-full bg-cinema-gray/60 border border-cinema-light text-xs md:text-xs text-white">
-                            Director: {movie.director}
-                          </div>
-                        )}
-                        {details?.runtime && (
-                          <div className="px-2 py-1 md:px-4 md:py-2 rounded-full bg-cinema-gray/60 border border-cinema-light text-xs md:text-xs text-white">
-                            Runtime: {details.runtime} min
-                          </div>
-                        )}
-                        {Array.isArray(details?.genres) && details.genres.length > 0 && (
-                          <div className="px-2 py-1 md:px-4 md:py-2 rounded-full bg-cinema-gray/60 border border-cinema-light text-xs md:text-xs text-white">
-                            Genres: {details.genres.map(g => g.name).join(', ')}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Description - better spacing on desktop */}
-                    {movie.overview && (
-                      <div className="space-y-2">
-                        <p className="text-sm md:text-sm text-white leading-relaxed line-clamp-3 md:line-clamp-none">
-                          {movie.overview}
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Cast section - mobile only (desktop version moved to left column) */}
-                    <div className="md:hidden space-y-2">
-                      {(() => {
-                        const castNames = details?.credits?.cast?.slice(0, 4)?.map(c => c.name)
-                          || (Array.isArray(movie.cast) ? movie.cast.slice(0, 4) : []);
-                        if (!castNames || castNames.length === 0) return null;
-                        return (
-                          <div className="space-y-2">
-                            <p className="text-xs md:text-sm text-white font-medium">Cast:</p>
-                            <div className="flex flex-wrap gap-1.5 md:gap-2">
-                              {castNames.map((name) => (
-                                <span key={name} className="px-2 py-1 md:px-3 md:py-1.5 rounded-full bg-cinema-gray/50 border border-cinema-light text-xs md:text-sm text-white">
-                                  {name}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        );
-                      })()}
-                    </div>
-
-                    {/* Streaming providers - now in right column on desktop */}
-                    <div className="space-y-4">
-                      <p className="text-sm md:text-sm text-white font-medium">Where to watch (US):</p>
-                      <StreamingProviders movieId={movie.id} delayMs={250} />
-                    </div>
+                  {/* Streaming providers */}
+                  <div className="space-y-3">
+                    <p className="text-sm text-white font-medium">Where to watch (US)</p>
+                    <StreamingProviders movieId={movie.id} delayMs={250} />
                   </div>
-
-                  {/* Buttons - pinned to bottom right on desktop */}
-                  <div className="flex justify-end gap-2 pt-4 mt-auto">
+                  
+                  {/* Action buttons */}
+                  <div className="flex gap-2 pt-4">
                     <GlowButton
-                      variant={isInList ? "primary" : "secondary"}
                       onClick={handleAddToWatchlist}
-                      className="text-sm py-2.5 px-2 md:px-3 md:py-2.5"
+                      className="text-sm py-2.5 px-2 md:px-3 md:py-2.5 gradient-button spotlight-button text-white border-0 shadow-lg hover:shadow-xl"
                     >
                       <span className="flex items-center gap-2">
-                        {isInList ? (
+                        {watchlistLoading ? (
                           <>
-                            <span>−</span>
-                            <span>In Watchlist</span>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
+                            {isInList ? 'Removing...' : 'Adding...'}
+                          </>
+                        ) : isInList ? (
+                          <>
+                            <Check size={16} />
+                            In Watchlist
                           </>
                         ) : (
                           <>
-                            <span>+</span>
-                            <span>Add to Watchlist</span>
+                            <Plus size={16} />
+                            {isAuthenticated ? 'Add to Watchlist' : 'Sign in to Save'}
                           </>
                         )}
                       </span>
@@ -385,21 +367,15 @@ const MovieCard = ({ movie, showAddButton = true, showDirector = true }) => {
                       className="inline-flex items-center gap-2 px-3 py-2.5 md:px-4 md:py-2.5 rounded-lg font-medium text-white border border-blue-800/40 hover:border-blue-700/50 transition-all duration-300 text-sm bg-gradient-to-r from-slate-900 to-blue-950 hover:from-slate-800 hover:to-blue-900 shadow-lg hover:shadow-blue-900/30"
                     >
                       <img 
-                        src="/src/assets/TMDB_logo.svg" 
+                        src="/TMDB_logo.svg" 
                         alt="TMDB" 
                         className="w-4 h-4 md:w-5 md:h-5"
                       />
                       <span className="hidden sm:inline">Read More on TMDB</span>
                       <span className="sm:hidden">TMDB</span>
                     </a>
-                    <button
-                      onClick={() => setShowDetails(false)}
-                      className="inline-flex items-center gap-2 px-3 py-2.5 md:px-4 md:py-2.5 rounded-lg font-medium text-white border border-red-800/40 hover:border-red-700/50 transition-all duration-300 text-sm bg-gradient-to-r from-slate-900 to-red-950 hover:from-slate-800 hover:to-red-900 shadow-lg hover:shadow-red-900/30"
-                    >
-                      <span>✕</span>
-                      <span className="hidden sm:inline">Close</span>
-                    </button>
                   </div>
+                </div>
                 </div>
               </div>
             </motion.div>

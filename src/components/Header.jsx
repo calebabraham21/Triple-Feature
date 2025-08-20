@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { List, Home, Info, Menu, X, Sparkles, User, LogOut } from 'lucide-react';
 import { useState, useLayoutEffect, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
@@ -8,7 +8,7 @@ import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabaseClient';
 
 
-const Header = ({ currentPage, currentStep, onNavigate, onSignOutRequest, onHomeNavigation }) => {
+const Header = ({ currentPage, currentStep, onNavigate, onSignOutRequest, onHomeNavigation, onProtectedNavRequest }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navRef = useRef(null);
   const { user, isAuthenticated, loading } = useAuth();
@@ -116,10 +116,10 @@ const Header = ({ currentPage, currentStep, onNavigate, onSignOutRequest, onHome
         navigate('/');
         break;
       case 'editors-choice':
-        navigate('/editors-choice');
+        onProtectedNavRequest ? onProtectedNavRequest('/editors-choice') : navigate('/editors-choice');
         break;
       case 'about-me':
-        navigate('/about-me');
+        onProtectedNavRequest ? onProtectedNavRequest('/about-me') : navigate('/about-me');
         break;
       default:
         navigate('/');
@@ -174,7 +174,7 @@ const Header = ({ currentPage, currentStep, onNavigate, onSignOutRequest, onHome
       <div className="absolute inset-0 bg-gradient-to-r from-accent-red/10 via-accent-purple/15 to-accent-blue/10" />
       
       {/* Desktop Navigation - Symmetrical Layout */}
-      <div className="hidden md:block py-4 relative z-10">
+      <div className="hidden md:block py-2.5 relative z-10">
         <div className="max-w-5xl mx-auto px-12 flex items-center justify-center relative">
           {/* Left Navigation - Movie App Links */}
           <motion.nav
@@ -202,7 +202,7 @@ const Header = ({ currentPage, currentStep, onNavigate, onSignOutRequest, onHome
             <img
               src={TripFeatLogo}
               alt="Triple Feature"
-              className="h-20 w-auto object-contain drop-shadow-lg"
+              className="h-16 w-auto object-contain drop-shadow-lg"
             />
           </motion.div>
 
@@ -300,7 +300,7 @@ const Header = ({ currentPage, currentStep, onNavigate, onSignOutRequest, onHome
       </div>
 
       {/* Mobile Navigation */}
-      <div className="md:hidden flex items-center justify-between px-4 py-3 relative z-10">
+      <div className="md:hidden flex items-center justify-between px-4 py-2 relative z-10">
         {/* Mobile Logo */}
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
@@ -318,7 +318,7 @@ const Header = ({ currentPage, currentStep, onNavigate, onSignOutRequest, onHome
           <img
             src={TripFeatLogo}
             alt="Triple Feature"
-            className="h-16 w-auto object-contain drop-shadow-lg"
+            className="h-14 w-auto object-contain drop-shadow-lg"
           />
         </motion.div>
 
@@ -329,32 +329,43 @@ const Header = ({ currentPage, currentStep, onNavigate, onSignOutRequest, onHome
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={toggleMobileMenu}
-          className="p-3 bg-cinema-black/80 backdrop-blur-sm border border-cinema-light rounded-lg text-white hover:bg-cinema-gray transition-colors"
+          className="p-2.5 bg-cinema-black/80 backdrop-blur-sm border border-cinema-light rounded-lg text-white hover:bg-cinema-gray transition-colors"
+          title={isMobileMenuOpen ? "Close menu" : "Open menu"}
         >
           {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
         </motion.button>
       </div>
 
       {/* Mobile Sidebar Menu - Slide in from right */}
-      {isMobileMenuOpen && createPortal(
-        <>
-          {/* Backdrop overlay */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[99998]"
-            onClick={() => setIsMobileMenuOpen(false)}
-          />
-          
-          {/* Sidebar menu */}
-          <motion.div
-            initial={{ x: '100%' }}
-            animate={{ x: 0 }}
-            exit={{ x: '100%' }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="md:hidden fixed top-0 right-0 w-4/5 h-full bg-cinema-dark/95 backdrop-blur-md border-l border-cinema-gray shadow-2xl z-[99999] overflow-y-auto"
-          >
+      {createPortal(
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <>
+              {/* Backdrop overlay */}
+              <motion.div
+                key="mobile-backdrop"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                transition={{ duration: 0.15, ease: "easeOut" }}
+                className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[99998]"
+                onClick={() => setIsMobileMenuOpen(false)}
+              />
+              
+              {/* Sidebar menu */}
+              <motion.div
+                key="mobile-sidebar"
+                initial={{ x: '100%' }}
+                animate={{ x: 0 }}
+                exit={{ x: '100%' }}
+                transition={{ 
+                  type: 'spring', 
+                  damping: 35, 
+                  stiffness: 400,
+                  duration: 0.25
+                }}
+                className="md:hidden fixed top-0 right-0 w-4/5 h-full bg-cinema-dark/95 backdrop-blur-md border-l border-cinema-gray shadow-2xl z-[99999] overflow-y-auto"
+              >
             {/* Close button */}
             <div className="flex justify-end p-4 border-b border-cinema-gray/30">
               <motion.button
@@ -497,8 +508,10 @@ const Header = ({ currentPage, currentStep, onNavigate, onSignOutRequest, onHome
                 </div>
               </div>
             </nav>
-          </motion.div>
-        </>,
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>,
         document.body
       )}
 

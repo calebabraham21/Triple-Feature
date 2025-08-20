@@ -1,14 +1,29 @@
 import { motion } from 'framer-motion';
+import { useEffect } from 'react';
 
 const LoadingOverlay = ({ isVisible, message = "Finding your perfect movies..." }) => {
-  if (!isVisible) return null;
+  // Lock/unlock scroll whenever visibility changes; also unlock on unmount
+  useEffect(() => {
+    if (isVisible) {
+      document.body.style.overflow = 'hidden';
+      document.documentElement.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+      document.documentElement.style.overflow = '';
+    };
+  }, [isVisible]);
 
   return (
+    isVisible && (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center"
+      className="fixed inset-0 z-50 bg-black/75 flex items-center justify-center"
       role="dialog"
       aria-modal="true"
       aria-labelledby="loading-title"
@@ -17,7 +32,7 @@ const LoadingOverlay = ({ isVisible, message = "Finding your perfect movies..." 
       <div className="bg-cinema-dark/95 border border-cinema-light/20 rounded-2xl p-8 max-w-md mx-4 text-center">
         {/* Loading spinner */}
         <div className="mb-6 flex justify-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-accent-blue" />
+          <div className="rounded-full h-12 w-12 border-2 border-transparent border-t-accent-blue border-l-accent-blue animate-[spin_0.9s_linear_infinite]" />
         </div>
         
         {/* Title */}
@@ -32,16 +47,7 @@ const LoadingOverlay = ({ isVisible, message = "Finding your perfect movies..." 
         
         {/* Indeterminate progress bar */}
         <div className="w-full bg-cinema-gray/30 rounded-full h-2 overflow-hidden">
-          <motion.div
-            className="h-full bg-gradient-to-r from-accent-blue via-accent-purple to-accent-red"
-            initial={{ x: '-100%' }}
-            animate={{ x: '100%' }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut"
-            }}
-          />
+          <div className="h-full bg-gradient-to-r from-accent-blue via-accent-purple to-accent-red indeterminate-bar" />
         </div>
         
         {/* Additional info */}
@@ -50,6 +56,7 @@ const LoadingOverlay = ({ isVisible, message = "Finding your perfect movies..." 
         </p>
       </div>
     </motion.div>
+    )
   );
 };
 

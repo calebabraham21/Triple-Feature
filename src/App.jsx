@@ -51,7 +51,9 @@ function App() {
   const [currentStep, setCurrentStep] = useState(1);
   const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   const [showEmailConfirmSuccess, setShowEmailConfirmSuccess] = useState(false);
-  const [showHomeNavigationConfirm, setShowHomeNavigationConfirm] = useState(false);
+  const [showLeaveRecommendationsConfirm, setShowLeaveRecommendationsConfirm] = useState(false);
+  const [pendingNavigationPath, setPendingNavigationPath] = useState(null);
+  const [pendingOnConfirm, setPendingOnConfirm] = useState(null);
   const { signOut } = useAuth();
 
   // Handle email confirmation success
@@ -143,23 +145,44 @@ function App() {
     setCurrentStep(step);
   };
 
-  const handleHomeNavigation = () => {
-    // If user is on step 5 (recommendations), show confirmation
+  const handleProtectedNavigation = (path) => {
+    // Show confirmation only when leaving recommendations (step 5)
     if (currentStep === 5) {
-      setShowHomeNavigationConfirm(true);
+      setPendingNavigationPath(path);
+      setPendingOnConfirm(null);
+      setShowLeaveRecommendationsConfirm(true);
     } else {
-      // For steps 2-4, navigate immediately without confirmation
-      window.location.href = '/';
+      window.location.href = path;
     }
   };
 
-  const confirmHomeNavigation = () => {
-    setShowHomeNavigationConfirm(false);
-    window.location.href = '/';
+  // Generic protected action (e.g., Start Over) that should confirm when on step 5
+  const handleProtectedAction = (actionCallback) => {
+    if (currentStep === 5) {
+      setPendingNavigationPath(null);
+      setPendingOnConfirm(() => actionCallback);
+      setShowLeaveRecommendationsConfirm(true);
+    } else {
+      actionCallback();
+    }
   };
 
-  const cancelHomeNavigation = () => {
-    setShowHomeNavigationConfirm(false);
+  const confirmLeaveNavigation = () => {
+    setShowLeaveRecommendationsConfirm(false);
+    if (typeof pendingOnConfirm === 'function') {
+      const fn = pendingOnConfirm;
+      setPendingOnConfirm(null);
+      fn();
+      return;
+    }
+    const path = pendingNavigationPath || '/';
+    setPendingNavigationPath(null);
+    window.location.href = path;
+  };
+
+  const cancelLeaveNavigation = () => {
+    setShowLeaveRecommendationsConfirm(false);
+    setPendingNavigationPath(null);
   };
 
   const handleSignOutRequest = () => {
@@ -192,26 +215,29 @@ function App() {
           currentStep={currentStep}
           onNavigate={handleNavigate} 
           onSignOutRequest={handleSignOutRequest}
-          onHomeNavigation={handleHomeNavigation}
+          onHomeNavigation={() => handleProtectedNavigation('/')}
+          onProtectedNavRequest={handleProtectedNavigation}
         />
-        <main>
-          <Routes>
-            <Route path="/" element={<HomePage onStepChange={handleStepChange} />} />
-            <Route path="/auth" element={<AuthPage />} />
-            <Route path="/confirm-success" element={<ConfirmSuccessPage />} />
-            <Route path="/watchlist" element={<ProtectedRoute><WatchlistPage /></ProtectedRoute>} />
-            <Route path="/about-me" element={<AboutMe />} />
-            <Route path="/about-triple" element={<AboutTripleFeature />} />
-            <Route path="/editors-choice" element={<EditorsChoicePage />} />
-            {/* Redirects for old routes */}
-            <Route path="/projects" element={<Navigate to="/about-me#projects" replace />} />
-            <Route path="/contact" element={<Navigate to="/about-me#contact" replace />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </main>
+        <div className="app-gradient">
+          <main>
+            <Routes>
+              <Route path="/" element={<HomePage onStepChange={handleStepChange} onProtectedActionRequest={handleProtectedAction} />} />
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/confirm-success" element={<ConfirmSuccessPage />} />
+              <Route path="/watchlist" element={<ProtectedRoute><WatchlistPage /></ProtectedRoute>} />
+              <Route path="/about-me" element={<AboutMe />} />
+              <Route path="/about-triple" element={<AboutTripleFeature />} />
+              <Route path="/editors-choice" element={<EditorsChoicePage />} />
+              {/* Redirects for old routes */}
+              <Route path="/projects" element={<Navigate to="/about-me#projects" replace />} />
+              <Route path="/contact" element={<Navigate to="/about-me#contact" replace />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </main>
 
-        {/* Footer */}
-        <Footer />
+          {/* Footer */}
+          <Footer />
+        </div>
 
         {/* Sign Out Confirmation Popup */}
         <AnimatePresence>
@@ -317,16 +343,16 @@ function App() {
           )}
         </AnimatePresence>
 
-        {/* Home Navigation Confirmation Popup */}
+        {/* Leave Recommendations Confirmation Popup */}
         <AnimatePresence>
-          {showHomeNavigationConfirm && (
+          {showLeaveRecommendationsConfirm && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3, ease: "easeOut" }}
               className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90"
-              onClick={cancelHomeNavigation}
+              onClick={cancelLeaveNavigation}
             >
               <motion.div
                 initial={{ scale: 0.9, y: 20 }}
@@ -346,16 +372,16 @@ function App() {
                 
                 <div className="flex gap-3">
                   <button
-                    onClick={cancelHomeNavigation}
+                    onClick={cancelLeaveNavigation}
                     className="flex-1 px-4 py-2 bg-cinema-gray hover:bg-cinema-light text-white rounded-lg transition-colors"
                   >
                     Stay Here
                   </button>
                   <button
-                    onClick={confirmHomeNavigation}
+                    onClick={confirmLeaveNavigation}
                     className="flex-1 px-4 py-2 bg-accent-blue hover:bg-accent-blue/80 text-white rounded-lg transition-colors"
                   >
-                    Go Home
+                    Leave Page
                   </button>
                 </div>
               </motion.div>

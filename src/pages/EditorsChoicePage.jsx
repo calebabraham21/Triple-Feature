@@ -147,8 +147,7 @@ const EditorsChoicePage = () => {
             <h1 className="text-3xl font-bold text-white">Editor's Choice</h1>
           </div>
           <p className="text-lg text-white/80">
-          My personal pick of the week
-          </p>
+          What I watched this week         </p>
         </motion.div>
 
         {/* Weekly Pick (DB-backed) */}

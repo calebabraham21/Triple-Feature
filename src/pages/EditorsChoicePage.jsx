@@ -2,6 +2,8 @@ import { motion } from 'framer-motion';
 import { Sparkles, Star, Calendar, Clock, User } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { searchMovieByTitle, getPosterUrl } from '../utils/tmdb';
+import { useAuth } from '../hooks/useAuth';
+import { supabase } from '../lib/supabaseClient';
 
 const EditorsChoicePage = () => {
   // Placeholder data for the weekly movie
@@ -17,6 +19,37 @@ const EditorsChoicePage = () => {
   };
 
   const [favorites, setFavorites] = useState([]);
+  const { isAuthenticated, user } = useAuth();
+  const OWNER_UUID = import.meta.env.VITE_OWNER_UUID || '99f02ae0-fbcf-4c8c-b5f6-1a1200c6e073';
+  const isOwner = Boolean(isAuthenticated && OWNER_UUID && user?.id === OWNER_UUID);
+  const [form, setForm] = useState({ title: '', year: '', director: '', runtime: '', rating: '', poster_path: '', review: '', why_pick: '' });
+  const [saving, setSaving] = useState(false);
+
+  const handleSave = async (e) => {
+    e.preventDefault();
+    if (!isAuthenticated) return;
+    try {
+      setSaving(true);
+      const { error } = await supabase.from('editors_choice').insert({
+        user_id: user?.id || null,
+        title: form.title,
+        year: form.year ? Number(form.year) : null,
+        director: form.director || null,
+        runtime: form.runtime ? Number(form.runtime) : null,
+        rating: form.rating || null,
+        poster_path: form.poster_path || null,
+        review: form.review || null,
+        why_pick: form.why_pick || null,
+      });
+      if (error) throw error;
+      setForm({ title: '', year: '', director: '', runtime: '', rating: '', poster_path: '', review: '', why_pick: '' });
+      alert('Saved!');
+    } catch (err) {
+      alert('Failed to save: ' + (err?.message || err));
+    } finally {
+      setSaving(false);
+    }
+  };
 
   useEffect(() => {
     let active = true;
@@ -170,6 +203,33 @@ const EditorsChoicePage = () => {
             ))}
           </div>
         </motion.div>
+
+        {/* Simple Auth-only CMS block */}
+        {isOwner && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            className="bg-cinema-dark/40 border border-cinema-light/20 rounded-xl p-4 md:p-5 mb-8"
+          >
+            <h3 className="text-lg font-semibold text-white mb-3">Update Weekly Pick</h3>
+            <form className="grid md:grid-cols-2 gap-3" onSubmit={handleSave}>
+              <input className="bg-cinema-gray text-white rounded p-2 border border-cinema-light/30" placeholder="Title" value={form.title} onChange={e=>setForm({...form,title:e.target.value})} required />
+              <input className="bg-cinema-gray text-white rounded p-2 border border-cinema-light/30" placeholder="Year (e.g. 1990)" value={form.year} onChange={e=>setForm({...form,year:e.target.value})} />
+              <input className="bg-cinema-gray text-white rounded p-2 border border-cinema-light/30" placeholder="Director" value={form.director} onChange={e=>setForm({...form,director:e.target.value})} />
+              <input className="bg-cinema-gray text-white rounded p-2 border border-cinema-light/30" placeholder="Runtime (min)" value={form.runtime} onChange={e=>setForm({...form,runtime:e.target.value})} />
+              <input className="bg-cinema-gray text-white rounded p-2 border border-cinema-light/30" placeholder="Rating (e.g. 4/5)" value={form.rating} onChange={e=>setForm({...form,rating:e.target.value})} />
+              <input className="bg-cinema-gray text-white rounded p-2 border border-cinema-light/30" placeholder="Poster path (/abc123.jpg)" value={form.poster_path} onChange={e=>setForm({...form,poster_path:e.target.value})} />
+              <textarea className="md:col-span-2 bg-cinema-gray text-white rounded p-2 border border-cinema-light/30" rows="3" placeholder="Short review" value={form.review} onChange={e=>setForm({...form,review:e.target.value})} />
+              <textarea className="md:col-span-2 bg-cinema-gray text-white rounded p-2 border border-cinema-light/30" rows="2" placeholder="Why this pick" value={form.why_pick} onChange={e=>setForm({...form,why_pick:e.target.value})} />
+              <div className="md:col-span-2 flex justify-end">
+                <button disabled={saving} className="px-4 py-2 rounded-lg bg-accent-blue hover:bg-accent-blue/80 text-white border border-blue-700/40">
+                  {saving ? 'Saving…' : 'Save Pick'}
+                </button>
+              </div>
+            </form>
+          </motion.div>
+        )}
 
   
       </div>

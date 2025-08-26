@@ -6,17 +6,16 @@ export const useRecommendations = () => {
   const [selectedGenres, setSelectedGenres] = useState([]);
   // Multi-decade selection; default to all decades
   const getAllDecades = () => {
-    const decades = [];
-    for (let year = 1900; year <= 2020; year += 10) {
+    const decades = ['1900-1930'];
+    for (let year = 1940; year <= 2020; year += 10) {
       decades.push(year);
     }
     return decades;
   };
   const [selectedDecades, setSelectedDecades] = useState(getAllDecades());
   
-  // New runtime and streaming filters
+  // Runtime preferences
   const [selectedRuntimes, setSelectedRuntimes] = useState(['short', 'medium', 'long']); // Default to all
-  const [streamingOnly, setStreamingOnly] = useState(false); // Default to false (all movies)
   
   // New consent state variables
   const [includeAdult, setIncludeAdult] = useState(null);
@@ -55,7 +54,6 @@ export const useRecommendations = () => {
       selectedGenres,
       selectedDecades,
       selectedRuntimes,
-      streamingOnly,
       includeAdult,
       languagePreference
     });
@@ -73,7 +71,6 @@ export const useRecommendations = () => {
   const baseFilters = {
     genres: selectedGenres,
     decades: selectedDecades,
-    streamingOnly,
     sortBy: 'popularity.desc',
     minRating: 6.0,
     includeAdult: includeAdult,
@@ -182,7 +179,9 @@ export const useRecommendations = () => {
           const year = movie.release_date ? parseInt(movie.release_date.slice(0, 4), 10) : null;
           if (!year) return false;
           const decade = Math.floor(year / 10) * 10;
-          return selectedDecades.includes(decade);
+          const hasEarly = selectedDecades.includes('1900-1930') && decade >= 1900 && decade <= 1930;
+          const hasExact = selectedDecades.includes(decade);
+          return hasEarly || hasExact;
         });
         console.log(`Decade filtering: ${beforeCount} movies before, ${movies.length} after`);
       }
@@ -200,13 +199,7 @@ export const useRecommendations = () => {
       console.log(`Recent movie filtering: ${beforeRecentFilter} movies before, ${movies.length} after`);
 
       // Note: Runtime filtering will be applied after fetching detailed movie information
-      // Streaming availability filtering is not yet implemented
-      // TMDB doesn't provide reliable streaming data in the discover endpoint
-      // This would require additional API calls to watch providers for each movie
-      if (streamingOnly) {
-        console.log('Streaming availability filtering requested but not yet implemented');
-        console.log('Note: This would require additional API calls to watch providers for each movie');
-      }
+      // Streaming availability filtering removed
 
              // TMDB's runtime filtering is unreliable, so we need to filter client-side
        // The movies array contains all movies from the initial search, we'll filter by runtime now
@@ -364,7 +357,7 @@ export const useRecommendations = () => {
         setRecentlyShown(newRecentlyShown);
       }
       
-      setCurrentStep(5);
+      setCurrentStep(4);
     } catch (err) {
       setError('Failed to generate recommendations');
       console.error('Error generating recommendations:', err);
@@ -378,7 +371,6 @@ export const useRecommendations = () => {
     setSelectedGenres([]);
     setSelectedDecades(getAllDecades());
     setSelectedRuntimes(['short', 'medium', 'long']);
-    setStreamingOnly(false);
     setIncludeAdult(null);
     setLanguagePreference('both');
     setRecommendations([]);
@@ -391,7 +383,7 @@ export const useRecommendations = () => {
 
   // Navigate to next step
   const nextStep = () => {
-    if (currentStep < 5) {
+    if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -438,13 +430,15 @@ export const useRecommendations = () => {
     });
   };
 
-  // Get decade options (1900s to 2020s)
+  // Get decade options (group 1900–1930s together, then 1940s..2020s)
   const getDecadeOptions = () => {
-    const decades = [];
-    for (let year = 1900; year <= 2020; year += 10) {
-      decades.push({ value: year, label: `${year}s` });
+    const options = [
+      { value: '1900-1930', label: '1900–1930s' },
+    ];
+    for (let year = 1940; year <= 2020; year += 10) {
+      options.push({ value: year, label: `${year}s` });
     }
-    return decades;
+    return options;
   };
 
   // Get runtime options
@@ -460,7 +454,6 @@ export const useRecommendations = () => {
     selectedGenres,
     selectedDecades,
     selectedRuntimes,
-    streamingOnly,
     includeAdult,
     languagePreference,
     recommendations,
@@ -473,7 +466,6 @@ export const useRecommendations = () => {
     setSelectedGenres,
     setSelectedDecades,
     setSelectedRuntimes,
-    setStreamingOnly,
     setIncludeAdult,
     setLanguagePreference,
     generateRecommendations,

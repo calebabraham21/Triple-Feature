@@ -1,9 +1,13 @@
 import { motion } from 'framer-motion';
-import { Sparkles, Star, Calendar, Clock } from 'lucide-react';
+import { Sparkles, Star, Calendar, Clock, Plus, Check, X, ChevronRight } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { searchMovieByTitle, getPosterUrl, getMovieDetails } from '../utils/tmdb';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '../lib/supabaseClient';
+import { useWatchlist } from '../hooks/useWatchlist';
+import { useNavigate } from 'react-router-dom';
+import GlowButton from '../components/GlowButton';
+import { useToast } from '../context/ToastContext';
 
 const EditorsChoicePage = () => {
   const [currentPick, setCurrentPick] = useState(null);
@@ -19,6 +23,13 @@ const EditorsChoicePage = () => {
   const [searching, setSearching] = useState(false);
   const [results, setResults] = useState([]);
   const [reviewExpanded, setReviewExpanded] = useState(false);
+  const [watchlistLoading, setWatchlistLoading] = useState(false);
+  const [resolvedMovie, setResolvedMovie] = useState(null);
+  const [isInCurrentWatchlist, setIsInCurrentWatchlist] = useState(false);
+  const [recentlyAdded, setRecentlyAdded] = useState(false);
+  const { toggleWatchlist, isInWatchlist } = useWatchlist();
+  const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const handleSave = async (e) => {
     e.preventDefault();
@@ -39,9 +50,9 @@ const EditorsChoicePage = () => {
       setForm({ title: '', year: '', director: '', runtime: '', poster_path: '', review: '' });
       setRatingValue(0);
       await loadCurrentPick();
-      alert('Saved!');
+      showToast({ type: 'success', title: 'Pick saved', message: `${form.title} has been updated.` });
     } catch (err) {
-      alert('Failed to save: ' + (err?.message || err));
+      showToast({ type: 'error', title: 'Save failed', message: err?.message || 'Unknown error' });
     } finally {
       setSaving(false);
     }
@@ -124,6 +135,94 @@ const EditorsChoicePage = () => {
     } catch {}
   };
 
+  const handleAddCurrentToWatchlist = async () => {
+    try {
+      if (!isAuthenticated) {
+        navigate('/auth');
+        return;
+      }
+      if (!currentPick?.title) return;
+      setWatchlistLoading(true);
+      let movieObj = resolvedMovie;
+      if (!movieObj) {
+        const search = await searchMovieByTitle(currentPick.title, currentPick.year || undefined);
+        const m = search?.results?.[0];
+        if (!m) {
+          showToast({ type: 'warning', title: 'Not found', message: 'Could not find this movie on TMDB.' });
+          return;
+        }
+        let details = null;
+        try { details = await getMovieDetails(m.id); } catch {}
+        movieObj = {
+          id: m.id,
+          title: m.title || currentPick.title,
+          poster_path: details?.poster_path || m.poster_path || currentPick.poster_path || null,
+          overview: details?.overview || '',
+          release_date: details?.release_date || null,
+          vote_average: details?.vote_average || null,
+        };
+      }
+
+      const wasIn = isInCurrentWatchlist || (movieObj?.id ? isInWatchlist(movieObj.id) : false);
+      await toggleWatchlist(movieObj);
+      if (wasIn) {
+        setIsInCurrentWatchlist(false);
+        showToast({ type: 'success', title: 'Removed from Watchlist', message: movieObj.title });
+      } else {
+        setIsInCurrentWatchlist(true);
+        setRecentlyAdded(true);
+        setTimeout(() => setRecentlyAdded(false), 1500);
+        showToast({ type: 'success', title: 'Added to Watchlist', message: movieObj.title });
+      }
+    } catch (e) {
+      console.error(e);
+      showToast({ type: 'error', title: 'Failed to update watchlist', message: e?.message || 'Unknown error' });
+    } finally {
+      setWatchlistLoading(false);
+    }
+  };
+
+  // Resolve current pick to a TMDB movie object for watchlist state
+  useEffect(() => {
+    let active = true;
+    const resolve = async () => {
+      try {
+        if (!currentPick?.title) {
+          if (!active) return;
+          setResolvedMovie(null);
+          setIsInCurrentWatchlist(false);
+          return;
+        }
+        const r = await searchMovieByTitle(currentPick.title, currentPick.year || undefined);
+        const m = r?.results?.[0];
+        if (!active) return;
+        if (!m) {
+          setResolvedMovie(null);
+          setIsInCurrentWatchlist(false);
+          return;
+        }
+        let details = null;
+        try { details = await getMovieDetails(m.id); } catch {}
+        const movieObj = {
+          id: m.id,
+          title: m.title || currentPick.title,
+          poster_path: details?.poster_path || m.poster_path || currentPick.poster_path || null,
+          overview: details?.overview || '',
+          release_date: details?.release_date || null,
+          vote_average: details?.vote_average || null,
+        };
+        setResolvedMovie(movieObj);
+        setIsInCurrentWatchlist(isInWatchlist(movieObj.id));
+      } catch {
+        if (!active) return;
+        setResolvedMovie(null);
+        setIsInCurrentWatchlist(false);
+      }
+    };
+    resolve();
+    return () => { active = false; };
+  }, [currentPick?.title, currentPick?.year, isInWatchlist]);
+
   // Debounce title search when typing in the title field
   useEffect(() => {
     if (!isOwner) return;
@@ -147,7 +246,7 @@ const EditorsChoicePage = () => {
             <h1 className="text-3xl font-bold text-white">Editor's Choice</h1>
           </div>
           <p className="text-lg text-white/80">
-          What I watched this week         </p>
+          What I watched recently  </p>
         </motion.div>
 
         {/* Weekly Pick (DB-backed) */}
@@ -194,6 +293,42 @@ const EditorsChoicePage = () => {
             <div className="bg-cinema-dark/30 border border-cinema-light/20 rounded-lg p-3">
               <p className="text-white/80 text-sm leading-relaxed">{currentPick?.review || 'Weekly movie reviews are coming soon.'}</p>
             </div>
+
+            {/* CTA inside mobile card */}
+            <div className="flex justify-end">
+              <div className="flex gap-2">
+                <GlowButton
+                  onClick={handleAddCurrentToWatchlist}
+                  disabled={watchlistLoading}
+                  className={`text-xs px-3 py-2 ${isInCurrentWatchlist ? 'bg-green-700/50' : ''}`}
+                >
+                  {watchlistLoading ? (
+                    'Working…'
+                  ) : isInCurrentWatchlist ? (
+                    <span className="inline-flex items-center gap-1">
+                      <Check size={14} />
+                      Added to Watchlist
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1">
+                      <Plus size={14} />
+                      Add to Watchlist
+                    </span>
+                  )}
+                </GlowButton>
+                <a
+                  href="/picks"
+                  className="relative inline-flex items-center gap-2 px-3 py-2 rounded-lg font-medium text-white bg-accent-blue hover:bg-accent-blue/80 border border-blue-700/40 text-xs trace-snake trace-snake--rb"
+                >
+                  <span>See all picks</span>
+                  <ChevronRight size={14} />
+                  <span className="trace-line trace-line--t" />
+                  <span className="trace-line trace-line--r" />
+                  <span className="trace-line trace-line--b" />
+                  <span className="trace-line trace-line--l" />
+                </a>
+              </div>
+            </div>
           </div>
 
           {/* Desktop layout */}
@@ -233,6 +368,42 @@ const EditorsChoicePage = () => {
 
               <div className="bg-cinema-dark/30 border border-cinema-light/20 rounded-lg p-3">
                 <p className="text-white/80 text-sm leading-relaxed">{currentPick?.review || 'Weekly movie reviews are coming soon.'}</p>
+              </div>
+
+              {/* CTA inside desktop card */}
+              <div className="flex justify-end">
+                <div className="flex gap-2">
+                  <GlowButton
+                    onClick={handleAddCurrentToWatchlist}
+                    disabled={watchlistLoading}
+                    className={`text-sm px-3 py-2 ${isInCurrentWatchlist ? 'bg-green-700/50' : ''}`}
+                  >
+                    {watchlistLoading ? (
+                      'Working…'
+                    ) : isInCurrentWatchlist ? (
+                      <span className="inline-flex items-center gap-1">
+                        <Check size={16} />
+                        Added to Watchlist
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center gap-1">
+                        <Plus size={16} />
+                        Add to Watchlist
+                      </span>
+                    )}
+                  </GlowButton>
+                  <a
+                    href="/picks"
+                    className="relative inline-flex items-center gap-2 px-4 py-2 rounded-lg font-medium text-white bg-accent-blue hover:bg-accent-blue/80 border border-blue-700/40 trace-snake trace-snake--rb"
+                  >
+                    <span>See all picks</span>
+                    <ChevronRight size={16} />
+                    <span className="trace-line trace-line--t" />
+                    <span className="trace-line trace-line--r" />
+                    <span className="trace-line trace-line--b" />
+                    <span className="trace-line trace-line--l" />
+                  </a>
+                </div>
               </div>
             </div>
           </div>

@@ -8,11 +8,14 @@ import WatchlistPage from './pages/WatchlistPage';
 import AboutMe from './pages/AboutMe';
 import AboutTripleFeature from './pages/AboutTripleFeature';
 import EditorsChoicePage from './pages/EditorsChoicePage';
+import PicksPage from './pages/PicksPage';
 import AuthPage from './pages/AuthPage';
 import ConfirmSuccessPage from './pages/ConfirmSuccessPage';
 import Footer from './components/Footer';
 import { useAuth } from './hooks/useAuth';
 import { supabase } from './lib/supabaseClient';
+import { ToastProvider } from './context/ToastContext';
+import Terms from './pages/Terms';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -119,6 +122,7 @@ function App() {
     const path = window.location.pathname;
     if (path === '/') setCurrentPage('home');
     else if (path === '/editors-choice') setCurrentPage('editors-choice');
+    else if (path === '/picks') setCurrentPage('picks');
     else if (path === '/about-me') setCurrentPage('about-me');
     else if (path === '/watchlist') setCurrentPage('watchlist');
     else if (path === '/auth') setCurrentPage('auth');
@@ -209,6 +213,7 @@ function App() {
 
   return (
     <Router>
+      <ToastProvider>
       <div className="min-h-screen">
         <Header 
           currentPage={currentPage} 
@@ -228,6 +233,8 @@ function App() {
               <Route path="/about-me" element={<AboutMe />} />
               <Route path="/about-triple" element={<AboutTripleFeature />} />
               <Route path="/editors-choice" element={<EditorsChoicePage />} />
+              <Route path="/picks" element={<PicksPage />} />
+              <Route path="/terms" element={<Terms />} />
               {/* Redirects for old routes */}
               <Route path="/projects" element={<Navigate to="/about-me#projects" replace />} />
               <Route path="/contact" element={<Navigate to="/about-me#contact" replace />} />
@@ -389,6 +396,7 @@ function App() {
           )}
         </AnimatePresence>
       </div>
+      </ToastProvider>
     </Router>
   );
 }

@@ -46,7 +46,6 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
     selectedGenres,
     selectedDecades,
     selectedRuntimes,
-    streamingOnly,
     includeAdult,
     languagePreference,
     recommendations,
@@ -56,7 +55,6 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
     currentStep,
     setSelectedDecades,
     setSelectedRuntimes,
-    setStreamingOnly,
     setIncludeAdult,
     setLanguagePreference,
     generateRecommendations,
@@ -110,7 +108,6 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
   const hasSelections = selectedGenres.length > 0 || 
     (selectedDecades && selectedDecades.length < 13) || // Less than all decades
     (selectedRuntimes && selectedRuntimes.length < 3) || // Less than all runtimes
-    streamingOnly || 
     includeAdult !== null || 
     languagePreference !== 'both';
 
@@ -149,7 +146,7 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
         transition={{ delay: 0.9 }}
         className="text-center mb-6"
       >
-        <div className="text-sm text-white/70 mb-2">Step 1 of 5</div>
+        <div className="text-sm text-white/70 mb-2">Step 1 of 4</div>
         <h2 className="text-2xl font-bold mb-2">Genre Selection</h2>
         <p className="text-white/80 text-sm">Choose up to 2 genres</p>
       </motion.div>
@@ -168,14 +165,14 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 1.1 + (index * 0.05) }}
             onClick={() => toggleGenre(genre.id)}
-            className={`p-2 rounded-lg font-medium text-sm trace-snake ${
+            className={`p-2 rounded-lg font-medium text-sm border trace-snake ${
               selectedGenres.includes(genre.id)
-                ? 'bg-accent-red text-white shadow-lg'
-                : `${selectedGenres.length >= 2 ? 'opacity-50 cursor-not-allowed' : ''} bg-cinema-gray text-white border border-cinema-light`
+                ? 'bg-accent-blue/20 text-white border-accent-blue'
+                : `${selectedGenres.length >= 2 ? 'opacity-50 cursor-not-allowed' : ''} bg-cinema-gray text-white border-cinema-light`
             }`}
             disabled={!selectedGenres.includes(genre.id) && selectedGenres.length >= 2}
           >
-            <span className="relative z-10">{genre.name}</span>
+            <span className="relative z-10">{genre.name === 'Science Fiction' ? 'Sci-Fi' : genre.name}</span>
             <span className="trace-line trace-line--t" />
             <span className="trace-line trace-line--r" />
             <span className="trace-line trace-line--b" />
@@ -217,9 +214,9 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
         transition={{ delay: 0.4 }}
         className="text-center mb-6"
       >
-        <div className="text-sm text-white/70 mb-2">Step 2 of 5</div>
-        <h2 className="text-2xl font-bold mb-2">Decade Selection</h2>
-        <p className="text-white/80 text-sm">Optional - defaults to all decades</p>
+        <div className="text-sm text-white/70 mb-2">Step 2 of 4</div>
+        <h2 className="text-2xl font-bold mb-2">Decade & Runtime</h2>
+        <p className="text-white/80 text-sm">Optional — defaults to all decades and runtimes</p>
       </motion.div>
 
       {/* Decades */}
@@ -275,6 +272,43 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
         <p className="text-xs text-white/70 mt-2 text-center">By default, all decades are selected.</p>
       </motion.div>
 
+      {/* Runtime Selector */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+        className="mb-5 p-4 rounded-xl border border-cinema-light/20 bg-cinema-gray/20"
+      >
+        <h3 className="text-base font-semibold mb-3 text-white flex items-center gap-2">
+          <Clock size={18} />
+          Runtime Preferences
+        </h3>
+        <p className="text-xs text-white/70 mb-3">Select your preferred movie lengths</p>
+        <div className="grid grid-cols-3 gap-2">
+          {runtimeOptions.map((runtime, index) => {
+            const isSelected = selectedRuntimes.includes(runtime.value);
+            return (
+              <motion.button
+                key={runtime.value}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.6 + (index * 0.05) }}
+                onClick={() => toggleRuntime(runtime.value)}
+                className={`p-3 rounded-lg border text-center transition-all duration-200 ${
+                  isSelected
+                    ? 'bg-accent-blue/20 text-white border-accent-blue'
+                    : 'bg-cinema-gray text-white border-cinema-light hover:border-accent-blue/50'
+                }`}
+              >
+                <div className="font-medium text-sm mb-1">{runtime.label}</div>
+                <div className="text-xs text-white/70">{runtime.description}</div>
+              </motion.button>
+            );
+          })}
+        </div>
+        <p className="text-xs text-white/70 mt-2 text-center">Multiple selections allowed</p>
+      </motion.div>
+
       {/* Navigation */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -309,7 +343,7 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
         transition={{ delay: 0.4 }}
         className="text-center mb-6"
       >
-        <div className="text-sm text-white/70 mb-2">Step 3 of 5</div>
+        <div className="text-sm text-white/70 mb-2">Step 3 of 4</div>
         <h2 className="text-2xl font-bold mb-2">Content Preferences</h2>
         <p className="text-white/80 text-sm">Customize your viewing experience</p>
       </motion.div>
@@ -426,9 +460,26 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
           Back
         </GlowButton>
 
-        <GlowButton onClick={nextStep} className="text-sm px-4 py-2">
-          Continue
-          <ChevronRight size={16} />
+        <GlowButton 
+          onClick={generateRecommendations}
+          disabled={loading}
+          className="text-sm px-4 py-2 bg-green-600/20 hover:bg-green-600/30 border border-green-400/40 text-white trace-snake trace-snake--rb"
+          aria-busy={loading}
+          aria-describedby={loading ? "loading-status" : undefined}
+          aria-controls="progress-announcement"
+        >
+          {loading ? (
+            <>
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+              Getting Recommendations...
+              <span id="loading-status" className="sr-only">Loading recommendations, please wait</span>
+            </>
+          ) : (
+            <>
+              Get Recommendations
+              <Sparkles size={16} />
+            </>
+          )}
         </GlowButton>
       </motion.div>
     </motion.div>
@@ -448,82 +499,11 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
         transition={{ delay: 0.4 }}
         className="text-center mb-6"
       >
-        <div className="text-sm text-white/70 mb-2">Step 4 of 5</div>
-        <h2 className="text-2xl font-bold mb-2">Runtime & Streaming</h2>
-        <p className="text-white/80 text-sm">Finalize your preferences</p>
+        <div className="text-sm text-white/70 mb-2">Step 4 of 4</div>
+        <h2 className="text-2xl font-bold mb-2">Finalize</h2>
+        <p className="text-white/80 text-sm">Ready to see your picks?</p>
       </motion.div>
-
-      {/* Runtime Selector */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="mb-5 p-4 rounded-xl border border-cinema-light/20 bg-cinema-gray/20"
-      >
-        <h3 className="text-base font-semibold mb-3 text-white flex items-center gap-2">
-          <Clock size={18} />
-          Runtime Preferences
-        </h3>
-        <p className="text-xs text-white/70 mb-3">Select your preferred movie lengths</p>
-        <div className="grid grid-cols-3 gap-2">
-          {runtimeOptions.map((runtime, index) => {
-            const isSelected = selectedRuntimes.includes(runtime.value);
-            return (
-              <motion.button
-                key={runtime.value}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.6 + (index * 0.05) }}
-                onClick={() => toggleRuntime(runtime.value)}
-                className={`p-3 rounded-lg border text-center transition-all duration-200 ${
-                  isSelected
-                    ? 'bg-accent-blue/20 text-white border-accent-blue'
-                    : 'bg-cinema-gray text-white border-cinema-light hover:border-accent-blue/50'
-                }`}
-              >
-                <div className="font-medium text-sm mb-1">{runtime.label}</div>
-                <div className="text-xs text-white/70">{runtime.description}</div>
-              </motion.button>
-            );
-          })}
-        </div>
-        <p className="text-xs text-white/70 mt-2 text-center">Multiple selections allowed</p>
-      </motion.div>
-
-      {/* Streaming Availability Filter */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8 }}
-        className="mb-6 p-4 rounded-xl border border-cinema-light/20 bg-cinema-gray/20"
-      >
-        <h3 className="text-base font-semibold mb-3 text-white flex items-center gap-2">
-          <Play size={18} />
-          Streaming Availability
-        </h3>
-        <p className="text-xs text-white/70 mb-3">Filter for movies available on streaming platforms</p>
-        <motion.label
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.9 }}
-          className="flex items-center cursor-pointer p-3 rounded-lg hover:bg-cinema-gray/30 transition-colors duration-150"
-        >
-          <input
-            type="checkbox"
-            checked={streamingOnly}
-            onChange={(e) => setStreamingOnly(e.target.checked)}
-            className="w-4 h-4 rounded border-2 border-cinema-light text-accent-blue focus:ring-accent-blue focus:ring-2"
-          />
-          <span className="ml-3 text-white text-sm">
-            Only show movies available via subscription or free streaming
-          </span>
-        </motion.label>
-        <p className="text-xs text-white/70 mt-2 text-center">
-          When enabled, excludes movies only available for rent/purchase
-        </p>
-      </motion.div>
-
-      {/* Navigation */}
+      {/* Finalize */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
@@ -546,7 +526,7 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
           {loading ? (
             <>
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-              Finding Movies...
+              Getting Recommendations...
               <span id="loading-status" className="sr-only">Loading recommendations, please wait</span>
             </>
           ) : (
@@ -705,6 +685,30 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
             </div>
           </motion.div>
 
+          {/* Editor's Choice CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18 }}
+            className="mb-4"
+          >
+            <div className="bg-cinema-dark/30 border border-cinema-light/20 rounded-xl p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Sparkles size={18} className="text-accent-gold" />
+                <div>
+                  <div className="text-white font-semibold text-sm">Editor's Choice</div>
+                  <div className="text-xs text-white/70">Weekly pick and past selections</div>
+                </div>
+              </div>
+              <button
+                onClick={() => navigate('/picks')}
+                className="text-accent-blue hover:underline text-sm"
+              >
+                See all picks →
+              </button>
+            </div>
+          </motion.div>
+
           {/* Fun Stats Strip */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -801,7 +805,7 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
           className="max-w-4xl mx-auto mb-8"
         >
           <div className="flex items-center justify-center space-x-3">
-            {[1, 2, 3, 4, 5].map((step) => (
+            {[1, 2, 3, 4].map((step) => (
               <motion.div
                 key={step}
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -813,10 +817,10 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
                   currentStep >= step 
                     ? 'bg-accent-blue text-white' 
                     : 'bg-cinema-gray text-white'
-                } ${currentStep === 5 && loading && step === 5 ? 'animate-pulse' : ''}`}>
+                } ${currentStep === 4 && loading && step === 4 ? 'animate-pulse' : ''}`}>
                   {step}
                 </div>
-                {step < 5 && (
+                {step < 4 && (
                   <div className={`w-10 h-0.5 mx-1.5 ${
                     currentStep > step ? 'bg-accent-blue' : 'bg-cinema-gray'
                   }`} />
@@ -831,18 +835,16 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
             className="text-center mt-2 text-xs text-white/70"
           >
             {currentStep === 1 && 'Genre Selection'}
-            {currentStep === 2 && 'Decade Selection'}
+            {currentStep === 2 && 'Decade & Runtime'}
             {currentStep === 3 && 'Content Preferences'}
-            {currentStep === 4 && 'Runtime & Streaming'}
-            {currentStep === 5 && (loading ? 'Loading Recommendations...' : 'Recommendations')}
+            {currentStep === 4 && (loading ? 'Loading Recommendations...' : 'Recommendations')}
           </motion.div>
         </motion.div>
         
         {currentStep === 1 && renderStep1()}
         {currentStep === 2 && renderStep2()}
         {currentStep === 3 && renderStep3()}
-        {currentStep === 4 && renderStep4()}
-        {currentStep === 5 && renderStep5()}
+        {currentStep === 4 && renderStep5()}
       </div>
     </div>
   );

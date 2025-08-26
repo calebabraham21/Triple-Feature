@@ -291,49 +291,25 @@ const WatchlistPage = () => {
         )}
       </div>
 
-      {/* Clear Confirmation Modal */}
-      <AnimatePresence>
-        {showClearConfirm && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4"
-          >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-cinema-dark border border-cinema-gray rounded-xl p-6 max-w-md w-full"
-            >
-              <h3 className="text-xl font-semibold mb-4">Clear Watchlist?</h3>
-              <p className="text-white mb-6">
-                This will permanently remove all {watchlist.length} movie{watchlist.length !== 1 ? 's' : ''} from your watchlist. This action cannot be undone.
-              </p>
-              
-              <div className="flex gap-3">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setShowClearConfirm(false)}
-                  className="flex-1 btn-secondary"
-                >
-                  Cancel
-                </motion.button>
-                
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleClearWatchlist}
-                  className="flex-1 bg-red-500 hover:bg-red-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
-                >
-                  Clear All
-                </motion.button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Clear Confirmation Modal - simplified for performance */}
+      {showClearConfirm && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4" onClick={() => setShowClearConfirm(false)}>
+          <div className="bg-cinema-dark border border-cinema-light/30 rounded-2xl p-6 max-w-md w-full shadow-2xl" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-xl font-semibold mb-4 text-white">Clear Watchlist?</h3>
+            <p className="text-white/90 mb-6 text-sm">
+              This will permanently remove all {watchlist.length} movie{watchlist.length !== 1 ? 's' : ''} from your watchlist. This action cannot be undone.
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setShowClearConfirm(false)} className="flex-1 px-4 py-2 bg-cinema-gray hover:bg-cinema-light text-white rounded-lg transition-colors">
+                Cancel
+              </button>
+              <button onClick={handleClearWatchlist} className="flex-1 px-4 py-2 bg-accent-red hover:bg-accent-red/80 text-white rounded-lg transition-colors">
+                Clear All
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

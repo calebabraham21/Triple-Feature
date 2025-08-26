@@ -44,7 +44,6 @@ export const getMoviesByFilters = async (filters = {}) => {
   const {
     genres = [],
     decades = null,
-    streamingOnly = false,
     page = 1,
     sortBy = 'popularity.desc',
     minRating = 6.0,
@@ -106,7 +105,6 @@ export const getMoviesByFilters = async (filters = {}) => {
   console.log('Making TMDB API call with params:', params);
   console.log(`Adult content preference: ${includeAdult === null ? 'Any rating' : includeAdult ? 'R-rated and above' : 'Family-friendly (up to PG-13)'}`);
   console.log(`Runtime filtering: ${filters['with_runtime.gte'] ? `>=${filters['with_runtime.gte']}min` : 'none'} ${filters['with_runtime.lte'] ? `<=${filters['with_runtime.lte']}min` : ''}`);
-  console.log(`Streaming only: ${streamingOnly ? 'Yes' : 'No'}`);
   const response = await makeRequest('/discover/movie', params);
   
   // Apply strict certification filtering if not "any" mode

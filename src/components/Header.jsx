@@ -347,7 +347,7 @@ const Header = ({ currentPage, currentStep, onNavigate, onSignOutRequest, onHome
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.15, ease: "easeOut" }}
+                transition={{ duration: 0.12, ease: 'linear' }}
                 className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[99998]"
                 onClick={() => setIsMobileMenuOpen(false)}
               />
@@ -358,103 +358,72 @@ const Header = ({ currentPage, currentStep, onNavigate, onSignOutRequest, onHome
                 initial={{ x: '100%' }}
                 animate={{ x: 0 }}
                 exit={{ x: '100%' }}
-                transition={{ 
-                  type: 'spring', 
-                  damping: 35, 
-                  stiffness: 400,
-                  duration: 0.25
+                transition={{ duration: 0.07, ease: [0.2, 0.9, 0.3, 1] }}
+                className="md:hidden fixed top-0 right-0 w-4/5 h-full z-[99999] overflow-y-auto"
+                style={{
+                  backgroundColor: 'rgba(0, 0, 0, 0.6)',
+                  backdropFilter: 'blur(6px)',
+                  WebkitBackdropFilter: 'blur(4px)',
+                  borderLeft: '1px solid rgba(255,255,255,0.15)',
+                  boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
+                  willChange: 'transform, opacity',
+                  transform: 'translateZ(0)'
                 }}
-                className="md:hidden fixed top-0 right-0 w-4/5 h-full bg-cinema-dark/95 backdrop-blur-md border-l border-cinema-gray shadow-2xl z-[99999] overflow-y-auto"
               >
             {/* Close button */}
-            <div className="flex justify-end p-4 border-b border-cinema-gray/30">
+            <div className="flex justify-end p-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.15)' }}>
               <motion.button
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="p-2 bg-cinema-gray/50 hover:bg-cinema-gray/70 rounded-lg text-white transition-colors"
+                className="p-2 rounded-lg text-white transition-colors"
+                style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}
               >
                 <X size={20} />
               </motion.button>
             </div>
             
             {/* Menu content */}
-            <nav className="flex flex-col space-y-6 p-4">
-              {/* Movie App Section */}
-              <div>
-                <h4 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-3 px-2">App & About</h4>
-                <div className="space-y-2">
-                  {leftNavItems.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = currentPage === item.id;
-                    
-                    return (
-                      <motion.a
-                        key={item.id}
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleNavigation(item.id);
-                          setIsMobileMenuOpen(false);
-                        }}
-                        className={`flex items-center gap-3 w-full px-3 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
-                          isActive 
-                            ? 'text-accent-blue bg-accent-blue/10 border border-accent-blue/20' 
-                            : 'text-white/80 hover:text-white hover:bg-white/5'
-                        }`}
-                        whileHover={{ x: 4 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <Icon size={18} className="transition-transform duration-300 group-hover:rotate-12" />
-                        {item.label}
-                      </motion.a>
-                    );
-                  })}
-                </div>
+            <nav className="flex flex-col p-5">
+              {/* Primary navigation list (no subsection titles) */}
+              <div className="space-y-2">
+                {allNavItems.map((item) => {
+                  const Icon = item.icon;
+                  const isActive = currentPage === item.id;
+                  return (
+                    <motion.a
+                      key={item.id}
+                      href="#"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        handleNavigation(item.id);
+                        setIsMobileMenuOpen(false);
+                      }}
+                      className={`flex items-center gap-3.5 w-full px-4 py-3.5 rounded-md text-lg transition-colors duration-150 ${
+                        isActive ? 'text-accent-blue' : 'text-white/85 hover:text-white'
+                      }`}
+                      whileHover={{ x: 4 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Icon size={20} />
+                      {item.label}
+                    </motion.a>
+                  );
+                })}
               </div>
 
-              {/* Personal Section */}
-              <div>
-                <h4 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-3 px-2">Portfolio</h4>
-                <div className="space-y-2">
-                  {rightNavItems.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = currentPage === item.id;
-                    
-                    return (
-                      <motion.a
-                        key={item.id}
-                        href="#"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleNavigation(item.id);
-                          setIsMobileMenuOpen(false);
-                        }}
-                        className={`flex items-center gap-3 w-full px-3 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
-                          isActive 
-                            ? 'text-accent-blue bg-accent-blue/10 border border-accent-blue/20' 
-                            : 'text-white/80 hover:text-white hover:bg-white/5'
-                        }`}
-                        whileHover={{ x: 4 }}
-                        whileTap={{ scale: 0.98 }}
-                      >
-                        <Icon size={18} className="transition-transform duration-300 group-hover:rotate-12" />
-                        {item.label}
-                      </motion.a>
-                    );
-                  })}
-                </div>
-              </div>
+              {/* Spacer and subtle divider before Account */}
+              <div className="my-6" style={{ borderTop: '1px solid rgba(255,255,255,0.12)' }} />
 
               {/* Authentication Section */}
               <div>
-                <h4 className="text-sm font-semibold text-white/60 uppercase tracking-wider mb-3 px-2">Account</h4>
+                <h4 className="text-sm font-semibold text-white/80 uppercase tracking-wider mb-3 px-2">Account</h4>
                 <div className="space-y-2">
                   {loading ? (
                     <motion.button
                       whileTap={{ scale: 0.98 }}
                       disabled
-                      className="flex items-center gap-3 w-full px-3 py-3 rounded-lg text-base font-medium text-white/50 cursor-not-allowed bg-white/5"
+                      className="flex items-center gap-3 w-full px-3 py-3 rounded-md text-base font-medium text-white/60 cursor-not-allowed"
                     >
                       <User size={18} />
                       Loading...
@@ -471,10 +440,10 @@ const Header = ({ currentPage, currentStep, onNavigate, onSignOutRequest, onHome
                           }
                         }}
                         disabled={loading || !isAuthenticated}
-                        className={`flex items-center gap-3 w-full px-3 py-3 rounded-lg text-base font-medium transition-all duration-200 ${
+                        className={`flex items-center gap-3.5 w-full px-4 py-3.5 rounded-md text-lg font-medium transition-colors duration-150 ${
                           loading || !isAuthenticated 
-                            ? 'text-white/50 cursor-not-allowed bg-white/5' 
-                            : 'text-white hover:text-white hover:bg-white/10'
+                            ? 'text-white/60 cursor-not-allowed' 
+                            : 'text-white/85 hover:text-white'
                         }`}
                       >
                         <List size={18} className="text-accent-gold" />
@@ -486,7 +455,7 @@ const Header = ({ currentPage, currentStep, onNavigate, onSignOutRequest, onHome
                           handleSignOut();
                           setIsMobileMenuOpen(false);
                         }}
-                        className="flex items-center gap-3 w-full px-3 py-3 rounded-lg text-base font-medium text-white hover:text-white hover:bg-white/10 transition-all duration-200"
+                        className="flex items-center gap-3.5 w-full px-4 py-3.5 rounded-md text-lg font-medium text-white/85 hover:text-white transition-colors duration-150"
                       >
                         <LogOut size={18} />
                         Sign Out
@@ -499,7 +468,7 @@ const Header = ({ currentPage, currentStep, onNavigate, onSignOutRequest, onHome
                         navigate('/auth');
                         setIsMobileMenuOpen(false);
                       }}
-                      className="flex items-center gap-3 w-full px-3 py-3 rounded-lg text-base font-medium text-white hover:text-white hover:bg-white/10 transition-all duration-200"
+                      className="flex items-center gap-3.5 w-full px-4 py-3.5 rounded-md text-lg font-medium text-white/85 hover:text-white transition-colors duration-150"
                     >
                       <User size={18} />
                       Sign In

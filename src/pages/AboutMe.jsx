@@ -16,7 +16,7 @@ const AboutMe = () => {
 
   return (
     <div className="min-h-screen app-gradient ">
-      <div className="max-w-4xl mx-auto px-4 py-12">
+      <div className="max-w-4xl mx-auto px-6 sm:px-6 py-12">
         {/* About Triple Feature */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -30,7 +30,7 @@ const AboutMe = () => {
           <p className="text-white/90 mb-4 text-base leading-relaxed">
             The app leans on TMDB data, some sensible filtering, and a bit of taste. It's intentionally small and fast, closer to a friend with good recs than a firehose of thumbnails. Also doubles as my sandbox for trying out UI ideas and seeing what actually feels good to use.
           </p>
-          <div className="bg-cinema-dark border border-cinema-gray rounded-lg p-6">
+          <div className="bg-cinema-dark border border-cinema-gray rounded-lg p-5 sm:p-6">
             <p className="text-white text-center italic">
             "Life is very, very complicated, and so films should be allowed to be, too." — David Lynch
             </p>

@@ -14,6 +14,17 @@ const Header = ({ currentPage, currentStep, onNavigate, onSignOutRequest, onHome
   const { user, isAuthenticated, loading } = useAuth();
 
   const navigate = useNavigate();
+  // Sidebar item entry animation (snappy, staggered)
+  const listVariants = {
+    hidden: {},
+    show: {
+      transition: { staggerChildren: 0.025 }
+    }
+  };
+  const itemVariants = {
+    hidden: { opacity: 0, y: 6, scale: 0.98 },
+    show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.16, ease: 'easeOut' } }
+  };
   
   const leftNavItems = [
     { id: 'home', label: 'Home', icon: Home },
@@ -384,7 +395,7 @@ const Header = ({ currentPage, currentStep, onNavigate, onSignOutRequest, onHome
             </div>
             
             {/* Menu content */}
-            <nav className="flex flex-col p-5">
+            <motion.nav className="flex flex-col p-5" initial="hidden" animate="show" variants={listVariants}>
               {/* Primary navigation list (no subsection titles) */}
               <div className="space-y-2">
                 {allNavItems.map((item) => {
@@ -404,6 +415,7 @@ const Header = ({ currentPage, currentStep, onNavigate, onSignOutRequest, onHome
                       }`}
                       whileHover={{ x: 4 }}
                       whileTap={{ scale: 0.98 }}
+                      variants={itemVariants}
                     >
                       <Icon size={20} />
                       {item.label}
@@ -424,6 +436,7 @@ const Header = ({ currentPage, currentStep, onNavigate, onSignOutRequest, onHome
                       whileTap={{ scale: 0.98 }}
                       disabled
                       className="flex items-center gap-3 w-full px-3 py-3 rounded-md text-base font-medium text-white/60 cursor-not-allowed"
+                      variants={itemVariants}
                     >
                       <User size={18} />
                       Loading...
@@ -445,6 +458,7 @@ const Header = ({ currentPage, currentStep, onNavigate, onSignOutRequest, onHome
                             ? 'text-white/60 cursor-not-allowed' 
                             : 'text-white/85 hover:text-white'
                         }`}
+                        variants={itemVariants}
                       >
                         <List size={18} className="text-accent-gold" />
                         My Watchlist
@@ -456,6 +470,7 @@ const Header = ({ currentPage, currentStep, onNavigate, onSignOutRequest, onHome
                           setIsMobileMenuOpen(false);
                         }}
                         className="flex items-center gap-3.5 w-full px-4 py-3.5 rounded-md text-lg font-medium text-white/85 hover:text-white transition-colors duration-150"
+                        variants={itemVariants}
                       >
                         <LogOut size={18} />
                         Sign Out
@@ -469,6 +484,7 @@ const Header = ({ currentPage, currentStep, onNavigate, onSignOutRequest, onHome
                         setIsMobileMenuOpen(false);
                       }}
                       className="flex items-center gap-3.5 w-full px-4 py-3.5 rounded-md text-lg font-medium text-white/85 hover:text-white transition-colors duration-150"
+                      variants={itemVariants}
                     >
                       <User size={18} />
                       Sign In
@@ -476,7 +492,7 @@ const Header = ({ currentPage, currentStep, onNavigate, onSignOutRequest, onHome
                   )}
                 </div>
               </div>
-            </nav>
+            </motion.nav>
               </motion.div>
             </>
           )}

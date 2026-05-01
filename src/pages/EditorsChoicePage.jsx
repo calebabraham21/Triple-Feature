@@ -43,7 +43,6 @@ async function enrichWithTmdb(base) {
   }
 }
 
-/** Merge Supabase editorial fields with optional TMDB details (fallback to row-only if TMDB fails). */
 function resolveDisplay(enriched) {
   const { base, tmdb, tmdbFailed } = enriched;
   const rowPoster = base.posterUrl;
@@ -192,108 +191,108 @@ const EditorsChoicePage = () => {
           enrichedPosts.map((enriched, index) => {
             const d = resolveDisplay(enriched);
             return (
-            <motion.article
-              key={enriched.base?.id ?? `post-${index}`}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: Math.min(0.15 * index, 0.75) }}
-              className="bg-cinema-dark/50 border border-cinema-light/20 rounded-xl p-6 mb-8"
-            >
-              <div className="text-center mb-4">
-                <div className="inline-flex flex-wrap items-center justify-center gap-2">
-                  <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-accent-gold/20 text-accent-gold rounded-full text-sm font-medium">
-                    <Calendar size={14} />
-                    <span>{index === 0 ? 'Latest pick' : 'Pick'}</span>
-                  </div>
-                  {d.watchedLabel && (
-                    <span className="text-white/55 text-xs">
-                      Watched {d.watchedLabel}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              {d.showTmdbNote && (
-                <p className="text-amber-200/90 text-xs text-center mb-4">
-                  Poster and credits could not be refreshed from TMDB; showing saved text only.
-                </p>
-              )}
-
-              <div className="grid md:grid-cols-2 gap-6 items-start">
-                <div className="text-center">
-                  {d.posterSrc ? (
-                    <img
-                      src={d.posterSrc}
-                      alt=""
-                      className="w-full max-w-sm mx-auto rounded-xl shadow-2xl object-contain"
-                      onError={(e) => {
-                        e.target.style.display = 'none';
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full max-w-sm mx-auto h-96 bg-cinema-dark/30 border border-cinema-light/20 rounded-xl flex items-center justify-center">
-                      <div className="text-center px-4">
-                        <div className="text-6xl mb-4">🎬</div>
-                        <p className="text-white/60">{d.title}</p>
-                      </div>
+              <motion.article
+                key={enriched.base?.id ?? `post-${index}`}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: Math.min(0.15 * index, 0.75) }}
+                className="bg-cinema-dark/50 border border-cinema-light/20 rounded-xl p-6 mb-8"
+              >
+                <div className="text-center mb-4">
+                  <div className="inline-flex flex-wrap items-center justify-center gap-2">
+                    <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-accent-gold/20 text-accent-gold rounded-full text-sm font-medium">
+                      <Calendar size={14} />
+                      <span>{index === 0 ? 'Latest pick' : 'Pick'}</span>
                     </div>
-                  )}
+                    {d.watchedLabel && (
+                      <span className="text-white/55 text-xs">
+                        Watched {d.watchedLabel}
+                      </span>
+                    )}
+                  </div>
                 </div>
 
-                <div className="space-y-3">
-                  <h2 className="text-2xl font-bold text-white">{d.title}</h2>
+                {d.showTmdbNote && (
+                  <p className="text-amber-200/90 text-xs text-center mb-4">
+                    Poster and credits could not be refreshed from TMDB; showing saved text only.
+                  </p>
+                )}
 
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-white/70 text-sm">
-                    {d.year != null && (
-                      <>
-                        <span>{d.year}</span>
-                        {(d.director || d.runtime || d.rating) && <span>•</span>}
-                      </>
-                    )}
-                    {d.director && (
-                      <>
-                        <span>{d.director}</span>
-                        {(d.runtime || d.rating) && <span>•</span>}
-                      </>
-                    )}
-                    {d.runtime && (
-                      <>
-                        <div className="flex items-center gap-1">
-                          <Clock size={14} />
-                          <span>{d.runtime}</span>
+                <div className="grid md:grid-cols-2 gap-6 items-start">
+                  <div className="text-center">
+                    {d.posterSrc ? (
+                      <img
+                        src={d.posterSrc}
+                        alt=""
+                        className="w-full max-w-sm mx-auto rounded-xl shadow-2xl object-contain"
+                        onError={(e) => {
+                          e.target.style.display = 'none';
+                        }}
+                      />
+                    ) : (
+                      <div className="w-full max-w-sm mx-auto h-96 bg-cinema-dark/30 border border-cinema-light/20 rounded-xl flex items-center justify-center">
+                        <div className="text-center px-4">
+                          <div className="text-6xl mb-4">🎬</div>
+                          <p className="text-white/60">{d.title}</p>
                         </div>
-                        {d.rating != null && <span>•</span>}
-                      </>
-                    )}
-                    {d.rating != null && (
-                      <div className="flex items-center gap-1">
-                        <Star size={14} className="text-accent-gold" />
-                        <span>{d.rating}</span>
                       </div>
                     )}
                   </div>
 
-                  {d.review ? (
-                    <div className="space-y-2">
-                      <h3 className="text-base font-semibold text-white">My review</h3>
-                      <p className="text-white/80 text-sm leading-relaxed whitespace-pre-wrap">
-                        {d.review}
-                      </p>
-                    </div>
-                  ) : null}
+                  <div className="space-y-3">
+                    <h2 className="text-2xl font-bold text-white">{d.title}</h2>
 
-                  {d.whyPick ? (
-                    <div className="space-y-2">
-                      <h3 className="text-base font-semibold text-white">Why this pick?</h3>
-                      <p className="text-white/80 text-sm leading-relaxed whitespace-pre-wrap">
-                        {d.whyPick}
-                      </p>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-white/70 text-sm">
+                      {d.year != null && (
+                        <>
+                          <span>{d.year}</span>
+                          {(d.director || d.runtime || d.rating) && <span>•</span>}
+                        </>
+                      )}
+                      {d.director && (
+                        <>
+                          <span>{d.director}</span>
+                          {(d.runtime || d.rating) && <span>•</span>}
+                        </>
+                      )}
+                      {d.runtime && (
+                        <>
+                          <div className="flex items-center gap-1">
+                            <Clock size={14} />
+                            <span>{d.runtime}</span>
+                          </div>
+                          {d.rating != null && <span>•</span>}
+                        </>
+                      )}
+                      {d.rating != null && (
+                        <div className="flex items-center gap-1">
+                          <Star size={14} className="text-accent-gold" />
+                          <span>{d.rating}</span>
+                        </div>
+                      )}
                     </div>
-                  ) : null}
+
+                    {d.review ? (
+                      <div className="space-y-2">
+                        <h3 className="text-base font-semibold text-white">My review</h3>
+                        <p className="text-white/80 text-sm leading-relaxed whitespace-pre-wrap">
+                          {d.review}
+                        </p>
+                      </div>
+                    ) : null}
+
+                    {d.whyPick ? (
+                      <div className="space-y-2">
+                        <h3 className="text-base font-semibold text-white">Why this pick?</h3>
+                        <p className="text-white/80 text-sm leading-relaxed whitespace-pre-wrap">
+                          {d.whyPick}
+                        </p>
+                      </div>
+                    ) : null}
+                  </div>
                 </div>
-              </div>
-            </motion.article>
-          );
+              </motion.article>
+            );
           })}
 
         <motion.div

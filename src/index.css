@@ -169,9 +169,32 @@
   
   .movie-card {
     @apply bg-cinema-dark rounded-xl overflow-hidden border border-cinema-gray 
-           hover:border-accent-red transition-all duration-300 transform hover:scale-105 
+           transition-all duration-300 transform hover:scale-105 
            shadow-lg hover:shadow-2xl;
+    position: relative;
+    isolation: isolate;
   }
+  /* Gradient border on hover (purple -> blue -> red) */
+  .movie-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1px; /* border thickness */
+    background: linear-gradient(135deg, #8b5cf6, #4a9eff, #ff4444);
+    -webkit-mask: 
+      linear-gradient(#000 0 0) content-box, 
+      linear-gradient(#000 0 0);
+            mask: 
+      linear-gradient(#000 0 0) content-box, 
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 200ms ease;
+    pointer-events: none;
+  }
+  .movie-card:hover::after { opacity: 1; }
   
   .glass-effect {
     @apply bg-white/10 backdrop-blur-md border border-white/20;
@@ -184,10 +207,42 @@
   .cinema-gradient {
     background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #2a2a2a 100%);
   }
+  /* Site-wide page background (behind nav and all content) */
+  .app-gradient {
+    background: 
+      radial-gradient(1200px 700px at 80% -150px, rgba(74,158,255,0.18), transparent 65%),
+      radial-gradient(900px 600px at 12% 110%, rgba(74,158,255,0.12), transparent 70%),
+      linear-gradient(180deg, #0a0a0a 0%, #0e1218 50%, #0b0f16 100%);
+  }
   
   .accent-gradient {
     background: linear-gradient(135deg, #ff4444 0%, #8b5cf6 50%, #4a9eff 100%);
   }
+
+  /* Vertical gradient rails (left and right outlines only) */
+  .side-rails {
+    position: relative;
+  }
+  .side-rails::before,
+  .side-rails::after {
+    content: "";
+    position: absolute;
+    top: 8px;
+    bottom: 8px;
+    width: 2px;
+    pointer-events: none;
+    /* Fade to transparent at the top and bottom tips */
+    background: linear-gradient(
+      180deg,
+      rgba(139, 92, 246, 0) 0%,
+      rgba(139, 92, 246, 0.28) 15%,
+      rgba(74, 158, 255, 0.28) 85%,
+      rgba(74, 158, 255, 0) 100%
+    );
+    border-radius: 1px;
+  }
+  .side-rails::before { left: -1px; }
+  .side-rails::after { right: -1px; }
 
   /* Main content spacing to prevent nav overlap */
   main {
@@ -238,6 +293,16 @@
   .spotlight-button > * {
     position: relative;
     z-index: 2;
+  }
+
+  /* Ultra-smooth indeterminate progress bar (GPU-accelerated) */
+  @keyframes indeterminate-x {
+    0% { transform: translate3d(-100%, 0, 0); }
+    100% { transform: translate3d(100%, 0, 0); }
+  }
+  .indeterminate-bar {
+    animation: indeterminate-x 1.1s linear infinite;
+    will-change: transform;
   }
 
   /* Line clamp utilities for text truncation */

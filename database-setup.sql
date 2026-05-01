@@ -79,3 +79,39 @@ GRANT USAGE ON SCHEMA public TO anon, authenticated;
 GRANT ALL ON public.profiles TO anon, authenticated;
 GRANT ALL ON public.watchlist TO anon, authenticated;
 GRANT USAGE ON SEQUENCE watchlist_id_seq TO anon, authenticated;
+
+-- Editor's Choice table for weekly featured movie
+CREATE TABLE IF NOT EXISTS editors_choice (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id) ON DELETE SET NULL,
+  title TEXT NOT NULL,
+  year INTEGER,
+  director TEXT,
+  runtime INTEGER,
+  rating TEXT,
+  poster_path TEXT,
+  review TEXT,
+  why_pick TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE IF EXISTS editors_choice ENABLE ROW LEVEL SECURITY;
+
+-- Policies: anyone can read; authenticated users can insert; owners can update/delete
+CREATE POLICY "Public can view editor picks" ON editors_choice
+  FOR SELECT USING (true);
+
+-- Only a specific owner UUID can insert/update/delete; set via a Supabase function comparing to a config var
+CREATE OR REPLACE FUNCTION public.is_owner() RETURNS boolean AS $$
+  SELECT auth.uid() = COALESCE(current_setting('app.owner_uuid', true), '99f02ae0-fbcf-4c8c-b5f6-1a1200c6e073')::uuid;
+$$ LANGUAGE sql STABLE;
+
+-- Allow the owner to insert/update/delete
+CREATE POLICY "Owner can insert editor pick" ON editors_choice
+  FOR INSERT WITH CHECK (public.is_owner());
+
+CREATE POLICY "Owner can update editor pick" ON editors_choice
+  FOR UPDATE USING (public.is_owner());
+
+CREATE POLICY "Owner can delete editor pick" ON editors_choice
+  FOR DELETE USING (public.is_owner());

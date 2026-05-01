@@ -2,20 +2,46 @@ import { useRecommendations } from '../hooks/useRecommendations';
 import MovieCard from '../components/MovieCard';
 import MovieCardSkeleton from '../components/MovieCardSkeleton';
 import LoadingOverlay from '../components/LoadingOverlay';
-import { ChevronLeft, ChevronRight, Sparkles, Clock, Play, Home } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, Clock, Play, Home, RotateCcw } from 'lucide-react';
 import GlowButton from '../components/GlowButton';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
+
 // Using public asset path for reliability in dev/prod
 
-const HomePage = ({ onStepChange }) => {
-  
+// Fast count-up number animation for fun stats
+const CountUp = ({ target, duration = 700, delayMs = 0, className = '' }) => {
+  const [value, setValue] = useState(0);
+  useEffect(() => {
+    let rafId = 0;
+    const start = () => {
+      const t0 = performance.now();
+      const tick = (now) => {
+        const elapsed = now - t0;
+        const progress = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        setValue(Math.round(target * eased));
+        if (progress < 1) rafId = requestAnimationFrame(tick);
+      };
+      rafId = requestAnimationFrame(tick);
+    };
+    const timer = setTimeout(start, delayMs);
+    return () => { clearTimeout(timer); if (rafId) cancelAnimationFrame(rafId); };
+  }, [target, duration, delayMs]);
+  const minDigits = target >= 10 ? 2 : 1; // no leading zero for single-digit targets
+  const text = String(value).padStart(minDigits, '0');
+  return <div className={className}>{text}</div>;
+};
+
+const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
+  const navigate = useNavigate();
+
   const {
     genres,
     selectedGenres,
     selectedDecades,
     selectedRuntimes,
-    streamingOnly,
     includeAdult,
     languagePreference,
     recommendations,
@@ -24,7 +50,6 @@ const HomePage = ({ onStepChange }) => {
     progressMessage,
     currentStep,
     setSelectedDecades,
-    setStreamingOnly,
     setIncludeAdult,
     setLanguagePreference,
     generateRecommendations,
@@ -69,7 +94,7 @@ const HomePage = ({ onStepChange }) => {
         transition={{ delay: 0.9 }}
         className="text-center mb-6"
       >
-        <div className="text-sm text-white/70 mb-2">Step 1 of 5</div>
+        <div className="text-sm text-white/70 mb-2">Step 1 of 4</div>
         <h2 className="text-2xl font-bold mb-2">Genre Selection</h2>
         <p className="text-white/80 text-sm">Choose up to 2 genres</p>
       </motion.div>
@@ -88,14 +113,14 @@ const HomePage = ({ onStepChange }) => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 1.1 + (index * 0.05) }}
             onClick={() => toggleGenre(genre.id)}
-            className={`p-2 rounded-lg font-medium text-sm trace-snake ${
+            className={`p-2 rounded-lg font-medium text-sm border trace-snake ${
               selectedGenres.includes(genre.id)
-                ? 'bg-accent-red text-white shadow-lg'
-                : `${selectedGenres.length >= 2 ? 'opacity-50 cursor-not-allowed' : ''} bg-cinema-gray text-white border border-cinema-light`
+                ? 'bg-accent-blue/20 text-white border-accent-blue'
+                : `${selectedGenres.length >= 2 ? 'opacity-50 cursor-not-allowed' : ''} bg-cinema-gray text-white border-cinema-light`
             }`}
             disabled={!selectedGenres.includes(genre.id) && selectedGenres.length >= 2}
           >
-            <span className="relative z-10">{genre.name}</span>
+            <span className="relative z-10">{genre.name === 'Science Fiction' ? 'Sci-Fi' : genre.name}</span>
             <span className="trace-line trace-line--t" />
             <span className="trace-line trace-line--r" />
             <span className="trace-line trace-line--b" />
@@ -137,9 +162,9 @@ const HomePage = ({ onStepChange }) => {
         transition={{ delay: 0.4 }}
         className="text-center mb-6"
       >
-        <div className="text-sm text-white/70 mb-2">Step 2 of 5</div>
-        <h2 className="text-2xl font-bold mb-2">Decade Selection</h2>
-        <p className="text-white/80 text-sm">Optional - defaults to all decades</p>
+        <div className="text-sm text-white/70 mb-2">Step 2 of 4</div>
+        <h2 className="text-2xl font-bold mb-2">Decade & Runtime</h2>
+        <p className="text-white/80 text-sm">Optional ??? defaults to all decades and runtimes</p>
       </motion.div>
 
       {/* Decades */}
@@ -195,6 +220,43 @@ const HomePage = ({ onStepChange }) => {
         <p className="text-xs text-white/70 mt-2 text-center">By default, all decades are selected.</p>
       </motion.div>
 
+      {/* Runtime Selector */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+        className="mb-5 p-4 rounded-xl border border-cinema-light/20 bg-cinema-gray/20"
+      >
+        <h3 className="text-base font-semibold mb-3 text-white flex items-center gap-2">
+          <Clock size={18} />
+          Runtime Preferences
+        </h3>
+        <p className="text-xs text-white/70 mb-3">Select your preferred movie lengths</p>
+        <div className="grid grid-cols-3 gap-2">
+          {runtimeOptions.map((runtime, index) => {
+            const isSelected = selectedRuntimes.includes(runtime.value);
+            return (
+              <motion.button
+                key={runtime.value}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.6 + (index * 0.05) }}
+                onClick={() => toggleRuntime(runtime.value)}
+                className={`p-3 rounded-lg border text-center transition-all duration-200 ${
+                  isSelected
+                    ? 'bg-accent-blue/20 text-white border-accent-blue'
+                    : 'bg-cinema-gray text-white border-cinema-light hover:border-accent-blue/50'
+                }`}
+              >
+                <div className="font-medium text-sm mb-1">{runtime.label}</div>
+                <div className="text-xs text-white/70">{runtime.description}</div>
+              </motion.button>
+            );
+          })}
+        </div>
+        <p className="text-xs text-white/70 mt-2 text-center">Multiple selections allowed</p>
+      </motion.div>
+
       {/* Navigation */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
@@ -229,7 +291,7 @@ const HomePage = ({ onStepChange }) => {
         transition={{ delay: 0.4 }}
         className="text-center mb-6"
       >
-        <div className="text-sm text-white/70 mb-2">Step 3 of 5</div>
+        <div className="text-sm text-white/70 mb-2">Step 3 of 4</div>
         <h2 className="text-2xl font-bold mb-2">Content Preferences</h2>
         <p className="text-white/80 text-sm">Customize your viewing experience</p>
       </motion.div>
@@ -297,7 +359,7 @@ const HomePage = ({ onStepChange }) => {
         className="mb-5 p-4 rounded-xl border border-cinema-light/20 bg-cinema-gray/20"
       >
         <h3 className="text-base font-semibold mb-2 text-white">Language Preference</h3>
-        <p className="text-xs text-white/70 mb-3">Try a non-English movie — it's like travel, without the TSA.</p>
+        <p className="text-xs text-white/70 mb-3">Try a non-English movie ??? it's like travel, without the TSA.</p>
         <div className="space-y-2">
           {[
             { value: 'english', label: 'English only' },
@@ -346,119 +408,10 @@ const HomePage = ({ onStepChange }) => {
           Back
         </GlowButton>
 
-        <GlowButton onClick={nextStep} className="text-sm px-4 py-2">
-          Continue
-          <ChevronRight size={16} />
-        </GlowButton>
-      </motion.div>
-    </motion.div>
-  );
-
-  const renderStep4 = () => (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3 }}
-      className="max-w-4xl mx-auto"
-    >
-      {/* Step indicator */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="text-center mb-6"
-      >
-        <div className="text-sm text-white/70 mb-2">Step 4 of 5</div>
-        <h2 className="text-2xl font-bold mb-2">Runtime & Streaming</h2>
-        <p className="text-white/80 text-sm">Finalize your preferences</p>
-      </motion.div>
-
-      {/* Runtime Selector */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="mb-5 p-4 rounded-xl border border-cinema-light/20 bg-cinema-gray/20"
-      >
-        <h3 className="text-base font-semibold mb-3 text-white flex items-center gap-2">
-          <Clock size={18} />
-          Runtime Preferences
-        </h3>
-        <p className="text-xs text-white/70 mb-3">Select your preferred movie lengths</p>
-        <div className="grid grid-cols-3 gap-2">
-          {runtimeOptions.map((runtime, index) => {
-            const isSelected = selectedRuntimes.includes(runtime.value);
-            return (
-              <motion.button
-                key={runtime.value}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.6 + (index * 0.05) }}
-                onClick={() => toggleRuntime(runtime.value)}
-                className={`p-3 rounded-lg border text-center transition-all duration-200 ${
-                  isSelected
-                    ? 'bg-accent-blue/20 text-white border-accent-blue'
-                    : 'bg-cinema-gray text-white border-cinema-light hover:border-accent-blue/50'
-                }`}
-              >
-                <div className="font-medium text-sm mb-1">{runtime.label}</div>
-                <div className="text-xs text-white/70">{runtime.description}</div>
-              </motion.button>
-            );
-          })}
-        </div>
-        <p className="text-xs text-white/70 mt-2 text-center">Multiple selections allowed</p>
-      </motion.div>
-
-      {/* Streaming Availability Filter */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8 }}
-        className="mb-6 p-4 rounded-xl border border-cinema-light/20 bg-cinema-gray/20"
-      >
-        <h3 className="text-base font-semibold mb-3 text-white flex items-center gap-2">
-          <Play size={18} />
-          Streaming Availability
-        </h3>
-        <p className="text-xs text-white/70 mb-3">Filter for movies available on streaming platforms</p>
-        <motion.label
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.9 }}
-          className="flex items-center cursor-pointer p-3 rounded-lg hover:bg-cinema-gray/30 transition-colors duration-150"
-        >
-          <input
-            type="checkbox"
-            checked={streamingOnly}
-            onChange={(e) => setStreamingOnly(e.target.checked)}
-            className="w-4 h-4 rounded border-2 border-cinema-light text-accent-blue focus:ring-accent-blue focus:ring-2"
-          />
-          <span className="ml-3 text-white text-sm">
-            Only show movies available via subscription or free streaming
-          </span>
-        </motion.label>
-        <p className="text-xs text-white/70 mt-2 text-center">
-          When enabled, excludes movies only available for rent/purchase
-        </p>
-      </motion.div>
-
-      {/* Navigation */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.0 }}
-        className="flex justify-between"
-      >
-        <GlowButton variant="secondary" onClick={prevStep} className="text-sm px-4 py-2">
-          <ChevronLeft size={16} />
-          Back
-        </GlowButton>
-
         <GlowButton 
-          onClick={generateRecommendations} 
-          disabled={loading} 
-          className="text-sm px-4 py-2"
+          onClick={generateRecommendations}
+          disabled={loading}
+          className="text-sm px-4 py-2 bg-green-600/20 hover:bg-green-600/30 border border-green-400/40 text-white trace-snake trace-snake--rb"
           aria-busy={loading}
           aria-describedby={loading ? "loading-status" : undefined}
           aria-controls="progress-announcement"
@@ -466,7 +419,7 @@ const HomePage = ({ onStepChange }) => {
           {loading ? (
             <>
               <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-              Finding Movies...
+              Getting Recommendations...
               <span id="loading-status" className="sr-only">Loading recommendations, please wait</span>
             </>
           ) : (
@@ -510,12 +463,19 @@ const HomePage = ({ onStepChange }) => {
         )}
       </div>
 
-      <div className="flex justify-center gap-4">
+      <div className="flex justify-center gap-4 pb-4 md:pb-0">
         <GlowButton
           variant="secondary"
-          onClick={resetFlow}
+          onClick={() => {
+            if (typeof onProtectedActionRequest === 'function') {
+              onProtectedActionRequest(() => resetFlow());
+            } else {
+              resetFlow();
+            }
+          }}
           className="text-sm px-6 py-3"
         >
+          <RotateCcw size={16} />
           Start Over
         </GlowButton>
       </div>
@@ -558,7 +518,7 @@ const HomePage = ({ onStepChange }) => {
               <img
                 src="/movie-posters.jpg"
                 alt="Movie posters background"
-                className="w-full h-full object-cover blur-sm opacity-20"
+                className="w-full h-full object-cover blur-sm opacity-40"
                 loading="lazy"
                 decoding="async"
               />
@@ -567,7 +527,7 @@ const HomePage = ({ onStepChange }) => {
             
             {/* Content */}
             <div className="relative z-10">
-              <h1 className="text-2xl md:text-3xl font-bold text-white mb-3">
+              <h1 className="text-2xl md:text-3xl font-bold text-white mb-3 text-center">
                 Stop scrolling, start watching
               </h1>
               <p className="text-base md:text-lg text-white/90 leading-relaxed mb-6">
@@ -575,27 +535,31 @@ const HomePage = ({ onStepChange }) => {
                 Tell us what you are in the mood for, we crunch the options, and give you three solid picks.
               </p>
               
-              {/* Start Button */}
-              <div className="text-center">
-                <GlowButton
-                  onClick={() => {
-                    const step1Element = document.querySelector('[data-step="1"]');
-                    if (step1Element) {
-                      step1Element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                    }
-                  }}
-                  onMouseMove={(e) => {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    const x = ((e.clientX - rect.left) / rect.width) * 100;
-                    const y = ((e.clientY - rect.top) / rect.height) * 100;
-                    e.currentTarget.style.setProperty('--x', `${x}%`);
-                    e.currentTarget.style.setProperty('--y', `${y}%`);
-                  }}
-                  className="px-6 py-3 text-sm gradient-button spotlight-button text-white border-0 shadow-lg hover:shadow-xl"
-                >
-                  <b>Start</b>
-                </GlowButton>
+              {/* Start button removed per request */}
+            </div>
+          </motion.div>
+
+          {/* Editor's Choice CTA */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.18 }}
+            className="mb-4"
+          >
+            <div className="bg-cinema-dark/30 border border-cinema-light/20 rounded-xl p-4 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Sparkles size={18} className="text-accent-gold" />
+                <div>
+                  <div className="text-white font-semibold text-sm">Editor's Choice</div>
+                  <div className="text-xs text-white/70">Weekly pick and past selections</div>
+                </div>
               </div>
+              <button
+                onClick={() => navigate('/picks')}
+                className="text-accent-blue hover:underline text-sm"
+              >
+                See all picks ???
+              </button>
             </div>
           </motion.div>
 
@@ -604,53 +568,89 @@ const HomePage = ({ onStepChange }) => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
-            className="mb-4"
+            className="mb-6"
           >
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.3 }}
-                className="bg-cinema-dark/30 border border-cinema-light/20 rounded-lg p-4 text-center hover:bg-cinema-dark/40 transition-colors cursor-pointer"
+                className="bg-cinema-dark/40 border border-cinema-light/20 rounded-xl p-5 text-center hover:bg-cinema-dark/50 transition-colors cursor-pointer shadow-sm side-rails"
               >
-                <div className="text-3xl md:text-4xl font-bold text-accent-red mb-1">80</div>
+                <CountUp target={80} duration={800} delayMs={200} className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-accent-purple to-accent-blue bg-clip-text text-transparent mb-1" />
                 <div className="text-xs text-white/70">hours saved from scrolling*</div>
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.4 }}
-                className="bg-cinema-dark/30 border border-cinema-light/20 rounded-lg p-4 text-center hover:bg-cinema-dark/40 transition-colors cursor-pointer"
+                className="bg-cinema-dark/40 border border-cinema-light/20 rounded-xl p-5 text-center hover:bg-cinema-dark/50 transition-colors cursor-pointer shadow-sm side-rails"
               >
-                <div className="text-3xl md:text-4xl font-bold text-accent-blue mb-1">38</div>
+                <CountUp target={38} duration={800} delayMs={260} className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-accent-purple to-accent-blue bg-clip-text text-transparent mb-1" />
                 <div className="text-xs text-white/70">arguments prevented for couples*</div>
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.5 }}
-                className="bg-cinema-dark/30 border border-cinema-light/20 rounded-lg p-4 text-center hover:bg-cinema-dark/40 transition-colors cursor-pointer"
+                className="bg-cinema-dark/40 border border-cinema-light/20 rounded-xl p-5 text-center hover:bg-cinema-dark/50 transition-colors cursor-pointer shadow-sm side-rails"
               >
-                <div className="text-3xl md:text-4xl font-bold text-accent-purple mb-1">3</div>
+                <CountUp target={3} duration={800} delayMs={320} className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-accent-purple to-accent-blue bg-clip-text text-transparent mb-1" />
                 <div className="text-xs text-white/70">picks, zero decision fatigue</div>
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.6 }}
-                className="bg-cinema-dark/30 border border-cinema-light/20 rounded-lg p-4 text-center hover:bg-cinema-dark/40 transition-colors cursor-pointer"
+                className="bg-cinema-dark/40 border border-cinema-light/20 rounded-xl p-5 text-center hover:bg-cinema-dark/50 transition-colors cursor-pointer shadow-sm side-rails"
               >
-                <div className="text-3xl md:text-4xl font-bold text-accent-gold mb-1">90</div>
+                <CountUp target={90} duration={800} delayMs={380} className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-accent-purple to-accent-blue bg-clip-text text-transparent mb-1" />
                 <div className="text-xs text-white/70">seconds from open to play</div>
               </motion.div>
             </div>
-            <div className="text-xs text-white/50 mt-2 text-center">*fun, fake stats</div>
+            <div className="text-xs text-white/50 mt-2 text-right pr-1">*fun, fake stats</div>
           </motion.div>
         </div>
       )}
 
       {/* Recommendation Flow */}
-      <div className="px-4 pt-4 md:pt-8">
+      <div className="px-4 pt-4 md:pt-4">
+        {/* Optional: How it Works section (shown on step 1 only, after stats, before generator) */}
+        {currentStep === 1 && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.25 }}
+            className="max-w-4xl mx-auto mb-8"
+          >
+            <div className="bg-cinema-dark/30 border border-cinema-light/20 rounded-2xl p-6 side-rails">
+              <h3 className="text-xl font-bold text-white text-left mb-6">How it works</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="rounded-xl bg-cinema-dark/40 border border-cinema-light/20 p-5">
+                  <div className="w-10 h-10 rounded-full bg-cinema-gray/60 border border-cinema-light/20 flex items-center justify-center mb-3">
+                    <Sparkles size={18} className="text-white" />
+                  </div>
+                  <p className="text-sm font-semibold text-white mb-1">Tell us your mood</p>
+                  <p className="text-xs text-white/70">Pick a genre, a decade or two, and any must???haves. No overthinking.</p>
+                </div>
+                <div className="rounded-xl bg-cinema-dark/40 border border-cinema-light/20 p-5">
+                  <div className="w-10 h-10 rounded-full bg-cinema-gray/60 border border-cinema-light/20 flex items-center justify-center mb-3">
+                    <Clock size={18} className="text-white" />
+                  </div>
+                  <p className="text-sm font-semibold text-white mb-1">We crunch the options</p>
+                  <p className="text-xs text-white/70">Smart filtering trims the noise and surfaces three high???signal picks.</p>
+                </div>
+                <div className="rounded-xl bg-cinema-dark/40 border border-cinema-light/20 p-5">
+                  <div className="w-10 h-10 rounded-full bg-cinema-gray/60 border border-cinema-light/20 flex items-center justify-center mb-3">
+                    <Play size={18} className="text-white" />
+                  </div>
+                  <p className="text-sm font-semibold text-white mb-1">Press play</p>
+                  <p className="text-xs text-white/70">Pick one and go. Less scrolling, more watching.</p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
         {/* Step Progress Indicator */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -659,7 +659,7 @@ const HomePage = ({ onStepChange }) => {
           className="max-w-4xl mx-auto mb-8"
         >
           <div className="flex items-center justify-center space-x-3">
-            {[1, 2, 3, 4, 5].map((step) => (
+            {[1, 2, 3, 4].map((step) => (
               <motion.div
                 key={step}
                 initial={{ opacity: 0, scale: 0.8 }}
@@ -671,10 +671,10 @@ const HomePage = ({ onStepChange }) => {
                   currentStep >= step 
                     ? 'bg-accent-blue text-white' 
                     : 'bg-cinema-gray text-white'
-                } ${currentStep === 5 && loading && step === 5 ? 'animate-pulse' : ''}`}>
+                } ${currentStep === 4 && loading && step === 4 ? 'animate-pulse' : ''}`}>
                   {step}
                 </div>
-                {step < 5 && (
+                {step < 4 && (
                   <div className={`w-10 h-0.5 mx-1.5 ${
                     currentStep > step ? 'bg-accent-blue' : 'bg-cinema-gray'
                   }`} />
@@ -689,18 +689,16 @@ const HomePage = ({ onStepChange }) => {
             className="text-center mt-2 text-xs text-white/70"
           >
             {currentStep === 1 && 'Genre Selection'}
-            {currentStep === 2 && 'Decade Selection'}
+            {currentStep === 2 && 'Decade & Runtime'}
             {currentStep === 3 && 'Content Preferences'}
-            {currentStep === 4 && 'Runtime & Streaming'}
-            {currentStep === 5 && (loading ? 'Loading Recommendations...' : 'Recommendations')}
+            {currentStep === 4 && (loading ? 'Loading Recommendations...' : 'Recommendations')}
           </motion.div>
         </motion.div>
         
         {currentStep === 1 && renderStep1()}
         {currentStep === 2 && renderStep2()}
         {currentStep === 3 && renderStep3()}
-        {currentStep === 4 && renderStep4()}
-        {currentStep === 5 && renderStep5()}
+        {currentStep === 4 && renderStep5()}
       </div>
     </div>
   );

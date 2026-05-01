@@ -32,6 +32,9 @@ const Footer = () => {
             <p className="text-white/50 text-xs mt-1">
               © 2025 Triple Feature
             </p>
+            <div className="mt-2 flex items-center justify-center gap-3 text-xs">
+              <a href="/terms" className="text-white/70 hover:text-white underline">Terms & Privacy Policy</a>
+            </div>
           </div>
 
           {/* Social Links */}

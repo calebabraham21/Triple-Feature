@@ -7,17 +7,23 @@ import HomePage from './pages/HomePage';
 import AboutMe from './pages/AboutMe';
 import AboutTripleFeature from './pages/AboutTripleFeature';
 import EditorsChoicePage from './pages/EditorsChoicePage';
+import PicksPage from './pages/PicksPage';
 import Footer from './components/Footer';
+import { ToastProvider } from './context/ToastContext';
+import Terms from './pages/Terms';
 
 function App() {
   const [currentPage, setCurrentPage] = useState('home');
   const [currentStep, setCurrentStep] = useState(1);
-  const [showHomeNavigationConfirm, setShowHomeNavigationConfirm] = useState(false);
+  const [showLeaveRecommendationsConfirm, setShowLeaveRecommendationsConfirm] = useState(false);
+  const [pendingNavigationPath, setPendingNavigationPath] = useState(null);
+  const [pendingOnConfirm, setPendingOnConfirm] = useState(null);
 
   useEffect(() => {
     const path = window.location.pathname;
     if (path === '/') setCurrentPage('home');
     else if (path === '/editors-choice') setCurrentPage('editors-choice');
+    else if (path === '/picks') setCurrentPage('picks');
     else if (path === '/about-me') setCurrentPage('about-me');
   }, []);
 
@@ -29,58 +35,92 @@ function App() {
     setCurrentStep(step);
   };
 
-  const handleHomeNavigation = () => {
+  const handleProtectedNavigation = (path) => {
     if (currentStep === 5) {
-      setShowHomeNavigationConfirm(true);
+      setPendingNavigationPath(path);
+      setPendingOnConfirm(null);
+      setShowLeaveRecommendationsConfirm(true);
     } else {
-      window.location.href = '/';
+      window.location.href = path;
     }
   };
 
-  const confirmHomeNavigation = () => {
-    setShowHomeNavigationConfirm(false);
-    window.location.href = '/';
+  const handleProtectedAction = (actionCallback) => {
+    if (currentStep === 5) {
+      setPendingNavigationPath(null);
+      setPendingOnConfirm(() => actionCallback);
+      setShowLeaveRecommendationsConfirm(true);
+    } else {
+      actionCallback();
+    }
   };
 
-  const cancelHomeNavigation = () => {
-    setShowHomeNavigationConfirm(false);
+  const confirmLeaveNavigation = () => {
+    setShowLeaveRecommendationsConfirm(false);
+    if (typeof pendingOnConfirm === 'function') {
+      const fn = pendingOnConfirm;
+      setPendingOnConfirm(null);
+      fn();
+      return;
+    }
+    const path = pendingNavigationPath || '/';
+    setPendingNavigationPath(null);
+    window.location.href = path;
+  };
+
+  const cancelLeaveNavigation = () => {
+    setShowLeaveRecommendationsConfirm(false);
+    setPendingNavigationPath(null);
+    setPendingOnConfirm(null);
   };
 
   return (
     <Router>
-      <div className="min-h-screen">
-        <Header
-          currentPage={currentPage}
-          onNavigate={handleNavigate}
-          onHomeNavigation={handleHomeNavigation}
-        />
-        <main>
-          <Routes>
-            <Route path="/" element={<HomePage onStepChange={handleStepChange} />} />
-            {/* Legacy authenticated routes removed — bookmarks redirect home */}
-            <Route path="/auth" element={<Navigate to="/" replace />} />
-            <Route path="/confirm-success" element={<Navigate to="/" replace />} />
-            <Route path="/watchlist" element={<Navigate to="/" replace />} />
-            <Route path="/about-me" element={<AboutMe />} />
-            <Route path="/about-triple" element={<AboutTripleFeature />} />
-            <Route path="/editors-choice" element={<EditorsChoicePage />} />
-            <Route path="/projects" element={<Navigate to="/about-me#projects" replace />} />
-            <Route path="/contact" element={<Navigate to="/about-me#contact" replace />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </main>
-
-        <Footer />
+      <ToastProvider>
+        <div className="min-h-screen app-gradient">
+          <Header
+            currentPage={currentPage}
+            currentStep={currentStep}
+            onNavigate={handleNavigate}
+            onHomeNavigation={() => handleProtectedNavigation('/')}
+            onProtectedNavRequest={handleProtectedNavigation}
+          />
+          <main>
+            <Routes>
+              <Route
+                path="/"
+                element={
+                  <HomePage
+                    onStepChange={handleStepChange}
+                    onProtectedActionRequest={handleProtectedAction}
+                  />
+                }
+              />
+              <Route path="/auth" element={<Navigate to="/" replace />} />
+              <Route path="/confirm-success" element={<Navigate to="/" replace />} />
+              <Route path="/watchlist" element={<Navigate to="/" replace />} />
+              <Route path="/about-me" element={<AboutMe />} />
+              <Route path="/about-triple" element={<AboutTripleFeature />} />
+              <Route path="/editors-choice" element={<EditorsChoicePage />} />
+              <Route path="/picks" element={<PicksPage />} />
+              <Route path="/terms" element={<Terms />} />
+              <Route path="/projects" element={<Navigate to="/about-me#projects" replace />} />
+              <Route path="/contact" element={<Navigate to="/about-me#contact" replace />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </main>
+          <Footer />
+        </div>
 
         <AnimatePresence>
-          {showHomeNavigationConfirm && (
+          {showLeaveRecommendationsConfirm && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3, ease: 'easeOut' }}
               className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90"
-              onClick={cancelHomeNavigation}
+              onClick={cancelLeaveNavigation}
             >
               <motion.div
                 initial={{ scale: 0.9, y: 20 }}
@@ -94,31 +134,30 @@ function App() {
                   <AlertTriangle size={48} className="mx-auto text-accent-yellow mb-4" />
                   <h3 className="text-xl font-bold text-white mb-2">Leave Recommendations?</h3>
                   <p className="text-white/80 text-sm">
-                    Are you sure you want to leave these recommendations? You'll need to go through the selection process again.
+                    Are you sure you want to leave these recommendations? You&apos;ll need to go through the selection process again.
                   </p>
                 </div>
-
                 <div className="flex gap-3">
                   <button
                     type="button"
-                    onClick={cancelHomeNavigation}
+                    onClick={cancelLeaveNavigation}
                     className="flex-1 px-4 py-2 bg-cinema-gray hover:bg-cinema-light text-white rounded-lg transition-colors"
                   >
                     Stay Here
                   </button>
                   <button
                     type="button"
-                    onClick={confirmHomeNavigation}
+                    onClick={confirmLeaveNavigation}
                     className="flex-1 px-4 py-2 bg-accent-blue hover:bg-accent-blue/80 text-white rounded-lg transition-colors"
                   >
-                    Go Home
+                    Leave Page
                   </button>
                 </div>
               </motion.div>
             </motion.div>
           )}
         </AnimatePresence>
-      </div>
+      </ToastProvider>
     </Router>
   );
 }

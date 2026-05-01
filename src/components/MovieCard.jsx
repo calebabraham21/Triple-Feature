@@ -1,47 +1,20 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Plus, Check, Calendar, User, Globe, Heart, Clock } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useWatchlist } from '../hooks/useWatchlist';
-import { useAuth } from '../hooks/useAuth';
+import { Star, Calendar, User, Globe, Clock } from 'lucide-react';
 import { getPosterUrl, getBackdropUrl, truncateText, formatRating, getLanguageName, getWatchProviders, tmdbConfig, getMovieDetails } from '../utils/tmdb';
-import GlowButton from './GlowButton';
 
-const MovieCard = ({ movie, showAddButton = true, showDirector = true }) => {
-  const { toggleWatchlist, isInWatchlist } = useWatchlist();
-  const { isAuthenticated } = useAuth();
-  const navigate = useNavigate();
-  const isInList = isInWatchlist(movie.id);
+const MovieCard = ({ movie, showDirector = true }) => {
   const [showDetails, setShowDetails] = useState(false);
-  const [providers, setProviders] = useState(null);
   const [details, setDetails] = useState(null);
-  const [detailsLoading, setDetailsLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
-  const [watchlistLoading, setWatchlistLoading] = useState(false);
-
-  const handleAddToWatchlist = async () => {
-    if (!isAuthenticated) {
-      navigate('/auth');
-      return;
-    }
-
-    setWatchlistLoading(true);
-    try {
-      await toggleWatchlist(movie);
-    } catch (error) {
-      console.error('Error toggling watchlist:', error);
-    } finally {
-      setWatchlistLoading(false);
-    }
-  };
 
   const getYear = (dateString) => {
     if (!dateString) return 'N/A';
     return new Date(dateString).getFullYear();
   };
 
-  // Normalize fields to support both API shape (snake_case) and watchlist shape (camelCase)
+  // Normalize fields for API shape (snake_case) or camelCase
   const posterPath = movie.poster_path || movie.posterPath;
   const backdropPath = movie.backdrop_path || movie.backdropPath;
   const releaseDate = movie.release_date || movie.releaseDate;
@@ -57,14 +30,11 @@ const MovieCard = ({ movie, showAddButton = true, showDirector = true }) => {
     let active = true;
     const load = async () => {
       try {
-        setDetailsLoading(true);
         const d = await getMovieDetails(movie.id);
         if (!active) return;
         setDetails(d);
-      } catch (e) {
+      } catch {
         if (!active) return;
-      } finally {
-        if (active) setDetailsLoading(false);
       }
     };
     load();
@@ -179,41 +149,11 @@ const MovieCard = ({ movie, showAddButton = true, showDirector = true }) => {
           </div>
         )}
 
-        {/* Action buttons */}
         <div className="flex gap-2">
-          {showAddButton && (
-            <motion.button
-              whileHover={{}}
-              whileTap={{}}
-              onClick={handleAddToWatchlist}
-              disabled={watchlistLoading}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg font-medium transition-all duration-200 ${
-                isInList
-                  ? 'bg-accent-gold text-cinema-black hover:bg-accent-gold/80'
-                  : 'bg-cinema-gray text-white hover:bg-cinema-light border border-cinema-light hover:border-accent-blue'
-              } ${watchlistLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              {watchlistLoading ? (
-                <>
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white" />
-                  {isInList ? 'Removing...' : 'Adding...'}
-                </>
-              ) : isInList ? (
-                <>
-                  <Check size={16} />
-                  In Watchlist
-                </>
-              ) : (
-                <>
-                  <Plus size={16} />
-                  {isAuthenticated ? 'Add to Watchlist' : 'Sign in to Save'}
-                </>
-              )}
-            </motion.button>
-          )}
           <motion.button
             whileHover={{}}
             whileTap={{}}
+            type="button"
             className="flex-1 flex items-center justify-center gap-2 py-2 px-4 rounded-lg font-medium bg-cinema-dark text-white border border-cinema-light hover:bg-cinema-gray"
             onClick={() => setShowDetails(true)}
           >
@@ -244,25 +184,137 @@ const MovieCard = ({ movie, showAddButton = true, showDirector = true }) => {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.98, y: 10 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className="relative z-10 w-[min(980px,95vw)] max-h-[90vh] overflow-auto overscroll-contain bg-cinema-dark border border-cinema-gray rounded-xl p-3 sm:p-6"
+              className="relative z-10 w-[min(980px,95vw)] max-h-[90vh] overflow-auto overscroll-contain border border-cinema-gray rounded-xl"
               style={{ willChange: 'transform, opacity', contain: 'content' }}
             >
-                            <div className="grid grid-cols-1 md:grid-cols-[auto_1fr] gap-3 md:gap-4 will-change-transform">
-                {/* Left column - Poster + additional content on desktop */}
-                <div className="space-y-3 md:space-y-6">
-                  {/* Poster - smaller on mobile, centered on mobile, left-aligned on desktop */}
-                  <div className="flex items-start justify-center md:justify-start">
-                    <img 
-                      src={getPosterUrl(posterPath)} 
-                      alt={movie.title} 
-                      className="w-32 h-48 sm:w-40 sm:h-60 md:w-auto md:h-auto md:max-w-[280px] object-contain rounded-lg bg-cinema-black" 
-                      loading="lazy" 
-                      decoding="async" 
-                    />
-                  </div>
-                  
-                  {/* Desktop-only content under poster */}
-                  <div className="hidden md:block space-y-6">
+                             {/* Mobile: Full background poster with fade/blur effect */}
+               <div className="md:hidden relative min-h-[90vh]">
+                 {/* Background poster with blur and fade effect */}
+                 <div className="absolute inset-0">
+                   <img 
+                     src={getPosterUrl(posterPath) || getBackdropUrl(backdropPath)} 
+                     alt="" 
+                     className="w-full h-full object-cover"
+                     loading="lazy" 
+                     decoding="async" 
+                   />
+                   <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+                 </div>
+                 
+                 {/* Close button - positioned outside scrollable content area */}
+                 <button
+                   onClick={() => setShowDetails(false)}
+                   className="absolute top-4 right-4 z-20 w-12 h-12 rounded-full bg-black/60 backdrop-blur-sm border border-white/30 text-white hover:bg-black/80 transition-colors flex items-center justify-center shadow-lg"
+                 >
+                   ✕
+                 </button>
+                 
+                 {/* Content overlay */}
+                 <div className="relative z-10 p-6 text-white pt-16">
+                   {/* Title and year */}
+                   <h2 className="text-2xl font-bold mb-4 text-shadow-lg">
+                     {movie.title} {releaseDate ? `(${getYear(releaseDate)})` : ''}
+                   </h2>
+
+                   {/* Key info badges */}
+                   <div className="flex flex-wrap gap-2 mb-4">
+                     {originalLanguage && (
+                       <div className="px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-sm font-medium">
+                         {getLanguageName(originalLanguage)}
+                       </div>
+                     )}
+                     {movie.director && (
+                       <div className="px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-sm font-medium">
+                         Dir. {movie.director}
+                       </div>
+                     )}
+                     {details?.runtime && (
+                       <div className="px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-sm font-medium">
+                         {details.runtime} min
+                       </div>
+                     )}
+                     {Array.isArray(details?.genres) && details.genres.length > 0 && (
+                       <div className="px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-sm font-medium">
+                         {details.genres.map(g => g.name).join(', ')}
+                       </div>
+                     )}
+                   </div>
+
+                   {/* Description */}
+                   {movie.overview && (
+                     <div className="mb-6">
+                       <p className="text-white/90 leading-relaxed text-base">
+                         {movie.overview}
+                       </p>
+                     </div>
+                   )}
+
+                   {/* Cast section */}
+                   {(() => {
+                     const castNames = details?.credits?.cast?.slice(0, 4)?.map(c => c.name)
+                       || (Array.isArray(movie.cast) ? movie.cast.slice(0, 4) : []);
+                     if (!castNames || castNames.length === 0) return null;
+                     return (
+                       <div className="mb-6">
+                         <p className="text-white font-medium mb-2">Cast:</p>
+                         <div className="flex flex-wrap gap-2">
+                           {castNames.map((name) => (
+                             <span key={name} className="px-3 py-1.5 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 text-sm text-white">
+                               {name}
+                             </span>
+                           ))}
+                         </div>
+                       </div>
+                     );
+                   })()}
+
+                   {/* Streaming providers */}
+                   <div className="mb-6">
+                     <p className="text-white font-medium mb-3">Where to watch (US):</p>
+                     <StreamingProviders movieId={movie.id} delayMs={250} />
+                   </div>
+
+                   <div className="flex flex-wrap gap-3">
+                     <a
+                       href={`https://www.themoviedb.org/movie/${movie.id}`}
+                       target="_blank"
+                       rel="noreferrer"
+                       className="inline-flex items-center gap-2 px-4 py-3 rounded-lg font-medium text-white border border-blue-400/40 hover:border-blue-300/50 transition-all duration-300 bg-gradient-to-r from-blue-900/40 to-blue-800/40 hover:from-blue-800/50 hover:to-blue-700/50 backdrop-blur-sm"
+                     >
+                       <img 
+                         src="/src/assets/TMDB_logo.svg" 
+                         alt="TMDB" 
+                         className="w-5 h-5"
+                       />
+                       <span>TMDB</span>
+                     </a>
+                     <button
+                       type="button"
+                       onClick={() => setShowDetails(false)}
+                       className="inline-flex items-center gap-2 px-4 py-3 rounded-lg font-medium text-white border border-white/25 hover:bg-white/10 transition-colors"
+                     >
+                       Close
+                     </button>
+                   </div>
+                 </div>
+               </div>
+
+              {/* Desktop: Original layout */}
+              <div className="hidden md:block bg-cinema-dark p-6">
+                <div className="grid grid-cols-[auto_1fr] gap-6 will-change-transform">
+                  {/* Left column - Poster + additional content on desktop */}
+                  <div className="space-y-6">
+                    {/* Poster */}
+                    <div className="flex items-start justify-start">
+                      <img 
+                        src={getPosterUrl(posterPath)} 
+                        alt={movie.title} 
+                        className="w-auto h-auto max-w-[280px] object-contain rounded-lg bg-cinema-black" 
+                        loading="lazy" 
+                        decoding="async" 
+                      />
+                    </div>
+                    
                     {/* Cast section - moved to left column on desktop */}
                     {(() => {
                       const castNames = details?.credits?.cast?.slice(0, 4)?.map(c => c.name)
@@ -282,123 +334,82 @@ const MovieCard = ({ movie, showAddButton = true, showDirector = true }) => {
                       );
                     })()}
                   </div>
-                </div>
-                
-                {/* Right column - Main content */}
-                <div className="flex flex-col h-full">
-                  {/* Content area - takes up available space */}
-                  <div className="flex-1 space-y-3 md:space-y-6">
-                    {/* Title and key info row for desktop */}
-                    <div className="space-y-3 md:space-y-4">
-                      {/* Title with year */}
-                      <h2 className="text-xl md:text-2xl font-bold mb-1 md:mb-3">
-                        {movie.title} {releaseDate ? `(${getYear(releaseDate)})` : ''}
-                      </h2>
+                  
+                  {/* Right column - Main content */}
+                  <div className="flex flex-col h-full">
+                    {/* Content area - takes up available space */}
+                    <div className="flex-1 space-y-6">
+                      {/* Title and key info row for desktop */}
+                      <div className="space-y-4">
+                        {/* Title with year */}
+                        <h2 className="text-2xl font-bold mb-3">
+                          {movie.title} {releaseDate ? `(${getYear(releaseDate)})` : ''}
+                        </h2>
 
-                      {/* Key Info Blocks - horizontal layout on desktop */}
-                      <div className="flex flex-wrap gap-1.5 md:gap-3 mb-3 md:mb-0">
-                        {originalLanguage && (
-                          <div className="px-2 py-1 md:px-4 md:py-2 rounded-full bg-cinema-gray/60 border border-cinema-light text-xs md:text-xs text-white">
-                            Language: {getLanguageName(originalLanguage)}
-                          </div>
-                        )}
-                        {movie.director && (
-                          <div className="px-2 py-1 md:px-4 md:py-2 rounded-full bg-cinema-gray/60 border border-cinema-light text-xs md:text-xs text-white">
-                            Director: {movie.director}
-                          </div>
-                        )}
-                        {details?.runtime && (
-                          <div className="px-2 py-1 md:px-4 md:py-2 rounded-full bg-cinema-gray/60 border border-cinema-light text-xs md:text-xs text-white">
-                            Runtime: {details.runtime} min
-                          </div>
-                        )}
-                        {Array.isArray(details?.genres) && details.genres.length > 0 && (
-                          <div className="px-2 py-1 md:px-4 md:py-2 rounded-full bg-cinema-gray/60 border border-cinema-light text-xs md:text-xs text-white">
-                            Genres: {details.genres.map(g => g.name).join(', ')}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Description - better spacing on desktop */}
-                    {movie.overview && (
-                      <div className="space-y-2">
-                        <p className="text-sm md:text-sm text-white leading-relaxed line-clamp-3 md:line-clamp-none">
-                          {movie.overview}
-                        </p>
-                      </div>
-                    )}
-
-                    {/* Cast section - mobile only (desktop version moved to left column) */}
-                    <div className="md:hidden space-y-2">
-                      {(() => {
-                        const castNames = details?.credits?.cast?.slice(0, 4)?.map(c => c.name)
-                          || (Array.isArray(movie.cast) ? movie.cast.slice(0, 4) : []);
-                        if (!castNames || castNames.length === 0) return null;
-                        return (
-                          <div className="space-y-2">
-                            <p className="text-xs md:text-sm text-white font-medium">Cast:</p>
-                            <div className="flex flex-wrap gap-1.5 md:gap-2">
-                              {castNames.map((name) => (
-                                <span key={name} className="px-2 py-1 md:px-3 md:py-1.5 rounded-full bg-cinema-gray/50 border border-cinema-light text-xs md:text-sm text-white">
-                                  {name}
-                                </span>
-                              ))}
+                        {/* Key Info Blocks - horizontal layout on desktop */}
+                        <div className="flex flex-wrap gap-3 mb-0">
+                          {originalLanguage && (
+                            <div className="px-4 py-2 rounded-full bg-cinema-gray/60 border border-cinema-light text-xs text-white">
+                              Language: {getLanguageName(originalLanguage)}
                             </div>
-                          </div>
-                        );
-                      })()}
+                          )}
+                          {movie.director && (
+                            <div className="px-4 py-2 rounded-full bg-cinema-gray/60 border border-cinema-light text-xs text-white">
+                              Director: {movie.director}
+                            </div>
+                          )}
+                          {details?.runtime && (
+                            <div className="px-4 py-2 rounded-full bg-cinema-gray/60 border border-cinema-light text-xs text-white">
+                              Runtime: {details.runtime} min
+                            </div>
+                          )}
+                          {Array.isArray(details?.genres) && details.genres.length > 0 && (
+                            <div className="px-4 py-2 rounded-full bg-cinema-gray/60 border border-cinema-light text-xs text-white">
+                              Genres: {details.genres.map(g => g.name).join(', ')}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Description - better spacing on desktop */}
+                      {movie.overview && (
+                        <div className="space-y-2">
+                          <p className="text-sm text-white leading-relaxed">
+                            {movie.overview}
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Streaming providers - now in right column on desktop */}
+                      <div className="space-y-4">
+                        <p className="text-sm text-white font-medium">Where to watch (US):</p>
+                        <StreamingProviders movieId={movie.id} delayMs={250} />
+                      </div>
                     </div>
 
-                    {/* Streaming providers - now in right column on desktop */}
-                    <div className="space-y-4">
-                      <p className="text-sm md:text-sm text-white font-medium">Where to watch (US):</p>
-                      <StreamingProviders movieId={movie.id} delayMs={250} />
+                    <div className="flex justify-end gap-2 flex-wrap pt-4 mt-auto">
+                      <a
+                        href={`https://www.themoviedb.org/movie/${movie.id}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-white border border-blue-800/40 hover:border-blue-700/50 transition-all duration-300 text-sm bg-gradient-to-r from-slate-900 to-blue-950 hover:from-slate-800 hover:to-blue-900 shadow-lg hover:shadow-blue-900/30"
+                      >
+                        <img 
+                          src="/src/assets/TMDB_logo.svg" 
+                          alt="TMDB" 
+                          className="w-5 h-5"
+                        />
+                        <span>Read More on TMDB</span>
+                      </a>
+                      <button
+                        type="button"
+                        onClick={() => setShowDetails(false)}
+                        className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-white border border-red-800/40 hover:border-red-700/50 transition-all duration-300 text-sm bg-gradient-to-r from-slate-900 to-red-950 hover:from-slate-800 hover:to-red-900 shadow-lg hover:shadow-red-900/30"
+                      >
+                        <span>✕</span>
+                        <span>Close</span>
+                      </button>
                     </div>
-                  </div>
-
-                  {/* Buttons - pinned to bottom right on desktop */}
-                  <div className="flex justify-end gap-2 pt-4 mt-auto">
-                    <GlowButton
-                      variant={isInList ? "primary" : "secondary"}
-                      onClick={handleAddToWatchlist}
-                      className="text-sm py-2.5 px-2 md:px-3 md:py-2.5"
-                    >
-                      <span className="flex items-center gap-2">
-                        {isInList ? (
-                          <>
-                            <span>−</span>
-                            <span>In Watchlist</span>
-                          </>
-                        ) : (
-                          <>
-                            <span>+</span>
-                            <span>Add to Watchlist</span>
-                          </>
-                        )}
-                      </span>
-                    </GlowButton>
-                    <a
-                      href={`https://www.themoviedb.org/movie/${movie.id}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-2 px-3 py-2.5 md:px-4 md:py-2.5 rounded-lg font-medium text-white border border-blue-800/40 hover:border-blue-700/50 transition-all duration-300 text-sm bg-gradient-to-r from-slate-900 to-blue-950 hover:from-slate-800 hover:to-blue-900 shadow-lg hover:shadow-blue-900/30"
-                    >
-                      <img 
-                        src="/src/assets/TMDB_logo.svg" 
-                        alt="TMDB" 
-                        className="w-4 h-4 md:w-5 md:h-5"
-                      />
-                      <span className="hidden sm:inline">Read More on TMDB</span>
-                      <span className="sm:hidden">TMDB</span>
-                    </a>
-                    <button
-                      onClick={() => setShowDetails(false)}
-                      className="inline-flex items-center gap-2 px-3 py-2.5 md:px-4 md:py-2.5 rounded-lg font-medium text-white border border-red-800/40 hover:border-red-700/50 transition-all duration-300 text-sm bg-gradient-to-r from-slate-900 to-red-950 hover:from-slate-800 hover:to-red-900 shadow-lg hover:shadow-red-900/30"
-                    >
-                      <span>✕</span>
-                      <span className="hidden sm:inline">Close</span>
-                    </button>
                   </div>
                 </div>
               </div>
@@ -414,7 +425,6 @@ const MovieCard = ({ movie, showAddButton = true, showDirector = true }) => {
 const StreamingProviders = ({ movieId, delayMs = 0 }) => {
   const [state, setState] = useState({
     groups: null,
-    link: null,
     loading: true,
   });
 
@@ -427,7 +437,6 @@ const StreamingProviders = ({ movieId, delayMs = 0 }) => {
         }
         const data = await getWatchProviders(movieId);
         const us = data?.results?.US;
-        const link = us?.link || null;
         const groups = {
           Free: us?.free || [],
           Subscription: us?.flatrate || [],
@@ -436,17 +445,17 @@ const StreamingProviders = ({ movieId, delayMs = 0 }) => {
           Buy: us?.buy || [],
         };
         if (!active) return;
-        setState({ groups, link, loading: false });
-      } catch (e) {
+        setState({ groups, loading: false });
+      } catch {
         if (!active) return;
-        setState({ groups: null, link: null, loading: false });
+        setState({ groups: null, loading: false });
       }
     };
     load();
     return () => { active = false; };
-  }, [movieId]);
+  }, [movieId, delayMs]);
 
-  const { groups, link, loading } = state;
+  const { groups, loading } = state;
   if (loading) return null;
   
   // Group rent and buy together, keep others separate

@@ -1,3 +1,9 @@
+/**
+ * Public Supabase client — anon key only (VITE_SUPABASE_ANON_KEY). Never expose a service-role key here.
+ *
+ * This app is read-only from the browser: only SELECT via RLS-approved policies.
+ * Sessions / sign-in UI have been removed; auth options are minimized so stray tokens are not persisted.
+ */
 import { createClient } from '@supabase/supabase-js';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -9,8 +15,8 @@ if (!supabaseUrl || !supabaseAnonKey) {
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   auth: {
-    persistSession: true,
-    autoRefreshToken: true,
-    detectSessionInUrl: true,
+    persistSession: false,
+    autoRefreshToken: false,
+    detectSessionInUrl: false,
   },
 });

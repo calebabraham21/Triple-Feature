@@ -15,7 +15,7 @@ const PosterBackdrop = ({ count = 12 }) => {
           .slice(0, count)
           .map((m) => getPosterUrl(m.poster_path, 'w500'));
         if (isMounted) setPosterUrls(posters);
-      } catch (e) {
+      } catch {
         // ignore background failures
       }
     };

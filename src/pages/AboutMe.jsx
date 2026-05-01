@@ -79,7 +79,7 @@ Hope you enjoy it!
               <div className="bg-cinema-dark/30 border border-cinema-light/20 rounded-lg p-4 text-center hover:bg-cinema-dark/40 transition-colors">
                 <div className="text-2xl mb-2">🚀</div>
                 <h3 className="text-sm font-semibold text-white mb-1">Supabase</h3>
-                <p className="text-xs text-white/60">Backend & auth</p>
+                <p className="text-xs text-white/60">Read-only Editorial data</p>
               </div>
 
               {/* API */}

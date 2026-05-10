@@ -17,7 +17,7 @@ export default {
         'accent-gold': '#fbbf24',
       },
       fontFamily: {
-        'cinema': ['Orbitron', 'monospace'],
+        'cinema': ['DM Mono', 'monospace'],
         'sans': ['DM Sans', 'system-ui', 'sans-serif'],
       },
       animation: {

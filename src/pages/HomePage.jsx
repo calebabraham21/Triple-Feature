@@ -94,9 +94,9 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
         transition={{ delay: 0.9 }}
         className="text-center mb-6"
       >
-        <div className="text-sm text-white/70 mb-2">Step 1 of 4</div>
-        <h2 className="text-2xl font-bold mb-2">Genre Selection</h2>
-        <p className="text-white/80 text-sm">Choose up to 2 genres</p>
+        <div className="wizard-step-number mb-3">Step 1 of 4</div>
+        <h2 className="wizard-step-title mb-3">Genre Selection</h2>
+        <p className="text-white/50 text-sm leading-relaxed">Choose up to 2 genres</p>
       </motion.div>
 
       {/* Genres */}
@@ -113,10 +113,10 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 1.1 + (index * 0.05) }}
             onClick={() => toggleGenre(genre.id)}
-            className={`p-2 rounded-lg font-medium text-sm border trace-snake ${
+            className={`chip-pill trace-snake p-2.5 rounded-md text-sm ${
               selectedGenres.includes(genre.id)
-                ? 'bg-accent-blue/20 text-white border-accent-blue'
-                : `${selectedGenres.length >= 2 ? 'opacity-50 cursor-not-allowed' : ''} bg-cinema-gray text-white border-cinema-light`
+                ? 'chip-selected'
+                : selectedGenres.length >= 2 ? 'opacity-50 cursor-not-allowed' : ''
             }`}
             disabled={!selectedGenres.includes(genre.id) && selectedGenres.length >= 2}
           >
@@ -162,9 +162,9 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
         transition={{ delay: 0.4 }}
         className="text-center mb-6"
       >
-        <div className="text-sm text-white/70 mb-2">Step 2 of 4</div>
-        <h2 className="text-2xl font-bold mb-2">Decade & Runtime</h2>
-        <p className="text-white/80 text-sm">Optional ??? defaults to all decades and runtimes</p>
+        <div className="wizard-step-number mb-3">Step 2 of 4</div>
+        <h2 className="wizard-step-title mb-3">Decade &amp; Runtime</h2>
+        <p className="text-white/50 text-sm leading-relaxed">Optional — defaults to all decades and runtimes</p>
       </motion.div>
 
       {/* Decades */}
@@ -202,11 +202,7 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.6 + (index * 0.03) }}
                 onClick={() => toggleDecade(decade.value)}
-                className={`py-2 px-2 rounded-md text-xs border trace-snake ${
-                  isSelected
-                    ? 'bg-accent-blue/20 text-white border-accent-blue'
-                    : 'bg-cinema-gray text-white border-cinema-light'
-                }`}
+                className={`chip-pill trace-snake py-2 px-2 rounded-md text-xs ${isSelected ? 'chip-selected' : ''}`}
               >
                 <span className="relative z-10">{decade.label}</span>
                 <span className="trace-line trace-line--t" />
@@ -225,13 +221,13 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.6 }}
-        className="mb-5 p-4 rounded-xl border border-cinema-light/20 bg-cinema-gray/20"
+        className="mb-6 pt-2"
       >
-        <h3 className="text-base font-semibold mb-3 text-white flex items-center gap-2">
-          <Clock size={18} />
+        <h3 className="text-xs font-semibold mb-3 text-white/50 uppercase tracking-widest flex items-center gap-2">
+          <Clock size={16} />
           Runtime Preferences
         </h3>
-        <p className="text-xs text-white/70 mb-3">Select your preferred movie lengths</p>
+        <p className="text-xs text-white/40 mb-3">Select your preferred movie lengths</p>
         <div className="grid grid-cols-3 gap-2">
           {runtimeOptions.map((runtime, index) => {
             const isSelected = selectedRuntimes.includes(runtime.value);
@@ -242,11 +238,7 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.6 + (index * 0.05) }}
                 onClick={() => toggleRuntime(runtime.value)}
-                className={`p-3 rounded-lg border text-center transition-all duration-200 ${
-                  isSelected
-                    ? 'bg-accent-blue/20 text-white border-accent-blue'
-                    : 'bg-cinema-gray text-white border-cinema-light hover:border-accent-blue/50'
-                }`}
+                className={`chip-pill p-3 rounded-lg text-center ${isSelected ? 'chip-selected' : ''}`}
               >
                 <div className="font-medium text-sm mb-1">{runtime.label}</div>
                 <div className="text-xs text-white/70">{runtime.description}</div>
@@ -291,9 +283,9 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
         transition={{ delay: 0.4 }}
         className="text-center mb-6"
       >
-        <div className="text-sm text-white/70 mb-2">Step 3 of 4</div>
-        <h2 className="text-2xl font-bold mb-2">Content Preferences</h2>
-        <p className="text-white/80 text-sm">Customize your viewing experience</p>
+        <div className="wizard-step-number mb-3">Step 3 of 4</div>
+        <h2 className="wizard-step-title mb-3">Content Preferences</h2>
+        <p className="text-white/50 text-sm leading-relaxed">Customize your viewing experience</p>
       </motion.div>
 
       {/* Adult Content Preference */}
@@ -301,10 +293,10 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="mb-5 p-4 rounded-xl border border-cinema-light/20 bg-cinema-gray/20"
+        className="mb-5"
       >
-        <h3 className="text-base font-semibold mb-2 text-white">Content Rating Preference</h3>
-        <p className="text-xs text-white/70 mb-3">Choose your content comfort level</p>
+        <h3 className="text-xs font-semibold mb-3 text-white/50 uppercase tracking-widest">Content Rating Preference</h3>
+        <p className="text-xs text-white/40 mb-3">Choose your content comfort level</p>
         <div className="space-y-2">
           {[
             { value: false, label: 'Family-friendly', description: 'G, PG, PG-13 only' },
@@ -356,10 +348,10 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.7 }}
-        className="mb-5 p-4 rounded-xl border border-cinema-light/20 bg-cinema-gray/20"
+        className="mb-5"
       >
-        <h3 className="text-base font-semibold mb-2 text-white">Language Preference</h3>
-        <p className="text-xs text-white/70 mb-3">Try a non-English movie ??? it's like travel, without the TSA.</p>
+        <h3 className="text-xs font-semibold mb-3 text-white/50 uppercase tracking-widest">Language Preference</h3>
+        <p className="text-xs text-white/40 mb-3">Try a non-English movie — it's like travel, without the TSA.</p>
         <div className="space-y-2">
           {[
             { value: 'english', label: 'English only' },
@@ -411,7 +403,7 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
         <GlowButton 
           onClick={generateRecommendations}
           disabled={loading}
-          className="text-sm px-4 py-2 bg-green-600/20 hover:bg-green-600/30 border border-green-400/40 text-white trace-snake trace-snake--rb"
+          className="text-sm px-6 py-3 snake-cta"
           aria-busy={loading}
           aria-describedby={loading ? "loading-status" : undefined}
           aria-controls="progress-announcement"
@@ -436,7 +428,7 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
   const renderStep5 = () => (
     <div className="max-w-7xl mx-auto">
       <div className="text-center mb-8">
-        <p className="text-white">Congratulations, you've successfully outsourced your decision-making to an <i>algorithm</i></p>
+        <p className="text-white/50 text-sm italic leading-relaxed">Congratulations, you've successfully outsourced your decision-making to an algorithm.</p>
       </div>
 
       {error && (
@@ -445,7 +437,7 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
         </div>
       )}
 
-      <div className="grid md:grid-cols-3 gap-6 mb-8">
+      <div className="grid md:grid-cols-3 gap-8 mb-12">
         {loading ? (
           // Show skeleton cards while loading
           <>
@@ -484,7 +476,7 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
 
   return (
     <div 
-      className="min-h-screen cinema-gradient"
+      className="min-h-screen app-gradient"
       aria-busy={loading}
       aria-live="polite"
     >
@@ -527,7 +519,7 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
             
             {/* Content */}
             <div className="relative z-10">
-              <h1 className="text-2xl md:text-3xl font-bold text-white mb-3 text-center">
+              <h1 className="font-cinema text-2xl md:text-3xl tracking-wide text-white mb-3 text-center">
                 Stop scrolling, start watching
               </h1>
               <p className="text-base md:text-lg text-white/90 leading-relaxed mb-6">
@@ -551,36 +543,36 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.3 }}
-                className="bg-cinema-dark/40 border border-cinema-light/20 rounded-xl p-5 text-center hover:bg-cinema-dark/50 transition-colors cursor-pointer shadow-sm side-rails"
+                className="bg-cinema-dark/40 border border-cinema-light/20 rounded-xl p-5 text-center hover:bg-cinema-dark/50 transition-colors cursor-pointer"
               >
-                <CountUp target={80} duration={800} delayMs={200} className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-accent-purple to-accent-blue bg-clip-text text-transparent mb-1" />
+                <CountUp target={80} duration={800} delayMs={200} className="stat-number mb-2" />
                 <div className="text-xs text-white/70">hours saved from scrolling*</div>
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.4 }}
-                className="bg-cinema-dark/40 border border-cinema-light/20 rounded-xl p-5 text-center hover:bg-cinema-dark/50 transition-colors cursor-pointer shadow-sm side-rails"
+                className="bg-cinema-dark/40 border border-cinema-light/20 rounded-xl p-5 text-center hover:bg-cinema-dark/50 transition-colors cursor-pointer"
               >
-                <CountUp target={38} duration={800} delayMs={260} className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-accent-purple to-accent-blue bg-clip-text text-transparent mb-1" />
+                <CountUp target={38} duration={800} delayMs={260} className="stat-number mb-2" />
                 <div className="text-xs text-white/70">arguments prevented for couples*</div>
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.5 }}
-                className="bg-cinema-dark/40 border border-cinema-light/20 rounded-xl p-5 text-center hover:bg-cinema-dark/50 transition-colors cursor-pointer shadow-sm side-rails"
+                className="bg-cinema-dark/40 border border-cinema-light/20 rounded-xl p-5 text-center hover:bg-cinema-dark/50 transition-colors cursor-pointer"
               >
-                <CountUp target={3} duration={800} delayMs={320} className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-accent-purple to-accent-blue bg-clip-text text-transparent mb-1" />
+                <CountUp target={3} duration={800} delayMs={320} className="stat-number mb-2" />
                 <div className="text-xs text-white/70">picks, zero decision fatigue</div>
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.6 }}
-                className="bg-cinema-dark/40 border border-cinema-light/20 rounded-xl p-5 text-center hover:bg-cinema-dark/50 transition-colors cursor-pointer shadow-sm side-rails"
+                className="bg-cinema-dark/40 border border-cinema-light/20 rounded-xl p-5 text-center hover:bg-cinema-dark/50 transition-colors cursor-pointer"
               >
-                <CountUp target={90} duration={800} delayMs={380} className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-accent-purple to-accent-blue bg-clip-text text-transparent mb-1" />
+                <CountUp target={90} duration={800} delayMs={380} className="stat-number mb-2" />
                 <div className="text-xs text-white/70">seconds from open to play</div>
               </motion.div>
             </div>
@@ -599,24 +591,24 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
             transition={{ delay: 0.25 }}
             className="max-w-4xl mx-auto mb-8"
           >
-            <div className="bg-cinema-dark/30 border border-cinema-light/20 rounded-2xl p-6 side-rails">
-              <h3 className="text-xl font-bold text-white text-left mb-6">How it works</h3>
+            <div className="bg-cinema-dark/30 border border-cinema-light/20 rounded-2xl p-6">
+              <h3 className="font-cinema text-xs uppercase tracking-widest text-white/60 text-left mb-6">How it works</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="rounded-xl bg-cinema-dark/40 border border-cinema-light/20 p-5">
+                <div className="p-5">
                   <div className="w-10 h-10 rounded-full bg-cinema-gray/60 border border-cinema-light/20 flex items-center justify-center mb-3">
                     <Sparkles size={18} className="text-white" />
                   </div>
                   <p className="text-sm font-semibold text-white mb-1">Tell us your mood</p>
                   <p className="text-xs text-white/70">Pick a genre, a decade or two, and any must???haves. No overthinking.</p>
                 </div>
-                <div className="rounded-xl bg-cinema-dark/40 border border-cinema-light/20 p-5">
+                <div className="p-5">
                   <div className="w-10 h-10 rounded-full bg-cinema-gray/60 border border-cinema-light/20 flex items-center justify-center mb-3">
                     <Clock size={18} className="text-white" />
                   </div>
                   <p className="text-sm font-semibold text-white mb-1">We crunch the options</p>
                   <p className="text-xs text-white/70">Smart filtering trims the noise and surfaces three high???signal picks.</p>
                 </div>
-                <div className="rounded-xl bg-cinema-dark/40 border border-cinema-light/20 p-5">
+                <div className="p-5">
                   <div className="w-10 h-10 rounded-full bg-cinema-gray/60 border border-cinema-light/20 flex items-center justify-center mb-3">
                     <Play size={18} className="text-white" />
                   </div>
@@ -643,10 +635,10 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
                 transition={{ delay: 0.2 + (step * 0.1) }}
                 className="flex items-center"
               >
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-medium transition-all duration-300 ${
-                  currentStep >= step 
-                    ? 'bg-accent-blue text-white' 
-                    : 'bg-cinema-gray text-white'
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-cinema transition-all duration-300 ${
+                  currentStep >= step
+                    ? 'bg-accent-blue text-white'
+                    : 'bg-cinema-gray/60 text-white/40'
                 } ${currentStep === 4 && loading && step === 4 ? 'animate-pulse' : ''}`}>
                   {step}
                 </div>

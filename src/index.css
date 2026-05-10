@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=DM+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Sans:wght@300;400;500;600;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,21 +7,32 @@
   body {
     @apply bg-cinema-black text-white font-sans;
     font-feature-settings: "rlig" 1, "calt" 1;
+    font-optical-sizing: auto;
+    line-height: 1.65;
+  }
+
+  h1, h2, h3, h4 {
+    text-wrap: balance;
+    line-height: 1.15;
+  }
+
+  p {
+    text-wrap: pretty;
   }
 }
 
 @layer components {
-  /* Shimmer animation for skeleton loading */
+  /* ─── Shimmer ────────────────────────────────── */
   @keyframes shimmer {
-    0% {
-      transform: translateX(-100%);
-    }
-    100% {
-      transform: translateX(100%);
-    }
+    0%   { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
   }
-  
-  /* 4-span snake outline effect: fast, clean, no scale/color change */
+
+  /*
+   * Trace-snake: 4-span perimeter animation.
+   * Animation is intentionally restricted to .snake-cta.
+   * All other .trace-snake elements get only the subtle inner ring on hover.
+   */
   .trace-snake {
     position: relative;
     overflow: hidden;
@@ -33,58 +44,52 @@
     pointer-events: none;
     background: currentColor;
   }
-  /* top */
   .trace-snake .trace-line--t {
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 2px;
+    top: 0; left: 0;
+    width: 100%; height: 2px;
     background: linear-gradient(90deg, transparent, currentColor);
     transform: translateX(-115%);
     transition: transform 0.35s linear;
   }
-  .trace-snake:hover .trace-line--t { transform: translateX(100%); transition-delay: 0s; }
-  /* right */
   .trace-snake .trace-line--r {
-    top: 0;
-    right: 0;
-    width: 2px;
-    height: 100%;
+    top: 0; right: 0;
+    width: 2px; height: 100%;
     background: linear-gradient(180deg, transparent, currentColor);
     transform: translateY(-130%);
     transition: transform 0.35s linear 0.08s;
   }
-  .trace-snake:hover .trace-line--r { transform: translateY(100%); }
-  /* bottom */
   .trace-snake .trace-line--b {
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    height: 2px;
+    bottom: 0; left: 0;
+    width: 100%; height: 2px;
     background: linear-gradient(270deg, transparent, currentColor);
     transform: translateX(100%);
     transition: transform 0.35s linear 0.17s;
   }
-  .trace-snake:hover .trace-line--b { transform: translateX(-115%); }
-  /* left */
   .trace-snake .trace-line--l {
-    top: 0;
-    left: 0;
-    width: 2px;
-    height: 100%;
+    top: 0; left: 0;
+    width: 2px; height: 100%;
     background: linear-gradient(360deg, transparent, currentColor);
     transform: translateY(130%);
     transition: transform 0.35s linear 0.25s;
   }
-  .trace-snake:hover .trace-line--l { transform: translateY(-130%); }
 
-  /* Persistent hover feedback: subtle inner outline and soft shadow */
+  /* Subtle ring on all .trace-snake hovers */
   .trace-snake:hover {
+    box-shadow: 0 0 0 1px rgba(255,255,255,0.06) inset;
+  }
+
+  /* ─── .snake-cta — the one CTA with the full animation ─── */
+  .snake-cta:hover .trace-line--t { transform: translateX(100%); transition-delay: 0s; }
+  .snake-cta:hover .trace-line--r { transform: translateY(100%); }
+  .snake-cta:hover .trace-line--b { transform: translateX(-115%); }
+  .snake-cta:hover .trace-line--l { transform: translateY(-130%); }
+  .snake-cta:hover {
     box-shadow:
       0 0 0 2px rgba(255,255,255,0.12) inset,
       0 4px 10px rgba(0,0,0,0.25);
   }
-  /* Snake-outline: fast, clean animated outline on hover */
+
+  /* ─── Positioning context ─────────────────────── */
   .snake-outline,
   .neon-trace,
   .btn-primary,
@@ -92,26 +97,25 @@
   .snake-hover {
     position: relative;
     overflow: hidden;
-    isolation: isolate; /* ensure local stacking context */
+    isolation: isolate;
   }
+
+  /* ::after conic ring — only on .snake-cta */
+  .snake-cta::after,
   .snake-outline::after,
   .neon-trace::after,
-  .btn-primary::after,
-  .btn-secondary::after,
   .trace-snake--rb::after {
     content: "";
     position: absolute;
     inset: 0;
-    border-radius: inherit; /* follow the element's rounding */
+    border-radius: inherit;
     pointer-events: none;
     z-index: 1;
   }
-  /* Animated stroke mask */
+
+  .snake-cta::after,
   .snake-outline::after,
-  .neon-trace::after,
-  .btn-primary::after,
-  .btn-secondary::after {
-    --snake-color: currentColor;
+  .neon-trace::after {
     background: conic-gradient(
       from var(--angle, 0deg),
       transparent 0deg 300deg,
@@ -120,7 +124,6 @@
       transparent 340deg 360deg
     );
     border-radius: inherit;
-    /* Reveal only a thin ring */
     -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #fff 0);
             mask: radial-gradient(farthest-side, transparent calc(100% - 2px), #fff 0);
     opacity: 0;
@@ -129,10 +132,9 @@
 
   @keyframes snake {
     from { --angle: 0deg; }
-    to { --angle: 360deg; }
+    to   { --angle: 360deg; }
   }
 
-  /* SVG-based snake border (robust across browsers) */
   .snake-border {
     stroke-dasharray: 100;
     stroke-dashoffset: 100;
@@ -144,82 +146,109 @@
     opacity: 1;
   }
 
+  /* Only .snake-cta fires the conic ring on hover */
+  .snake-cta:hover::after,
   .snake-outline:hover::after,
-  .neon-trace:hover::after,
-  .btn-primary:hover::after,
-  .btn-secondary:hover::after {
+  .neon-trace:hover::after {
     opacity: 1;
     animation: snake 0.35s linear forwards;
   }
+
+  /* ─── Buttons ─────────────────────────────────── */
   .btn-primary {
     @apply text-white font-semibold py-3 px-6 rounded-lg border;
-    background-color: #1a1a1a; /* cinema-dark */
-    border-color: #2a2a2a; /* cinema-gray */
+    background-color: #1a1a1a;
+    border-color: #2a2a2a;
+    transition: background-color 0.2s ease, box-shadow 0.2s ease;
   }
-  
+  .btn-primary:hover {
+    background-color: #212121;
+  }
+
   .btn-secondary {
     @apply bg-cinema-gray text-white font-medium py-2 px-4 rounded-lg border border-cinema-light;
+    transition: background-color 0.2s ease;
   }
-  
+  .btn-secondary:hover {
+    background-color: #333333;
+  }
+
+  /* ─── Cards ──────────────────────────────────── */
   .card {
-    @apply bg-cinema-dark rounded-xl p-6 border border-cinema-gray 
-           hover:border-accent-blue transition-all duration-300 transform hover:scale-105 
-           shadow-lg hover:shadow-2xl;
+    background-color: #1a1a1a;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    border: 1px solid #2a2a2a;
+    transition: transform 300ms ease, box-shadow 300ms ease, border-color 200ms ease;
   }
-  
+  .card:hover {
+    border-color: #4a9eff;
+    transform: scale(1.02);
+    box-shadow: 0 12px 24px rgba(0,0,0,0.4);
+  }
+
   .movie-card {
-    @apply bg-cinema-dark rounded-xl overflow-hidden border border-cinema-gray 
-           transition-all duration-300 transform hover:scale-105 
-           shadow-lg hover:shadow-2xl;
+    background-color: #1a1a1a;
+    border-radius: 0.75rem;
+    overflow: hidden;
+    border: 1px solid #2a2a2a;
+    transition: transform 300ms ease, box-shadow 300ms ease;
     position: relative;
     isolation: isolate;
   }
-  /* Gradient border on hover (purple -> blue -> red) */
+  .movie-card:hover {
+    transform: scale(1.02);
+    box-shadow: 0 16px 32px rgba(0,0,0,0.5);
+  }
+
+  /* Gradient border reveal on hover — CSS mask technique */
   .movie-card::after {
     content: "";
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    padding: 1px; /* border thickness */
+    padding: 1px;
     background: linear-gradient(135deg, #8b5cf6, #4a9eff, #ff4444);
-    -webkit-mask: 
-      linear-gradient(#000 0 0) content-box, 
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
       linear-gradient(#000 0 0);
-            mask: 
-      linear-gradient(#000 0 0) content-box, 
+            mask:
+      linear-gradient(#000 0 0) content-box,
       linear-gradient(#000 0 0);
     -webkit-mask-composite: xor;
             mask-composite: exclude;
     opacity: 0;
-    transition: opacity 200ms ease;
+    transition: opacity 250ms ease;
     pointer-events: none;
   }
   .movie-card:hover::after { opacity: 1; }
-  
+
+  /* ─── Utility effects ────────────────────────── */
   .glass-effect {
     @apply bg-white/10 backdrop-blur-md border border-white/20;
   }
-  
+
   .text-glow {
-    text-shadow: 0 0 10px currentColor;
+    text-shadow: 0 0 8px rgba(255,255,255,0.25);
   }
-  
+
+  /* ─── Backgrounds ────────────────────────────── */
   .cinema-gradient {
-    background: linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #2a2a2a 100%);
+    background: linear-gradient(180deg, #0a0a0a 0%, #0c0d10 50%, #0a0a0a 100%);
   }
-  /* Site-wide page background (behind nav and all content) */
+
   .app-gradient {
-    background: 
-      radial-gradient(1200px 700px at 80% -150px, rgba(74,158,255,0.18), transparent 65%),
-      radial-gradient(900px 600px at 12% 110%, rgba(74,158,255,0.12), transparent 70%),
-      linear-gradient(180deg, #0a0a0a 0%, #0e1218 50%, #0b0f16 100%);
+    background:
+      radial-gradient(1000px 580px at 78% -80px, rgba(74,158,255,0.10), transparent 62%),
+      radial-gradient(680px 480px at 14% 115%, rgba(74,158,255,0.06), transparent 68%),
+      linear-gradient(180deg, #0a0a0a 0%, #0c0f14 55%, #0a0c10 100%);
   }
-  
+
   .accent-gradient {
     background: linear-gradient(135deg, #ff4444 0%, #8b5cf6 50%, #4a9eff 100%);
   }
 
-  /* Vertical gradient rails (left and right outlines only) */
+  /* ─── Side rails (reduced to 1px, much lower opacity) ─── */
   .side-rails {
     position: relative;
   }
@@ -227,110 +256,153 @@
   .side-rails::after {
     content: "";
     position: absolute;
-    top: 8px;
-    bottom: 8px;
-    width: 2px;
+    top: 10px;
+    bottom: 10px;
+    width: 1px;
     pointer-events: none;
-    /* Fade to transparent at the top and bottom tips */
     background: linear-gradient(
       180deg,
-      rgba(139, 92, 246, 0) 0%,
-      rgba(139, 92, 246, 0.28) 15%,
-      rgba(74, 158, 255, 0.28) 85%,
+      rgba(74, 158, 255, 0) 0%,
+      rgba(74, 158, 255, 0.08) 30%,
+      rgba(74, 158, 255, 0.08) 70%,
       rgba(74, 158, 255, 0) 100%
     );
-    border-radius: 1px;
   }
-  .side-rails::before { left: -1px; }
-  .side-rails::after { right: -1px; }
+  .side-rails::before { left: 0; }
+  .side-rails::after  { right: 0; }
 
-  /* Main content spacing to prevent nav overlap */
+  /* ─── Nav height compensation ─────────────────── */
   main {
     padding-top: var(--nav-height, 80px);
   }
 
-  /* Smooth gradient animation for buttons */
+  /* ─── Gradient button ────────────────────────── */
   .gradient-button {
-    background: linear-gradient(90deg, 
-      rgba(255, 68, 68, 0.3) 0%, 
-      rgba(139, 92, 246, 0.3) 50%, 
-      rgba(74, 158, 255, 0.3) 100%);
+    background: linear-gradient(90deg,
+      rgba(255, 68,  68, 0.2) 0%,
+      rgba(139, 92, 246, 0.2) 50%,
+      rgba( 74,158, 255, 0.2) 100%);
     background-size: 200% 100%;
     transition: background-position 0.5s ease;
   }
-  
-  .gradient-button:hover {
-    background-position: 100% 0;
-  }
+  .gradient-button:hover { background-position: 100% 0; }
 
-  /* Dynamic spotlight effect */
-  .spotlight-button {
-    position: relative;
-    overflow: hidden;
-  }
-  
+  /* ─── Spotlight button ───────────────────────── */
+  .spotlight-button { position: relative; overflow: hidden; }
   .spotlight-button::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: radial-gradient(ellipse 80px 40px at var(--x, 50%) var(--y, 50%), 
-      rgba(255, 68, 68, 0.05) 0%, 
-      rgba(74, 158, 255, 0.05) 50%, 
+    inset: 0;
+    background: radial-gradient(ellipse 80px 40px at var(--x, 50%) var(--y, 50%),
+      rgba(255, 68,  68, 0.04) 0%,
+      rgba( 74,158, 255, 0.04) 50%,
       transparent 100%);
     opacity: 0;
     transition: opacity 0.3s ease;
     pointer-events: none;
     z-index: 1;
   }
-  
-  .spotlight-button:hover::before {
-    opacity: 1;
-  }
-  
-  .spotlight-button > * {
-    position: relative;
-    z-index: 2;
-  }
+  .spotlight-button:hover::before { opacity: 1; }
+  .spotlight-button > * { position: relative; z-index: 2; }
 
-  /* Ultra-smooth indeterminate progress bar (GPU-accelerated) */
+  /* ─── Loading bar ────────────────────────────── */
   @keyframes indeterminate-x {
-    0% { transform: translate3d(-100%, 0, 0); }
-    100% { transform: translate3d(100%, 0, 0); }
+    0%   { transform: translate3d(-100%, 0, 0); }
+    100% { transform: translate3d(100%,  0, 0); }
   }
   .indeterminate-bar {
     animation: indeterminate-x 1.1s linear infinite;
     will-change: transform;
   }
 
-  /* Line clamp utilities for text truncation */
+  /* ─── Line clamp ─────────────────────────────── */
   .line-clamp-1 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 1;
+    overflow: hidden; display: -webkit-box;
+    -webkit-box-orient: vertical; -webkit-line-clamp: 1;
   }
-  
   .line-clamp-2 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
+    overflow: hidden; display: -webkit-box;
+    -webkit-box-orient: vertical; -webkit-line-clamp: 2;
   }
-  
   .line-clamp-3 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 3;
+    overflow: hidden; display: -webkit-box;
+    -webkit-box-orient: vertical; -webkit-line-clamp: 3;
   }
-  
   .line-clamp-none {
-    overflow: visible;
+    overflow: visible; display: block;
+    -webkit-box-orient: unset; -webkit-line-clamp: unset;
+  }
+
+  /* ─── Wizard typography ──────────────────────── */
+  .wizard-step-number {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.38);
     display: block;
-    -webkit-box-orient: unset;
-    -webkit-line-clamp: unset;
+  }
+  .wizard-step-title {
+    font-family: 'DM Mono', monospace;
+    font-size: clamp(1.35rem, 2.5vw, 1.85rem);
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    line-height: 1.15;
+    text-wrap: balance;
+    color: #ffffff;
+    display: block;
+  }
+
+  /* ─── Chip pills ─────────────────────────────── */
+  .chip-pill {
+    background-color: #1a1a1a;
+    border: 1px solid rgba(255,255,255,0.10);
+    border-radius: 6px;
+    color: rgba(255,255,255,0.55);
+    font-family: 'DM Sans', system-ui, sans-serif;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+  }
+  .chip-pill:hover:not(:disabled) {
+    background-color: #222222;
+    color: rgba(255,255,255,0.85);
+    border-color: rgba(74,158,255,0.22);
+  }
+  .chip-pill.chip-selected {
+    background-color: transparent;
+    border: 1.5px solid #4a9eff;
+    color: #ffffff;
+  }
+  .chip-pill.chip-selected:hover {
+    background-color: rgba(74,158,255,0.05);
+  }
+
+  /* ─── Stat number display ────────────────────── */
+  .stat-number {
+    font-family: 'DM Mono', monospace;
+    font-size: clamp(1.75rem, 3.5vw, 2.25rem);
+    font-weight: 500;
+    color: #ffffff;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    display: block;
+  }
+
+  /* ─── Reduced motion ─────────────────────────── */
+  @media (prefers-reduced-motion: reduce) {
+    .trace-snake .trace-line,
+    .movie-card,
+    .card,
+    .chip-pill {
+      transition-duration: 0.01ms !important;
+    }
+    .indeterminate-bar { animation: none; }
+    .snake-cta:hover .trace-line--t,
+    .snake-cta:hover .trace-line--r,
+    .snake-cta:hover .trace-line--b,
+    .snake-cta:hover .trace-line--l { transform: none !important; }
   }
 }

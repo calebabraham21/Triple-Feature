@@ -43,7 +43,7 @@ const Footer = () => {
               href="https://github.com/calebabraham21"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 bg-cinema-gray hover:bg-cinema-light rounded-lg transition-colors group"
+              className="p-2 transition-colors group"
               aria-label="GitHub"
             >
               <Github size={18} className="text-white group-hover:text-accent-purple transition-colors" />
@@ -52,14 +52,14 @@ const Footer = () => {
               href="https://www.linkedin.com/in/caleb-abraham-3900b9281/"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 bg-cinema-gray hover:bg-cinema-light rounded-lg transition-colors group"
+              className="p-2 transition-colors group"
               aria-label="LinkedIn"
             >
               <Linkedin size={18} className="text-white group-hover:text-accent-blue transition-colors" />
             </a>
             <a
               href="mailto:calebabraham21@gmail.com"
-              className="p-2 bg-cinema-gray hover:bg-cinema-light rounded-lg transition-colors group"
+              className="p-2 transition-colors group"
               aria-label="Email"
             >
               <Mail size={18} className="text-white group-hover:text-accent-red transition-colors" />

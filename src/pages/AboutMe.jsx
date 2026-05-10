@@ -46,10 +46,10 @@ const AboutMe = () => {
         >
           <h2 className="text-2xl font-bold mb-4 text-white">Who I Am</h2>
           <p className="text-white mb-3 text-base leading-relaxed">
-            I work in lifecycle marketing focused on retention and engagement. I use SQL to segment audiences and query behavioral data, then feed those insights into campaigns. I've primarily worked with Salesforce Marketing Cloud and use AMPscript for personalization at scale. I work across email, push, and in-app and track performance to optimize messaging.
+            I work in MarTech focused on retention, engagement, and personalization across email, push, and in-app. Most of my work is in Salesforce Marketing Cloud using SQL, AMPscript, APIs, and behavioral data to build segmentation, automation, and large-scale personalized campaigns.
           </p>
           <p className="text-white/90 text-base leading-relaxed">
-            On the side I'm studying software engineering, especially front-end and UX. I care about building clean, responsive interfaces that are easy to use and reliable. This app is where I prototype and learn, with a focus on simple, fast flows.
+            Outside of work I'm a CS student and have gotten really interested in data engineering/data science, especially customer data architecture, analytics, and large-scale automation systems. I'm also really into movies, music, esports/Counter-Strike, and lately have been getting into golf and building small side projects/web apps to learn new tech and experiment with ideas.
           </p>
         </motion.div>
 

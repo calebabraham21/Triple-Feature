@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Info, Menu, X, Sparkles, Search } from 'lucide-react';
+import { Home, Info, Menu, X } from 'lucide-react';
 import { useState, useLayoutEffect, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
@@ -23,8 +23,6 @@ const Header = ({ currentPage, onNavigate, onHomeNavigation, onProtectedNavReque
 
   const leftNavItems = [
     { id: 'home', label: 'Home', icon: Home },
-    { id: 'editors-choice', label: 'Editor\'s Choice', icon: Sparkles },
-    { id: 'picks', label: 'Picks', icon: Search },
   ];
 
   const rightNavItems = [{ id: 'about-me', label: 'About Me', icon: Info }];
@@ -117,12 +115,6 @@ const Header = ({ currentPage, onNavigate, onHomeNavigation, onProtectedNavReque
       case 'home':
         navigate('/');
         break;
-      case 'editors-choice':
-        goPath('/editors-choice');
-        break;
-      case 'picks':
-        goPath('/picks');
-        break;
       case 'about-me':
         goPath('/about-me');
         break;
@@ -170,15 +162,7 @@ const Header = ({ currentPage, onNavigate, onHomeNavigation, onProtectedNavReque
       <div className="absolute inset-0 bg-gradient-to-r from-accent-red/10 via-accent-purple/15 to-accent-blue/10" />
 
       <div className="hidden md:block py-2.5 relative z-10">
-        <div className="max-w-5xl mx-auto px-12 flex items-center justify-center relative">
-          <motion.nav
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2 absolute left-8"
-          >
-            {leftNavItems.map(renderNavLink)}
-          </motion.nav>
-
+        <div className="max-w-5xl mx-auto px-8 flex items-center justify-between">
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -202,9 +186,9 @@ const Header = ({ currentPage, onNavigate, onHomeNavigation, onProtectedNavReque
           <motion.nav
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2 absolute right-8"
+            className="flex items-center gap-2"
           >
-            {rightNavItems.map(renderNavLink)}
+            {[...leftNavItems, ...rightNavItems].map(renderNavLink)}
           </motion.nav>
         </div>
       </div>

@@ -18,7 +18,7 @@ export default {
       },
       fontFamily: {
         'cinema': ['Orbitron', 'monospace'],
-        'sans': ['Inter', 'system-ui', 'sans-serif'],
+        'sans': ['DM Sans', 'system-ui', 'sans-serif'],
       },
       animation: {
         'glow': 'glow 2s ease-in-out infinite alternate',

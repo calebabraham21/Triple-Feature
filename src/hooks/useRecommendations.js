@@ -23,6 +23,7 @@ export const useRecommendations = () => {
   
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [genresLoading, setGenresLoading] = useState(false);
   const [error, setError] = useState(null);
   const [progressMessage, setProgressMessage] = useState(null);
   const [currentStep, setCurrentStep] = useState(1);
@@ -34,14 +35,14 @@ export const useRecommendations = () => {
   useEffect(() => {
     const loadGenres = async () => {
       try {
-        setLoading(true);
+        setGenresLoading(true);
         const response = await getGenres();
         setGenres(response.genres || []);
       } catch (err) {
         setError('Failed to load genres');
         console.error('Error loading genres:', err);
       } finally {
-        setLoading(false);
+        setGenresLoading(false);
       }
     };
 

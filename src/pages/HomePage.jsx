@@ -539,30 +539,6 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
             </div>
           </motion.div>
 
-          {/* Editor's Choice CTA */}
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.18 }}
-            className="mb-4"
-          >
-            <div className="bg-cinema-dark/30 border border-cinema-light/20 rounded-xl p-4 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Sparkles size={18} className="text-accent-gold" />
-                <div>
-                  <div className="text-white font-semibold text-sm">Editor's Choice</div>
-                  <div className="text-xs text-white/70">Weekly pick and past selections</div>
-                </div>
-              </div>
-              <button
-                onClick={() => navigate('/picks')}
-                className="text-accent-blue hover:underline text-sm"
-              >
-                See all picks ???
-              </button>
-            </div>
-          </motion.div>
-
           {/* Fun Stats Strip */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}

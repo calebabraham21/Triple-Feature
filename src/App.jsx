@@ -6,8 +6,6 @@ import Header from './components/Header';
 import HomePage from './pages/HomePage';
 import AboutMe from './pages/AboutMe';
 import AboutTripleFeature from './pages/AboutTripleFeature';
-import EditorsChoicePage from './pages/EditorsChoicePage';
-import PicksPage from './pages/PicksPage';
 import Footer from './components/Footer';
 import { ToastProvider } from './context/ToastContext';
 import Terms from './pages/Terms';
@@ -22,8 +20,6 @@ function App() {
   useEffect(() => {
     const path = window.location.pathname;
     if (path === '/') setCurrentPage('home');
-    else if (path === '/editors-choice') setCurrentPage('editors-choice');
-    else if (path === '/picks') setCurrentPage('picks');
     else if (path === '/about-me') setCurrentPage('about-me');
   }, []);
 
@@ -101,8 +97,6 @@ function App() {
               <Route path="/watchlist" element={<Navigate to="/" replace />} />
               <Route path="/about-me" element={<AboutMe />} />
               <Route path="/about-triple" element={<AboutTripleFeature />} />
-              <Route path="/editors-choice" element={<EditorsChoicePage />} />
-              <Route path="/picks" element={<PicksPage />} />
               <Route path="/terms" element={<Terms />} />
               <Route path="/projects" element={<Navigate to="/about-me#projects" replace />} />
               <Route path="/contact" element={<Navigate to="/about-me#contact" replace />} />

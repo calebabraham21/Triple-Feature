@@ -116,8 +116,8 @@ const MovieCard = ({ movie, showDirector = true }) => {
                 style={{ willChange: 'transform, opacity' }}
               >
                 <div
-                  className="overflow-y-auto"
-                  style={{ maxHeight: '92vh', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}
+                  className="overflow-y-auto overflow-x-hidden"
+                  style={{ maxHeight: '92vh', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
                 >
                   {/* Close button */}
                   <button

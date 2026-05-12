@@ -139,10 +139,14 @@ export const useRecommendations = () => {
           console.log(`Fetching batch ${currentBatch}/${totalBatches}: pages ${batch[0]}-${batch[batch.length - 1]} (${progressPercent}% complete)`);
           setProgressMessage(`Fetching batch ${currentBatch}/${totalBatches} of ${totalBatches}... ${progressPercent}% complete... Building movie database...`);
           
-          const batchResponses = await Promise.all(
+          const batchResults = await Promise.allSettled(
             batch.map((page) => getMoviesByFilters({ ...baseFilters, page }))
           );
-          
+
+          const batchResponses = batchResults
+            .filter((r) => r.status === 'fulfilled')
+            .map((r) => r.value);
+
           allResponses.push(...batchResponses);
           
           // Small delay between batches to be respectful to the API
@@ -272,6 +276,7 @@ export const useRecommendations = () => {
          if (movies.length < 3) {
            console.log(`Only ${movies.length} movies found matching runtime criteria.`);
            setError(`Only found ${movies.length} movie(s) matching your runtime preferences. Please try different filters.`);
+           setCurrentStep(4);
            return;
          }
        }
@@ -279,6 +284,7 @@ export const useRecommendations = () => {
        if (movies.length < 3) {
          console.log(`Only ${movies.length} movies found matching all criteria.`);
          setError(`Only found ${movies.length} movie(s) matching your criteria. Please try different filters.`);
+         setCurrentStep(4);
          return;
        }
        
@@ -360,7 +366,8 @@ export const useRecommendations = () => {
       
       setCurrentStep(4);
     } catch (err) {
-      setError('Failed to generate recommendations');
+      setError('Something went wrong. Check your connection and try again.');
+      setCurrentStep(4);
       console.error('Error generating recommendations:', err);
     } finally {
       setLoading(false);

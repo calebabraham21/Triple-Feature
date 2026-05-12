@@ -71,7 +71,7 @@ export const useRecommendations = () => {
         // Build base filters
   const baseFilters = {
     genres: selectedGenres,
-    decades: selectedDecades,
+    decades: selectedDecades.length < getAllDecades().length ? selectedDecades : null,
     sortBy: 'popularity.desc',
     minRating: 6.0,
     includeAdult: includeAdult,

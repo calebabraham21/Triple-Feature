@@ -1,68 +1,49 @@
-import { motion } from 'framer-motion';
-import { Heart, Github, Linkedin, Mail } from 'lucide-react';
+import { Github, Linkedin, Mail } from 'lucide-react';
 import TMDBLogo from '../assets/TMDB_logo.svg';
 
 const Footer = () => {
   return (
-    <footer className="bg-cinema-dark/80 border-t border-cinema-light/20 mt-auto">
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        <div className="grid md:grid-cols-3 gap-8 items-center">
-          {/* TMDB Attribution */}
-          <div className="text-center md:text-left">
-            <div className="flex items-center justify-center md:justify-start gap-2 mb-2">
-              <img 
-                src={TMDBLogo} 
-                alt="TMDB Logo" 
-                className="w-8 h-8"
-              />
-              <span className="text-white/70 text-sm">
-                Powered by TMDB API
-              </span>
-            </div>
-            <p className="text-white/50 text-xs">
-              This product uses the TMDB API but is not endorsed or certified by TMDB
-            </p>
+    <footer className="border-t border-smoke bg-paper mt-auto">
+      <div className="max-w-5xl mx-auto px-8 py-6">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-fog">
+          <div className="flex items-center gap-2">
+            <img src={TMDBLogo} alt="TMDB" className="w-5 h-5 opacity-50" />
+            <span>Powered by TMDB API. Not endorsed by TMDB.</span>
           </div>
 
-          {/* Center - Made with Love */}
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-2 text-white/70 text-sm">
-              <span>Made by Caleb Abraham</span>
-            </div>
-            <p className="text-white/50 text-xs mt-1">
-              © 2025 Triple Feature
-            </p>
-            <div className="mt-2 flex items-center justify-center gap-3 text-xs">
-              <a href="/terms" className="text-white/70 hover:text-white underline">Terms & Privacy Policy</a>
-            </div>
+          <div className="flex items-center gap-3">
+            <span>Made by Caleb Abraham · © {new Date().getFullYear()} Triple Feature</span>
+            <span className="text-ash">·</span>
+            <a href="/terms" className="underline underline-offset-2 hover:text-ink transition-colors">
+              Terms
+            </a>
           </div>
 
-          {/* Social Links */}
-          <div className="flex justify-center md:justify-end gap-4">
+          <div className="flex items-center gap-3">
             <a
               href="https://github.com/calebabraham21"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 transition-colors group"
               aria-label="GitHub"
+              className="hover:text-ink transition-colors"
             >
-              <Github size={18} className="text-white group-hover:text-accent-purple transition-colors" />
+              <Github size={15} />
             </a>
             <a
               href="https://www.linkedin.com/in/caleb-abraham-3900b9281/"
               target="_blank"
               rel="noopener noreferrer"
-              className="p-2 transition-colors group"
               aria-label="LinkedIn"
+              className="hover:text-ink transition-colors"
             >
-              <Linkedin size={18} className="text-white group-hover:text-accent-blue transition-colors" />
+              <Linkedin size={15} />
             </a>
             <a
               href="mailto:calebabraham21@gmail.com"
-              className="p-2 transition-colors group"
               aria-label="Email"
+              className="hover:text-ink transition-colors"
             >
-              <Mail size={18} className="text-white group-hover:text-accent-red transition-colors" />
+              <Mail size={15} />
             </a>
           </div>
         </div>

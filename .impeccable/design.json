@@ -1,0 +1,292 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-09T00:00:00Z",
+  "title": "Design System: Triple Feature",
+  "extensions": {
+    "colorMeta": {
+      "film-burn": {
+        "role": "primary",
+        "displayName": "Film Burn",
+        "canonical": "oklch(63% 0.26 25)",
+        "tonalRamp": [
+          "oklch(12% 0.10 25)",
+          "oklch(22% 0.16 25)",
+          "oklch(32% 0.20 25)",
+          "oklch(42% 0.23 25)",
+          "oklch(52% 0.25 25)",
+          "oklch(63% 0.26 25)",
+          "oklch(74% 0.22 25)",
+          "oklch(87% 0.12 25)"
+        ]
+      },
+      "emulsion-blue": {
+        "role": "secondary",
+        "displayName": "Emulsion Blue",
+        "canonical": "oklch(66% 0.17 244)",
+        "tonalRamp": [
+          "oklch(12% 0.07 244)",
+          "oklch(22% 0.10 244)",
+          "oklch(32% 0.13 244)",
+          "oklch(42% 0.15 244)",
+          "oklch(54% 0.16 244)",
+          "oklch(66% 0.17 244)",
+          "oklch(76% 0.14 244)",
+          "oklch(88% 0.07 244)"
+        ]
+      },
+      "end-reel-flare": {
+        "role": "tertiary",
+        "displayName": "End-Reel Flare",
+        "canonical": "oklch(56% 0.23 293)",
+        "tonalRamp": [
+          "oklch(12% 0.09 293)",
+          "oklch(22% 0.13 293)",
+          "oklch(32% 0.17 293)",
+          "oklch(43% 0.20 293)",
+          "oklch(56% 0.23 293)",
+          "oklch(66% 0.22 293)",
+          "oklch(76% 0.17 293)",
+          "oklch(88% 0.09 293)"
+        ]
+      },
+      "projection-arc": {
+        "role": "tertiary",
+        "displayName": "Projection Arc",
+        "canonical": "oklch(83% 0.17 80)",
+        "tonalRamp": [
+          "oklch(18% 0.07 80)",
+          "oklch(28% 0.10 80)",
+          "oklch(40% 0.13 80)",
+          "oklch(53% 0.16 80)",
+          "oklch(65% 0.17 80)",
+          "oklch(75% 0.17 80)",
+          "oklch(83% 0.17 80)",
+          "oklch(93% 0.09 80)"
+        ]
+      },
+      "projection-booth": {
+        "role": "neutral",
+        "displayName": "Projection Booth",
+        "canonical": "oklch(8% 0.006 250)",
+        "tonalRamp": [
+          "oklch(5% 0.004 250)",
+          "oklch(8% 0.006 250)",
+          "oklch(11% 0.006 250)",
+          "oklch(15% 0.006 250)",
+          "oklch(20% 0.006 250)",
+          "oklch(27% 0.006 250)",
+          "oklch(36% 0.006 250)",
+          "oklch(48% 0.006 250)"
+        ]
+      },
+      "lamphouse": {
+        "role": "neutral",
+        "displayName": "Lamphouse",
+        "canonical": "oklch(13% 0.006 250)",
+        "tonalRamp": [
+          "oklch(8% 0.005 250)",
+          "oklch(13% 0.006 250)",
+          "oklch(18% 0.006 250)",
+          "oklch(24% 0.006 250)",
+          "oklch(31% 0.006 250)",
+          "oklch(40% 0.006 250)",
+          "oklch(52% 0.006 250)",
+          "oklch(66% 0.005 250)"
+        ]
+      },
+      "exposure": {
+        "role": "neutral",
+        "displayName": "Exposure",
+        "canonical": "oklch(20% 0.006 250)",
+        "tonalRamp": [
+          "oklch(10% 0.005 250)",
+          "oklch(15% 0.005 250)",
+          "oklch(20% 0.006 250)",
+          "oklch(26% 0.006 250)",
+          "oklch(33% 0.006 250)",
+          "oklch(42% 0.006 250)",
+          "oklch(54% 0.006 250)",
+          "oklch(68% 0.005 250)"
+        ]
+      },
+      "silver-edge": {
+        "role": "neutral",
+        "displayName": "Silver Edge",
+        "canonical": "oklch(27% 0.006 250)",
+        "tonalRamp": [
+          "oklch(12% 0.005 250)",
+          "oklch(18% 0.005 250)",
+          "oklch(24% 0.006 250)",
+          "oklch(27% 0.006 250)",
+          "oklch(34% 0.006 250)",
+          "oklch(44% 0.006 250)",
+          "oklch(57% 0.005 250)",
+          "oklch(72% 0.005 250)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display",
+        "purpose": "Product mark and hero-level identity text only. Orbitron 900. Never used for body copy or instructions."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "Section headers, wizard step labels, results headers. Orbitron 700. Should feel like a chapter title."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Movie titles in cards, modal subheads, component-level headings. DM Sans 600."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "All descriptive text, about-page copy, wizard instructions, taglines. DM Sans 400. Max 65-75ch line length."
+      },
+      "label": {
+        "displayName": "Label",
+        "purpose": "Badges (year, runtime, language, rating), step indicators, meta tags. DM Sans 600, uppercase, tracked."
+      }
+    },
+    "shadows": [
+      {
+        "name": "glow-pulse",
+        "value": "0 0 5px #ff4444, 0 0 10px #ff4444, 0 0 15px #ff4444",
+        "purpose": "Animated CTA glow. Used only on .glow keyframe animation. Not for static elements."
+      },
+      {
+        "name": "card-lift",
+        "value": "0 20px 25px -5px rgba(0,0,0,0.5), 0 8px 10px -6px rgba(0,0,0,0.4)",
+        "purpose": "Applied to movie cards and generic cards on hover. shadow-2xl equivalent. Earned, not resting."
+      },
+      {
+        "name": "inner-focus",
+        "value": "0 0 0 2px rgba(255,255,255,0.12) inset, 0 4px 10px rgba(0,0,0,0.25)",
+        "purpose": "Inner ring on .trace-snake hover. Confirms active state without changing element footprint."
+      }
+    ],
+    "motion": [
+      {
+        "name": "ease-out-standard",
+        "value": "cubic-bezier(0.2, 0.9, 0.3, 1)",
+        "purpose": "Primary easing for panel/drawer transitions. Used on the mobile sidebar slide-in."
+      },
+      {
+        "name": "ease-out-snappy",
+        "value": "ease-out",
+        "purpose": "Default easing for opacity and transform transitions on cards and buttons. 0.3-0.5s duration."
+      },
+      {
+        "name": "snake-linear",
+        "value": "linear",
+        "purpose": "Snake border trace lines. Linear is intentional: the trace should feel mechanical, not springy."
+      },
+      {
+        "name": "stagger-nav-items",
+        "value": "staggerChildren: 0.025s",
+        "purpose": "Framer Motion stagger for mobile nav items on open. 25ms per item."
+      }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button (GlowButton)",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Default action button. Quiet at rest; snake border traces the perimeter on hover.",
+      "html": "<button class=\"ds-btn-primary\"><span class=\"ds-trace ds-trace--t\"></span><span class=\"ds-trace ds-trace--r\"></span><span class=\"ds-trace ds-trace--b\"></span><span class=\"ds-trace ds-trace--l\"></span><span class=\"ds-btn-label\">Get Recommendations</span></button>",
+      "css": ".ds-btn-primary { position: relative; display: inline-flex; align-items: center; justify-content: center; background-color: #1a1a1a; color: #ffffff; border: 1px solid #2a2a2a; border-radius: 8px; padding: 12px 24px; font-family: 'DM Sans', system-ui, sans-serif; font-size: 1rem; font-weight: 600; cursor: pointer; overflow: hidden; isolation: isolate; transition: box-shadow 0.2s ease; } .ds-btn-primary:hover { box-shadow: 0 0 0 2px rgba(255,255,255,0.12) inset, 0 4px 10px rgba(0,0,0,0.25); } .ds-btn-label { position: relative; z-index: 10; } .ds-trace { position: absolute; display: block; pointer-events: none; background: currentColor; } .ds-trace--t { top: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(90deg, transparent, rgba(74,158,255,0.8)); transform: translateX(-115%); transition: transform 0.35s linear 0s; } .ds-btn-primary:hover .ds-trace--t { transform: translateX(100%); } .ds-trace--r { top: 0; right: 0; width: 2px; height: 100%; background: linear-gradient(180deg, transparent, rgba(255,68,68,0.8)); transform: translateY(-130%); transition: transform 0.35s linear 0.08s; } .ds-btn-primary:hover .ds-trace--r { transform: translateY(100%); } .ds-trace--b { bottom: 0; left: 0; width: 100%; height: 2px; background: linear-gradient(270deg, transparent, rgba(74,158,255,0.8)); transform: translateX(100%); transition: transform 0.35s linear 0.17s; } .ds-btn-primary:hover .ds-trace--b { transform: translateX(-115%); } .ds-trace--l { top: 0; left: 0; width: 2px; height: 100%; background: linear-gradient(360deg, transparent, rgba(255,68,68,0.8)); transform: translateY(130%); transition: transform 0.35s linear 0.25s; } .ds-btn-primary:hover .ds-trace--l { transform: translateY(-130%); }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Lower-priority action. Same snake border behavior, lighter visual weight.",
+      "html": "<button class=\"ds-btn-secondary\"><span class=\"ds-btn-label\">Reset</span></button>",
+      "css": ".ds-btn-secondary { position: relative; display: inline-flex; align-items: center; justify-content: center; background-color: #2a2a2a; color: #ffffff; border: 1px solid #3a3a3a; border-radius: 8px; padding: 8px 16px; font-family: 'DM Sans', system-ui, sans-serif; font-size: 0.9rem; font-weight: 500; cursor: pointer; overflow: hidden; isolation: isolate; transition: background-color 0.2s ease; } .ds-btn-secondary:hover { background-color: #333333; }"
+    },
+    {
+      "name": "Movie Card",
+      "kind": "card",
+      "refersTo": "movie-card",
+      "description": "Poster-first card for film recommendations. Gradient border reveals on hover via CSS mask.",
+      "html": "<div class=\"ds-movie-card\"><div class=\"ds-movie-poster\"><img src=\"https://via.placeholder.com/300x450/1a1a1a/444\" alt=\"Movie Poster\" /></div><div class=\"ds-movie-info\"><span class=\"ds-movie-badge\">2024</span><span class=\"ds-movie-badge\">★ 8.2</span><h3 class=\"ds-movie-title\">The Film Title</h3><p class=\"ds-movie-meta\">115 min · English</p></div></div>",
+      "css": ".ds-movie-card { position: relative; background-color: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 12px; overflow: hidden; isolation: isolate; transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; } .ds-movie-card:hover { transform: scale(1.05); box-shadow: 0 20px 25px -5px rgba(0,0,0,0.5), 0 8px 10px -6px rgba(0,0,0,0.4); } .ds-movie-card::after { content: ''; position: absolute; inset: 0; border-radius: 12px; padding: 1px; background: linear-gradient(135deg, #8b5cf6, #4a9eff, #ff4444); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; opacity: 0; transition: opacity 0.2s ease; pointer-events: none; } .ds-movie-card:hover::after { opacity: 1; } .ds-movie-poster img { width: 100%; display: block; aspect-ratio: 2/3; object-fit: cover; } .ds-movie-info { padding: 12px; display: flex; flex-direction: column; gap: 6px; } .ds-movie-badge { display: inline-flex; align-items: center; font-family: 'DM Sans', system-ui, sans-serif; font-size: 0.7rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-right: 8px; } .ds-movie-title { font-family: 'DM Sans', system-ui, sans-serif; font-size: 1rem; font-weight: 600; color: #ffffff; margin: 0; line-height: 1.3; } .ds-movie-meta { font-family: 'DM Sans', system-ui, sans-serif; font-size: 0.8rem; font-weight: 400; color: rgba(255,255,255,0.5); margin: 0; }"
+    },
+    {
+      "name": "Preference Chip",
+      "kind": "chip",
+      "description": "Selectable genre/decade/runtime pill in the recommendation wizard.",
+      "html": "<button class=\"ds-chip\">Drama</button><button class=\"ds-chip ds-chip--selected\">Thriller</button>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; padding: 8px 16px; background-color: #1a1a1a; color: rgba(255,255,255,0.8); border: 1px solid #3a3a3a; border-radius: 9999px; font-family: 'DM Sans', system-ui, sans-serif; font-size: 0.875rem; font-weight: 500; cursor: pointer; transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease; } .ds-chip:hover { background-color: #2a2a2a; color: #ffffff; } .ds-chip--selected { background-color: rgba(74,158,255,0.15); border-color: #4a9eff; color: #ffffff; }"
+    },
+    {
+      "name": "Navigation Bar",
+      "kind": "nav",
+      "description": "Fixed top nav with blurred cinema-poster backdrop and logo mark.",
+      "html": "<header class=\"ds-nav\"><div class=\"ds-nav-backdrop\"></div><div class=\"ds-nav-inner\"><div class=\"ds-nav-logo\">TF</div><nav class=\"ds-nav-links\"><a href=\"#\" class=\"ds-nav-link ds-nav-link--active\">Home</a><a href=\"#\" class=\"ds-nav-link\">About Me</a></nav></div></header>",
+      "css": ".ds-nav { position: fixed; top: 0; left: 0; right: 0; z-index: 50; border-bottom: 1px solid rgba(255,255,255,0.10); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); } .ds-nav-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.60); background-image: linear-gradient(90deg, rgba(255,68,68,0.08) 0%, rgba(139,92,246,0.12) 50%, rgba(74,158,255,0.08) 100%); } .ds-nav-inner { position: relative; z-index: 10; max-width: 64rem; margin: 0 auto; padding: 10px 32px; display: flex; align-items: center; justify-content: space-between; } .ds-nav-logo { font-family: 'Orbitron', monospace; font-size: 1.25rem; font-weight: 700; color: #ffffff; } .ds-nav-links { display: flex; align-items: center; gap: 4px; } .ds-nav-link { position: relative; display: inline-flex; align-items: center; gap: 8px; padding: 8px 12px; color: rgba(255,255,255,0.80); font-family: 'DM Sans', system-ui, sans-serif; font-size: 1rem; font-weight: 500; text-decoration: none; transition: color 0.2s ease, transform 0.2s ease; } .ds-nav-link:hover { color: #ffffff; transform: translateY(-2px); } .ds-nav-link--active { color: #4a9eff; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Trusted Recommendation",
+    "overview": "Triple Feature is built around the credibility of a personal voice. Not an algorithm, not a rating aggregator: a friend with a dog-eared notebook who has seen everything and tells you exactly what to put on. The design system holds that posture in every detail — dark surfaces that take film seriously, typography with authority, interactions that reward attention rather than demanding it.\n\nThe system is dark because the content demands it. Not dark as a trend, not dark to signal \"professional tool\" — dark because this is a projection-room experience. The user is in a seat, the lights have gone down, and three choices are about to appear. Everything around that moment should recede. The backgrounds hold back; the content steps forward.\n\nAgainst the near-black field, the accents read as photochemical events: a film burn at the edges, an emulsion-blue light leak bleeding across the frame, the purple flare of end-of-reel celluloid. These are not decorative highlights. They mark state, signal interactivity, and confirm selection. Their rarity is the point.",
+    "keyCharacteristics": [
+      "Near-black surface stack (four steps from #0a0a0a to #3a3a3a) creates depth without shadows",
+      "Two typefaces: Orbitron for identifiers and titles, DM Sans for everything the user reads",
+      "Accents evoke photochemical imperfection, not generic UI convention",
+      "All elements are flat at rest; they earn their lift on hover and active state",
+      "The creator's personal voice is an explicit design ingredient, not a branding afterthought"
+    ],
+    "rules": [
+      {
+        "name": "The Rarity Rule",
+        "body": "Film Burn and End-Reel Flare appear only on interactive state and meaningful emphasis. They must not appear as background fills on static content. If either is visible at rest, it has lost its signal.",
+        "section": "colors"
+      },
+      {
+        "name": "The App-Gradient Rule",
+        "body": "The page background is .app-gradient: Emulsion Blue radial hazes layered over Projection Booth, not a flat #0a0a0a. Any new full-bleed background must honor this atmospheric base.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two-Voice Rule",
+        "body": "Orbitron and DM Sans are the only typefaces. System-ui is a last-resort fallback only. A third typeface breaks the pairing.",
+        "section": "typography"
+      },
+      {
+        "name": "The Orbitron Scope Rule",
+        "body": "Orbitron is for identifiers: the product name, section titles, step headings. It is not for instructions, descriptions, or anything the user reads for more than three seconds. DM Sans handles the rest.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "No element carries a resting shadow. Hover is the only trigger for lift. A shadow on a static element is noise; remove it.",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do use Orbitron for product-identity text (the product name, section titles, wizard step headings) and DM Sans for everything the user actually reads.",
+      "Do keep accents rare. Film Burn and End-Reel Flare are state signals, not decoration. If they appear more than 10% of a given surface at rest, pull back.",
+      "Do start any new full-bleed background from .app-gradient — the radial Emulsion Blue hazes over Projection Booth. The atmosphere is the product.",
+      "Do use scale(1.05) plus shadow-2xl as the hover treatment for cards. The scale is the affordance; the shadow follows.",
+      "Do apply the snake border to every interactive element that is not a plain text link. It is the system's handshake with the user.",
+      "Do use the four-step neutral scale (Projection Booth, Lamphouse, Exposure, Silver Edge) for surface layering. Never introduce a fifth neutral."
+    ],
+    "donts": [
+      "Don't build a Letterboxd. Triple Feature has no community layer, no film diary, no social feed, no critic scores. No Tomatometer badges, no review counts, no 'people who liked X' rows.",
+      "Don't build a Netflix or streaming service interface. No infinite scroll grids, no genre carousels, no 'because you watched' recommendations. The product is three answers, not forty options.",
+      "Don't build a generic SaaS dark mode. No dark-blue sidebar plus card grid template. The dark aesthetic is earned from cinema, not borrowed from a B2B dashboard.",
+      "Don't use border-left greater than 1px as a colored accent stripe on cards, callouts, or list items. Rewrite with background tints, full borders, or nothing.",
+      "Don't use gradient text (background-clip: text with a gradient fill). Use solid Film Burn, Emulsion Blue, or white. Emphasis through weight or size.",
+      "Don't use glassmorphism decoratively. .glass-effect exists for the mobile nav drawer and modal overlays only. It is not a default card treatment.",
+      "Don't add resting shadows to static elements. Shadows appear only on hover. A resting shadow is noise.",
+      "Don't let Projection Arc (#fbbf24) migrate beyond its role. It is for star ratings and score badges. It is not an action color, CTA color, or hover color."
+    ]
+  }
+}

@@ -1,5 +1,3 @@
-import { motion } from 'framer-motion';
-
 const GlowButton = ({
   children,
   className = '',
@@ -8,34 +6,22 @@ const GlowButton = ({
   type = 'button',
   ...props
 }) => {
-  const base = 'relative inline-flex items-center justify-center rounded-lg px-6 py-3 font-semibold disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none isolate trace-snake';
+  const base = 'inline-flex items-center justify-center rounded px-5 py-2.5 text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed';
   const variants = {
-    primary: 'bg-cinema-dark text-white border border-cinema-gray',
-    secondary: 'bg-cinema-gray text-white border border-cinema-light',
+    primary: 'bg-ink text-paper border border-ink hover:bg-reel hover:border-reel',
+    secondary: 'bg-frame text-ink border border-ash hover:border-fog',
   };
 
   return (
-    <motion.button
-      whileHover={disabled ? {} : {}}
-      whileTap={disabled ? {} : {}}
+    <button
       disabled={disabled}
       type={type}
-      className={`${base} ${disabled ? '' : 'snake-hover'} ${variants[variant]} ${className}`}
+      className={`${base} ${variants[variant]} ${className}`}
       {...props}
     >
-      <span className="relative z-10 inline-flex items-center gap-2">{children}</span>
-      {!disabled && (
-        <>
-          <span className="trace-line trace-line--t" />
-          <span className="trace-line trace-line--r" />
-          <span className="trace-line trace-line--b" />
-          <span className="trace-line trace-line--l" />
-        </>
-      )}
-    </motion.button>
+      <span className="inline-flex items-center gap-2">{children}</span>
+    </button>
   );
 };
 
 export default GlowButton;
-
-

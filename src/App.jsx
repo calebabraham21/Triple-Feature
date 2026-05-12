@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { AlertTriangle } from 'lucide-react';
 import Header from './components/Header';
 import HomePage from './pages/HomePage';
 import AboutMe from './pages/AboutMe';
@@ -73,7 +72,7 @@ function App() {
   return (
     <Router>
       <ToastProvider>
-        <div className="min-h-screen app-gradient">
+        <div className="min-h-screen bg-paper">
           <Header
             currentPage={currentPage}
             currentStep={currentStep}
@@ -106,45 +105,45 @@ function App() {
           <Footer />
         </div>
 
+        {/* Leave recommendations confirmation */}
         <AnimatePresence>
           {showLeaveRecommendationsConfirm && (
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              transition={{ duration: 0.3, ease: 'easeOut' }}
-              className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/90"
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-ink/40"
               onClick={cancelLeaveNavigation}
             >
               <motion.div
-                initial={{ scale: 0.9, y: 20 }}
+                initial={{ scale: 0.95, y: 12 }}
                 animate={{ scale: 1, y: 0 }}
-                exit={{ scale: 0.9, y: 20 }}
-                transition={{ duration: 0.3, ease: 'easeOut' }}
-                className="bg-cinema-dark border border-cinema-light/30 rounded-2xl p-6 max-w-md w-full shadow-2xl"
+                exit={{ scale: 0.95, y: 12 }}
+                transition={{ duration: 0.2, ease: 'easeOut' }}
+                className="bg-frame border border-ash rounded-xl p-7 max-w-sm w-full shadow-xl"
                 onClick={(e) => e.stopPropagation()}
               >
-                <div className="text-center mb-6">
-                  <AlertTriangle size={48} className="mx-auto text-accent-yellow mb-4" />
-                  <h3 className="text-xl font-bold text-white mb-2">Leave Recommendations?</h3>
-                  <p className="text-white/80 text-sm">
-                    Are you sure you want to leave these recommendations? You&apos;ll need to go through the selection process again.
+                <div className="mb-6">
+                  <h3 className="font-cinema text-lg font-medium text-ink mb-2">Leave recommendations?</h3>
+                  <p className="text-sm text-fog leading-relaxed">
+                    You'll need to go through the selection process again if you leave now.
                   </p>
                 </div>
                 <div className="flex gap-3">
                   <button
                     type="button"
                     onClick={cancelLeaveNavigation}
-                    className="flex-1 px-4 py-2 bg-cinema-gray hover:bg-cinema-light text-white rounded-lg transition-colors"
+                    className="flex-1 px-4 py-2.5 text-sm font-medium text-fog border border-ash rounded hover:border-fog hover:text-ink transition-colors"
                   >
-                    Stay Here
+                    Stay here
                   </button>
                   <button
                     type="button"
                     onClick={confirmLeaveNavigation}
-                    className="flex-1 px-4 py-2 bg-accent-blue hover:bg-accent-blue/80 text-white rounded-lg transition-colors"
+                    className="flex-1 px-4 py-2.5 text-sm font-medium text-paper bg-ink rounded hover:bg-reel transition-colors"
                   >
-                    Leave Page
+                    Leave
                   </button>
                 </div>
               </motion.div>

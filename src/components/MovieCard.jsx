@@ -1,334 +1,297 @@
 import { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Star, Calendar, User, Globe, Clock, X } from 'lucide-react';
-import { getPosterUrl, getBackdropUrl, formatRating, getLanguageName, getWatchProviders, tmdbConfig, getMovieDetails } from '../utils/tmdb';
-import GlowButton from './GlowButton';
+import { X } from 'lucide-react';
+import {
+  getPosterUrl,
+  getBackdropUrl,
+  formatRating,
+  getLanguageName,
+  getWatchProviders,
+  tmdbConfig,
+  getMovieDetails,
+} from '../utils/tmdb';
 
 const MovieCard = ({ movie, showDirector = true }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [details, setDetails] = useState(null);
   const [mounted, setMounted] = useState(false);
 
-  const getYear = (dateString) => {
-    if (!dateString) return 'N/A';
-    return new Date(dateString).getFullYear();
-  };
+  const getYear = (dateString) => (dateString ? new Date(dateString).getFullYear() : null);
 
-  // Normalize fields for API shape (snake_case) or camelCase
   const posterPath = movie.poster_path || movie.posterPath;
   const backdropPath = movie.backdrop_path || movie.backdropPath;
   const releaseDate = movie.release_date || movie.releaseDate;
   const originalLanguage = movie.original_language || movie.originalLanguage;
 
-  // Lazy-load full details (runtime, genres, full cast) when opening the modal
   useEffect(() => {
     if (!showDetails) return;
-    
-    // Lock background scroll when modal is open
     document.body.style.overflow = 'hidden';
-    
     let active = true;
-    const load = async () => {
-      try {
-        const d = await getMovieDetails(movie.id);
-        if (!active) return;
-        setDetails(d);
-      } catch {
-        if (!active) return;
-      }
-    };
-    load();
-    
-    // Cleanup function to restore scroll when modal closes or component unmounts
-    return () => { 
+    getMovieDetails(movie.id)
+      .then((d) => { if (active) setDetails(d); })
+      .catch(() => {});
+    return () => {
       active = false;
       document.body.style.overflow = 'unset';
     };
   }, [showDetails, movie.id]);
 
-  // Ensure portals mount only on client
   useEffect(() => { setMounted(true); }, []);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="movie-card group"
-    >
-      {/* Poster */}
-      <div className="relative overflow-hidden h-80">
-        {/* Blurred zoomed background using poster or backdrop */}
-        <img
-          src={
-            (posterPath && getPosterUrl(posterPath)) ||
-            (backdropPath && getBackdropUrl(backdropPath)) ||
-            '/placeholder-poster.jpg'
-          }
-          alt=""
-          aria-hidden="true"
-          className="absolute inset-0 w-full h-full object-cover scale-110 blur-2xl opacity-60"
-          onError={(e) => {
-            e.currentTarget.style.display = 'none';
-          }}
-        />
-        <div className="absolute inset-0 bg-black/40" aria-hidden="true" />
-        {/* Foreground poster, fully visible without cropping */}
-        <img
-          src={getPosterUrl(posterPath) || '/placeholder-poster.jpg'}
-          alt={movie.title}
-          className="relative z-10 w-full h-full object-contain"
-          onError={(e) => {
-            e.target.src = '/placeholder-poster.jpg';
-          }}
-        />
-
-        {/* Rating badge (top-right) */}
-        {movie.vote_average && (
-          <div className="absolute top-2 right-2 z-20 bg-cinema-dark/90 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1.5 text-sm shadow-md">
-            <Star size={16} className="text-accent-gold fill-current" />
-            <span className="font-semibold">{formatRating(movie.vote_average)}</span>
-          </div>
-        )}
-        {/* Language badge (top-left) */}
-        {originalLanguage && (
-          <div className="absolute top-2 left-2 z-20 bg-cinema-dark/90 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1.5 text-sm text-white shadow-md">
-            <Globe size={14} className="opacity-80" />
-            <span className="font-medium">{getLanguageName(originalLanguage)}</span>
-          </div>
-        )}
-        {/* Year badge (bottom-left) */}
-        {releaseDate && (
-          <div className="absolute bottom-2 left-2 z-20 bg-cinema-dark/90 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1.5 text-sm text-white shadow-md">
-            <Calendar size={14} className="opacity-80" />
-            <span className="font-medium">{getYear(releaseDate)}</span>
-          </div>
-        )}
-        {/* Runtime badge (bottom-right) */}
-        {movie.runtime && (
-          <div className="absolute bottom-2 right-2 z-20 bg-cinema-dark/90 backdrop-blur-sm rounded-full px-3 py-1.5 flex items-center gap-1.5 text-sm text-white shadow-md">
-            <Clock size={14} className="opacity-80" />
-            <span className="font-medium">
-              {movie.runtime >= 60 
-                ? `${Math.floor(movie.runtime / 60)}h ${movie.runtime % 60}m`
-                : `${movie.runtime}m`}
-            </span>
-          </div>
-        )}
-      </div>
-
-      {/* Content */}
-      <div className="p-4">
-        {/* Title only with single-line clamp */}
-        <div className="mb-5">
-          <h3 className="font-semibold text-lg leading-tight text-white line-clamp-1">{movie.title}</h3>
-        </div>
-
-        {/* Director */}
-        {showDirector && movie.director && (
-          <div className="flex items-center gap-2 text-sm text-white mb-4">
-            <User size={14} className="text-white" />
-            <span className="font-medium">Dir. {movie.director}</span>
-          </div>
-        )}
-
-        {/* Overview */}
-        <p className="text-sm text-white mb-4 leading-relaxed line-clamp-3">{movie.overview}</p>
-
-        <div className="flex gap-2">
-          <GlowButton
-            variant="secondary"
-            className="flex-1 text-sm py-2.5 px-3 md:px-4 hover:border-accent-blue/60"
-            onClick={() => setShowDetails(true)}
-          >
-            View Details
-          </GlowButton>
-        </div>
-      </div>
-
-      {/* Details Modal */}
-      {mounted && createPortal(
-        (<AnimatePresence>
-        {showDetails && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.18, ease: 'easeOut' }}
-            className="fixed inset-0 z-50 flex items-center justify-center"
-            style={{ willChange: 'opacity' }}
-          >
-            {/* No backdrop blur for performance */}
-            {/* Faded tint layer (click to close) */}
-            <div
-              className="absolute inset-0 bg-black/80"
-              onClick={() => setShowDetails(false)}
+    <>
+      {/* Archive row */}
+      <div
+        className="archive-row"
+        onClick={() => setShowDetails(true)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => e.key === 'Enter' && setShowDetails(true)}
+        aria-haspopup="dialog"
+      >
+        {/* Poster thumbnail */}
+        <div className="flex-shrink-0 w-14 sm:w-16">
+          <div className="aspect-[2/3] overflow-hidden rounded-sm bg-smoke">
+            <img
+              src={getPosterUrl(posterPath, 'w185') || '/placeholder-poster.jpg'}
+              alt={movie.title}
+              className="w-full h-full object-cover"
+              onError={(e) => { e.target.src = '/placeholder-poster.jpg'; }}
+              loading="lazy"
             />
-            
-            {/* Modal wrapper */}
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="flex-1 min-w-0 flex flex-col justify-center gap-1">
+          <div className="flex items-baseline justify-between gap-3 flex-wrap">
+            <h3 className="font-cinema text-sm sm:text-base font-medium text-ink line-clamp-1 leading-snug">
+              {movie.title}
+            </h3>
+            <div className="flex items-center gap-2.5 text-xs text-fog flex-shrink-0 font-mono">
+              {movie.vote_average && <span>{formatRating(movie.vote_average)}</span>}
+              {releaseDate && getYear(releaseDate) && <span>{getYear(releaseDate)}</span>}
+            </div>
+          </div>
+
+          {showDirector && movie.director && (
+            <div className="text-xs text-fog line-clamp-1">
+              Dir. {movie.director}
+              {originalLanguage && originalLanguage !== 'en' && (
+                <span className="ml-2 opacity-70">· {getLanguageName(originalLanguage)}</span>
+              )}
+            </div>
+          )}
+
+          {movie.overview && (
+            <p className="text-xs text-fog mt-0.5 line-clamp-2 leading-relaxed">{movie.overview}</p>
+          )}
+        </div>
+      </div>
+
+      {/* Film detail modal */}
+      {mounted && createPortal(
+        <AnimatePresence>
+          {showDetails && (
             <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 12 }}
-              transition={{ duration: 0.18, ease: 'easeOut' }}
-              className="relative z-10 w-[min(980px,95vw)] max-h-[90vh] rounded-xl border border-cinema-gray/30 bg-cinema-dark overflow-hidden"
-              style={{ willChange: 'transform, opacity' }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2, ease: 'easeOut' }}
+              className="fixed inset-0 z-50 flex items-end sm:items-center justify-center"
+              style={{ willChange: 'opacity' }}
             >
-              {/* Scrollable content (header included so it scrolls away) */}
-              <div className="relative overflow-y-auto will-change-transform" style={{ maxHeight: '90vh', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}>
-                {/* Floating close button (pinned) */}
-                <button
-                  onClick={() => setShowDetails(false)}
-                  aria-label="Close"
-                  className="absolute top-2 left-2 sm:top-3 sm:left-3 z-50 p-2 rounded-full bg-cinema-dark/80 border border-cinema-light/30 text-white hover:bg-cinema-gray/80 shadow-md"
+              <div
+                className="absolute inset-0 bg-ink/50"
+                onClick={() => setShowDetails(false)}
+              />
+
+              <motion.div
+                initial={{ opacity: 0, y: 18 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 18 }}
+                transition={{ duration: 0.25, ease: [0.2, 0, 0, 1] }}
+                className="relative z-10 w-full sm:w-[min(900px,95vw)] max-h-[92vh] sm:max-h-[88vh] bg-frame rounded-t-2xl sm:rounded-xl overflow-hidden border border-smoke shadow-2xl"
+                style={{ willChange: 'transform, opacity' }}
+              >
+                <div
+                  className="overflow-y-auto"
+                  style={{ maxHeight: '92vh', overscrollBehavior: 'contain', WebkitOverflowScrolling: 'touch' }}
                 >
-                  <X size={18} />
-                </button>
-                {/* Header: Backdrop + Poster (use CSS mask to avoid border seam) */}
-                <div className="relative h-48 sm:h-56 overflow-hidden" style={{ backgroundColor: '#1a1a1a' }}>
-                  {/* Backdrop image */}
-                  <div 
-                    className="absolute -inset-1 bg-cover bg-center bg-no-repeat"
-                    style={{
-                      backgroundImage: `url(${backdropPath ? getBackdropUrl(backdropPath, 'original') : (posterPath ? getPosterUrl(posterPath, 'original') : '')})`,
-                      transform: 'scale(1.05)'
-                    }}
-                  />
-                  {/* Subtle dark veil to improve text contrast */}
-                  <div className="absolute inset-0 bg-black/70 pointer-events-none" aria-hidden="true" />
-                  {/* Progressive fade overlay to base grey */}
-                  <div
-                    className="absolute -inset-1 pointer-events-none"
-                    style={{
-                      background: 'linear-gradient(to bottom, rgba(26,26,26,0) 0%, rgba(26,26,26,0) 68%, rgba(26,26,26,0.55) 84%, rgba(26,26,26,0.85) 94%, rgba(26,26,26,1) 100%)'
-                    }}
-                  />
-                  {/* Poster over backdrop */}
-                  <div className="absolute top-4 right-4 z-50">
-                    <img 
-                      src={getPosterUrl(posterPath)} 
-                      alt={movie.title} 
-                      className="w-28 h-42 sm:w-32 sm:h-48 object-cover rounded-lg shadow-2xl border-2 border-white/40" 
-                      loading="lazy" 
-                      decoding="async" 
-                    />
-                  </div>
-                  {/* Overlayed heading & meta */}
-                  <div className="absolute inset-x-4 bottom-3 sm:bottom-4 z-40 pr-28 sm:pr-0">
-                    <div className="flex items-baseline gap-2 flex-wrap">
-                      <h2 className="text-xl md:text-2xl font-bold text-white drop-shadow leading-tight line-clamp-3">{movie.title}</h2>
-                      {releaseDate && (
-                        <span className="text-white/85">{getYear(releaseDate)}</span>
-                      )}
-                    </div>
-                    {movie.director && (
-                      <p className="text-sm text-white/90 leading-snug">Directed by <span className="font-medium">{movie.director}</span></p>
-                    )}
-                    <div className="flex flex-wrap gap-2 text-xs text-white/80 mt-1">
-                      {(details?.runtime || movie.runtime) && (
-                        <span>{details?.runtime || movie.runtime} min</span>
-                      )}
-                      {originalLanguage && (details?.runtime || movie.runtime) && (<span>•</span>)}
-                      {originalLanguage && (
-                        <span>{getLanguageName(originalLanguage)}</span>
-                      )}
-                      {Array.isArray(details?.genres) && details.genres.length > 0 && originalLanguage && (<span>•</span>)}
-                      {Array.isArray(details?.genres) && details.genres.length > 0 && (
-                        <span>{details.genres.map(g => g.name).slice(0, 3).join(', ')}</span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-                <div className="p-4 sm:p-6 pt-4 sm:pt-6">
-                {/* Letterboxd-style vertical layout */}
-                <div className="space-y-4">
-                  {/* Title/meta moved over backdrop */}
+                  {/* Close button */}
+                  <button
+                    onClick={() => setShowDetails(false)}
+                    aria-label="Close"
+                    className="absolute top-3 right-3 z-50 p-1.5 rounded-full bg-frame/90 border border-smoke text-fog hover:text-ink transition-colors"
+                  >
+                    <X size={16} />
+                  </button>
 
-                  {/* Description */}
-                  {movie.overview && (
-                    <div className="space-y-2">
-                      <p className="text-sm text-white leading-relaxed">
-                        {movie.overview}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Cast section */}
-                  <div className="space-y-3">
-                    {(() => {
-                      const castNames = details?.credits?.cast?.slice(0, 6)?.map(c => c.name)
-                        || (Array.isArray(movie.cast) ? movie.cast.slice(0, 6) : []);
-                      if (!castNames || castNames.length === 0) return null;
-                      return (
-                        <div className="space-y-2">
-                          <p className="text-sm text-white font-medium">Cast</p>
-                          <div className="flex flex-wrap gap-1.5">
-                            {castNames.map((name) => (
-                              <span key={name} className="px-2.5 py-1 rounded-full bg-cinema-gray/50 border border-cinema-light text-xs text-white">
-                                {name}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      );
-                    })()}
-                  </div>
-
-                  {/* Streaming providers */}
-                  <div className="space-y-3">
-                    <p className="text-sm text-white font-medium">Where to watch (US)</p>
-                    <StreamingProviders movieId={movie.id} delayMs={250} />
-                  </div>
-                  
-                  <div className="flex flex-wrap gap-2 pt-4">
-                    <a
-                      href={`https://www.themoviedb.org/movie/${movie.id}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-2 px-3 py-2.5 md:px-4 md:py-2.5 rounded-lg font-medium text-white border border-blue-800/40 hover:border-blue-700/50 transition-all duration-300 text-sm bg-gradient-to-r from-slate-900 to-blue-950 hover:from-slate-800 hover:to-blue-900 shadow-lg hover:shadow-blue-900/30"
-                    >
-                      <img 
-                        src="/TMDB_logo.svg" 
-                        alt="TMDB" 
-                        className="w-4 h-4 md:w-5 md:h-5"
+                  {/* Hero image — desaturated for editorial feel */}
+                  <div className="relative overflow-hidden bg-reel" style={{ aspectRatio: '16/7', minHeight: '180px' }}>
+                    {(backdropPath || posterPath) && (
+                      <img
+                        src={
+                          backdropPath
+                            ? getBackdropUrl(backdropPath, 'original')
+                            : getPosterUrl(posterPath, 'original')
+                        }
+                        alt=""
+                        aria-hidden="true"
+                        className="w-full h-full object-cover"
+                        style={{ filter: 'saturate(0.25) brightness(0.65)' }}
                       />
-                      <span className="hidden sm:inline">Read More on TMDB</span>
-                      <span className="sm:hidden">TMDB</span>
-                    </a>
-                    <button
-                      type="button"
-                      onClick={() => setShowDetails(false)}
-                      className="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg font-medium text-white border border-white/25 hover:bg-white/10 transition-colors text-sm"
-                    >
-                      Close
-                    </button>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-reel/80" />
+                  </div>
+
+                  {/* Content */}
+                  <div className="p-6 sm:p-8">
+                    {/* Title + meta */}
+                    <div className="mb-6">
+                      <h2 className="font-cinema text-2xl sm:text-3xl font-medium text-ink leading-tight mb-2">
+                        {movie.title}
+                      </h2>
+                      <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm text-fog">
+                        {releaseDate && getYear(releaseDate) && <span>{getYear(releaseDate)}</span>}
+                        {(details?.runtime || movie.runtime) && (
+                          <><span className="text-ash">·</span><span>{details?.runtime || movie.runtime} min</span></>
+                        )}
+                        {Array.isArray(details?.genres) && details.genres.length > 0 && (
+                          <><span className="text-ash">·</span><span>{details.genres.map((g) => g.name).slice(0, 3).join(', ')}</span></>
+                        )}
+                        {movie.director && (
+                          <><span className="text-ash">·</span><span>Dir. {movie.director}</span></>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Two-column layout */}
+                    <div className="grid sm:grid-cols-[1fr_160px] gap-8">
+                      {/* Main column */}
+                      <div className="space-y-6 min-w-0">
+                        {movie.overview && (
+                          <p className="text-sm text-ink leading-relaxed">{movie.overview}</p>
+                        )}
+
+                        {/* Cast */}
+                        {(() => {
+                          const castNames =
+                            details?.credits?.cast?.slice(0, 6)?.map((c) => c.name) ||
+                            (Array.isArray(movie.cast) ? movie.cast.slice(0, 6) : []);
+                          if (!castNames?.length) return null;
+                          return (
+                            <div>
+                              <div className="text-xs font-semibold tracking-widest uppercase text-fog mb-2">Cast</div>
+                              <div className="flex flex-wrap gap-1.5">
+                                {castNames.map((name) => (
+                                  <span
+                                    key={name}
+                                    className="text-xs px-2.5 py-1 bg-smoke border border-ash rounded-full text-ink"
+                                  >
+                                    {name}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          );
+                        })()}
+
+                        {/* Streaming */}
+                        <div>
+                          <div className="text-xs font-semibold tracking-widest uppercase text-fog mb-2">Where to watch (US)</div>
+                          <StreamingProviders movieId={movie.id} delayMs={200} />
+                        </div>
+
+                        {/* Actions */}
+                        <div className="flex items-center gap-5 pt-1">
+                          <a
+                            href={`https://www.themoviedb.org/movie/${movie.id}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs text-fog hover:text-ink transition-colors underline underline-offset-2"
+                          >
+                            <img src="/TMDB_logo.svg" alt="TMDB" className="w-4 h-4 opacity-50" />
+                            More on TMDB
+                          </a>
+                          <button
+                            type="button"
+                            onClick={() => setShowDetails(false)}
+                            className="text-xs text-fog hover:text-ink transition-colors"
+                          >
+                            Close
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Sidebar */}
+                      <div className="space-y-4">
+                        {posterPath && (
+                          <div className="aspect-[2/3] overflow-hidden rounded bg-smoke">
+                            <img
+                              src={getPosterUrl(posterPath)}
+                              alt={movie.title}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                          </div>
+                        )}
+
+                        <div className="space-y-3 text-xs">
+                          {movie.director && (
+                            <div>
+                              <div className="font-semibold tracking-widest uppercase text-fog/60 mb-0.5">Director</div>
+                              <div className="text-ink">{movie.director}</div>
+                            </div>
+                          )}
+                          {originalLanguage && (
+                            <div>
+                              <div className="font-semibold tracking-widest uppercase text-fog/60 mb-0.5">Language</div>
+                              <div className="text-ink">{getLanguageName(originalLanguage)}</div>
+                            </div>
+                          )}
+                          {releaseDate && (
+                            <div>
+                              <div className="font-semibold tracking-widest uppercase text-fog/60 mb-0.5">Released</div>
+                              <div className="text-ink">
+                                {new Date(releaseDate).toLocaleDateString('en-US', {
+                                  month: 'long',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                })}
+                              </div>
+                            </div>
+                          )}
+                          {movie.vote_average && (
+                            <div>
+                              <div className="font-semibold tracking-widest uppercase text-fog/60 mb-0.5">Rating</div>
+                              <div className="text-ink">{formatRating(movie.vote_average)} / 10</div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-                </div>
-              </div>
+              </motion.div>
             </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>), document.body)}
-    </motion.div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
+    </>
   );
 };
 
-// Fetch and render US streaming providers grouped by subcategory
 const StreamingProviders = ({ movieId, delayMs = 0 }) => {
-  const [state, setState] = useState({
-    groups: null,
-    loading: true,
-  });
+  const [state, setState] = useState({ groups: null, loading: true });
 
   useEffect(() => {
     let active = true;
     const load = async () => {
       try {
-        if (delayMs) {
-          await new Promise((r) => setTimeout(r, delayMs));
-        }
+        if (delayMs) await new Promise((r) => setTimeout(r, delayMs));
         const data = await getWatchProviders(movieId);
         const us = data?.results?.US;
         const groups = {
@@ -351,73 +314,53 @@ const StreamingProviders = ({ movieId, delayMs = 0 }) => {
 
   const { groups, loading } = state;
   if (loading) return null;
-  
-  // Group rent and buy together, keep others separate
+
   const combinedGroups = {};
   if (groups) {
-    // Keep Free, Subscription, and Ad-supported as separate sections
-    if (groups.Free && groups.Free.length > 0) combinedGroups.Free = groups.Free;
-    if (groups.Subscription && groups.Subscription.length > 0) combinedGroups.Subscription = groups.Subscription;
-    if (groups['Ad-supported'] && groups['Ad-supported'].length > 0) combinedGroups['Ad-supported'] = groups['Ad-supported'];
-    
-    // Combine Rent and Buy into one section, deduplicating providers
+    if (groups.Free?.length) combinedGroups.Free = groups.Free;
+    if (groups.Subscription?.length) combinedGroups.Subscription = groups.Subscription;
+    if (groups['Ad-supported']?.length) combinedGroups['Ad-supported'] = groups['Ad-supported'];
+
     const rentAndBuy = [];
-    const seenProviders = new Set();
-    
-    if (groups.Rent && groups.Rent.length > 0) {
-      groups.Rent.forEach(provider => {
-        if (!seenProviders.has(provider.provider_id)) {
-          rentAndBuy.push(provider);
-          seenProviders.add(provider.provider_id);
-        }
-      });
-    }
-    
-    if (groups.Buy && groups.Buy.length > 0) {
-      groups.Buy.forEach(provider => {
-        if (!seenProviders.has(provider.provider_id)) {
-          rentAndBuy.push(provider);
-          seenProviders.add(provider.provider_id);
-        }
-      });
-    }
-    
-    if (rentAndBuy.length > 0) combinedGroups['Rent or Buy'] = rentAndBuy;
+    const seen = new Set();
+    [...(groups.Rent || []), ...(groups.Buy || [])].forEach((p) => {
+      if (!seen.has(p.provider_id)) { rentAndBuy.push(p); seen.add(p.provider_id); }
+    });
+    if (rentAndBuy.length) combinedGroups['Rent or Buy'] = rentAndBuy;
   }
-  
-  const nonEmpty = Object.entries(combinedGroups).filter(([, arr]) => Array.isArray(arr) && arr.length > 0);
-  if (!nonEmpty || nonEmpty.length === 0) {
+
+  const nonEmpty = Object.entries(combinedGroups).filter(([, arr]) => arr?.length);
+  if (!nonEmpty.length) {
     return (
-      <div className="text-center py-4">
-        <p className="text-sm text-white/60 italic">Currently not available for streaming in the US</p>
-      </div>
+      <p className="text-xs text-fog italic">Not currently available for streaming in the US</p>
     );
   }
 
   return (
-    <div className="space-y-3 md:space-y-4">
+    <div className="space-y-3">
       {nonEmpty.map(([label, list]) => (
-        <div key={label} className="space-y-2">
-          <p className="text-xs text-white font-medium">{label}</p>
-          <div className="flex flex-wrap items-center gap-1 md:gap-1.5">
+        <div key={label}>
+          <p className="text-xs text-fog/70 mb-1.5">{label}</p>
+          <div className="flex flex-wrap gap-1.5">
             {list.map((p) => (
-              <div key={`${label}-${p.provider_id}`} className="flex items-center gap-1.5 bg-cinema-gray/60 border border-cinema-light rounded-full px-2 py-1 md:px-2.5 md:py-1.5">
+              <div
+                key={`${label}-${p.provider_id}`}
+                className="flex items-center gap-1.5 border border-ash rounded-full px-2.5 py-1 bg-smoke"
+              >
                 {p.logo_path && (
                   <img
                     src={`${tmdbConfig.imageBaseURL}/original${p.logo_path}`}
                     alt={p.provider_name}
-                    className="w-5 h-5 md:w-5 md:h-5 object-contain rounded"
+                    className="w-4 h-4 object-contain rounded"
                     loading="lazy"
-                    decoding="async"
                   />
                 )}
-                <span className="text-xs md:text-sm text-white whitespace-nowrap">{p.provider_name}</span>
+                <span className="text-xs text-ink whitespace-nowrap">{p.provider_name}</span>
               </div>
             ))}
           </div>
         </div>
       ))}
-
     </div>
   );
 };

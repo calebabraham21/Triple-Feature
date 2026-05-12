@@ -1,233 +1,127 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Home, Info, Menu, X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import { useState, useLayoutEffect, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createPortal } from 'react-dom';
-import TripFeatLogo from '../../TripFeatLogo.png';
 
 const Header = ({ currentPage, onNavigate, onHomeNavigation, onProtectedNavRequest }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const navRef = useRef(null);
-
   const navigate = useNavigate();
-  const listVariants = {
-    hidden: {},
-    show: {
-      transition: { staggerChildren: 0.025 },
-    },
-  };
-  const itemVariants = {
-    hidden: { opacity: 0, y: 6, scale: 0.98 },
-    show: { opacity: 1, y: 0, scale: 1, transition: { duration: 0.16, ease: 'easeOut' } },
-  };
-
-  const leftNavItems = [
-    { id: 'home', label: 'Home', icon: Home },
-  ];
-
-  const rightNavItems = [{ id: 'about-me', label: 'About Me', icon: Info }];
-
-  const allNavItems = [...leftNavItems, ...rightNavItems];
 
   useLayoutEffect(() => {
     const updateNavHeight = () => {
-      const height = navRef.current?.offsetHeight || 80;
+      const height = navRef.current?.offsetHeight || 64;
       document.documentElement.style.setProperty('--nav-height', `${height}px`);
     };
-
     updateNavHeight();
     window.addEventListener('resize', updateNavHeight);
-
     return () => window.removeEventListener('resize', updateNavHeight);
   }, []);
-
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
-  };
 
   useEffect(() => {
     if (isMobileMenuOpen) {
       const scrollY = window.scrollY;
-
       document.body.style.overflow = 'hidden';
       document.body.style.position = 'fixed';
       document.body.style.top = `-${scrollY}px`;
       document.body.style.width = '100%';
-
-      const scrollableElements = document.querySelectorAll('*');
-      scrollableElements.forEach((element) => {
-        if (getComputedStyle(element).overflow === 'auto' || getComputedStyle(element).overflow === 'scroll') {
-          element.style.overflow = 'hidden';
-        }
-      });
     } else {
       const scrollY = document.body.style.top;
       document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.top = '';
       document.body.style.width = '';
-
-      const scrollableElements = document.querySelectorAll('*');
-      scrollableElements.forEach((element) => {
-        if (element.style.overflow === 'hidden') {
-          element.style.overflow = '';
-        }
-      });
-
-      if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || '0', 10) * -1);
-      }
+      if (scrollY) window.scrollTo(0, parseInt(scrollY || '0', 10) * -1);
     }
-
     return () => {
       const scrollY = document.body.style.top;
       document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.top = '';
       document.body.style.width = '';
-
-      if (scrollY) {
-        window.scrollTo(0, parseInt(scrollY || '0', 10) * -1);
-      }
+      if (scrollY) window.scrollTo(0, parseInt(scrollY || '0', 10) * -1);
     };
   }, [isMobileMenuOpen]);
 
   const goPath = (path) => {
-    if (onProtectedNavRequest) {
-      onProtectedNavRequest(path);
-    } else {
-      navigate(path);
-    }
+    if (onProtectedNavRequest) onProtectedNavRequest(path);
+    else navigate(path);
   };
 
   const handleNavigation = (page) => {
     if (page === 'home') {
-      if (onHomeNavigation) {
-        onHomeNavigation();
-        return;
-      }
+      if (onHomeNavigation) { onHomeNavigation(); return; }
     }
-
     onNavigate(page);
     setIsMobileMenuOpen(false);
-
     switch (page) {
-      case 'home':
-        navigate('/');
-        break;
-      case 'about-me':
-        goPath('/about-me');
-        break;
-      default:
-        navigate('/');
+      case 'home': navigate('/'); break;
+      case 'about-me': goPath('/about-me'); break;
+      default: navigate('/');
     }
   };
 
-  const renderNavLink = (item) => {
-    const Icon = item.icon;
-    const isActive = currentPage === item.id;
-
-    return (
-      <motion.a
-        key={item.id}
-        href="#"
-        onClick={(e) => {
-          e.preventDefault();
-          handleNavigation(item.id);
-        }}
-        className={`relative inline-flex items-center gap-2 px-3 py-2 text-base font-medium transition-all duration-300 cursor-pointer group ${
-          isActive ? 'text-accent-blue' : 'text-white/80'
-        } hover:text-white hover:scale-105`}
-        whileHover={{ y: -2 }}
-      >
-        <Icon size={16} className="transition-transform duration-300 group-hover:rotate-12" />
-        <span className="hidden lg:inline relative">
-          {item.label}
-          <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-accent-blue to-accent-purple transition-all duration-300 group-hover:w-full"></span>
-        </span>
-      </motion.a>
-    );
-  };
+  const navItems = [
+    { id: 'home', label: 'Home' },
+    { id: 'about-me', label: 'About' },
+  ];
 
   return (
-    <header ref={navRef} className="site-nav fixed top-0 left-0 right-0 z-50 backdrop-blur-xl border-b border-white/10">
-      <div className="absolute inset-0 overflow-hidden">
-        <img
-          src="/movie-posters.jpg"
-          alt=""
-          className="w-full h-full object-cover blur-lg opacity-40 scale-110"
-        />
-      </div>
-      <div className="absolute inset-0 bg-black/60" />
-      <div className="absolute inset-0 bg-gradient-to-r from-accent-red/10 via-accent-purple/15 to-accent-blue/10" />
+    <header ref={navRef} className="fixed top-0 left-0 right-0 z-50 bg-frame/95 backdrop-blur-sm border-b border-smoke">
 
-      <div className="hidden md:block py-2.5 relative z-10">
-        <div className="max-w-5xl mx-auto px-8 flex items-center justify-between">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="cursor-pointer"
-            onClick={() => {
-              if (onHomeNavigation) {
-                onHomeNavigation();
-              } else {
-                handleNavigation('home');
-              }
-            }}
-            whileHover={{ scale: 1.05 }}
-          >
-            <img
-              src={TripFeatLogo}
-              alt="Triple Feature"
-              className="h-16 w-auto object-contain drop-shadow-lg"
-            />
-          </motion.div>
-
-          <motion.nav
-            initial={{ opacity: 0, x: 50 }}
-            animate={{ opacity: 1, x: 0 }}
-            className="flex items-center gap-2"
-          >
-            {[...leftNavItems, ...rightNavItems].map(renderNavLink)}
-          </motion.nav>
-        </div>
-      </div>
-
-      <div className="md:hidden flex items-center justify-between px-4 py-2 relative z-10">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className="cursor-pointer"
-          onClick={() => {
-            if (onHomeNavigation) {
-              onHomeNavigation();
-            } else {
-              handleNavigation('home');
-            }
-          }}
-          whileHover={{ scale: 1.05 }}
-        >
-          <img
-            src={TripFeatLogo}
-            alt="Triple Feature"
-            className="h-14 w-auto object-contain drop-shadow-lg"
-          />
-        </motion.div>
-
-        <motion.button
+      {/* Desktop */}
+      <div className="hidden md:flex items-center justify-between h-16 max-w-5xl mx-auto px-8">
+        <button
           type="button"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={toggleMobileMenu}
-          className="p-2.5 bg-cinema-black/80 backdrop-blur-sm border border-cinema-light rounded-lg text-white hover:bg-cinema-gray transition-colors"
-          title={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+          onClick={() => onHomeNavigation ? onHomeNavigation() : handleNavigation('home')}
+          className="font-cinema text-xl font-medium tracking-tight text-ink hover:opacity-60 transition-opacity"
         >
-          {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-        </motion.button>
+          Triple Feature
+        </button>
+
+        <nav className="flex items-center gap-8">
+          {navItems.map((item) => {
+            const isActive = currentPage === item.id;
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => handleNavigation(item.id)}
+                className={`text-sm font-medium transition-colors relative pb-0.5 ${
+                  isActive ? 'text-ink' : 'text-fog hover:text-ink'
+                }`}
+              >
+                {item.label}
+                {isActive && (
+                  <span className="absolute bottom-0 left-0 right-0 h-px bg-ink" />
+                )}
+              </button>
+            );
+          })}
+        </nav>
       </div>
 
+      {/* Mobile */}
+      <div className="md:hidden flex items-center justify-between h-14 px-5">
+        <button
+          type="button"
+          onClick={() => onHomeNavigation ? onHomeNavigation() : handleNavigation('home')}
+          className="font-cinema text-lg font-medium tracking-tight text-ink"
+        >
+          Triple Feature
+        </button>
+        <button
+          type="button"
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="p-2 text-fog hover:text-ink transition-colors"
+          aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+        >
+          {isMobileMenuOpen ? <X size={18} /> : <Menu size={18} />}
+        </button>
+      </div>
+
+      {/* Mobile drawer */}
       {createPortal(
         <AnimatePresence>
           {isMobileMenuOpen && (
@@ -237,74 +131,50 @@ const Header = ({ currentPage, onNavigate, onHomeNavigation, onProtectedNavReque
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                transition={{ duration: 0.12, ease: 'linear' }}
-                className="md:hidden fixed inset-0 bg-black/60 backdrop-blur-sm z-[99998]"
+                transition={{ duration: 0.15 }}
+                className="md:hidden fixed inset-0 bg-ink/25 z-[99998]"
                 onClick={() => setIsMobileMenuOpen(false)}
               />
-
               <motion.div
                 key="mobile-sidebar"
                 initial={{ x: '100%' }}
                 animate={{ x: 0 }}
                 exit={{ x: '100%' }}
-                transition={{ duration: 0.07, ease: [0.2, 0.9, 0.3, 1] }}
-                className="md:hidden fixed top-0 right-0 w-4/5 h-full z-[99999] overflow-y-auto"
-                style={{
-                  backgroundColor: 'rgba(0, 0, 0, 0.6)',
-                  backdropFilter: 'blur(6px)',
-                  WebkitBackdropFilter: 'blur(4px)',
-                  borderLeft: '1px solid rgba(255,255,255,0.15)',
-                  boxShadow: '0 10px 30px rgba(0,0,0,0.5)',
-                  willChange: 'transform, opacity',
-                  transform: 'translateZ(0)',
-                }}
+                transition={{ duration: 0.22, ease: [0.2, 0, 0, 1] }}
+                className="md:hidden fixed top-0 right-0 h-full w-3/4 max-w-xs z-[99999] bg-frame border-l border-ash overflow-y-auto"
               >
-                <div className="flex justify-end p-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.15)' }}>
-                  <motion.button
+                <div className="flex justify-between items-center px-5 py-4 border-b border-smoke">
+                  <span className="font-cinema text-base font-medium text-ink">Triple Feature</span>
+                  <button
                     type="button"
-                    whileHover={{ scale: 1.1 }}
-                    whileTap={{ scale: 0.9 }}
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="p-2 rounded-lg text-white transition-colors"
-                    style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}
+                    className="p-1.5 text-fog hover:text-ink transition-colors"
                   >
-                    <X size={20} />
-                  </motion.button>
+                    <X size={18} />
+                  </button>
                 </div>
-
-                <motion.nav className="flex flex-col p-5" initial="hidden" animate="show" variants={listVariants}>
-                  <div className="space-y-2">
-                    {allNavItems.map((item) => {
-                      const Icon = item.icon;
-                      const isActive = currentPage === item.id;
-                      return (
-                        <motion.a
-                          key={item.id}
-                          href="#"
-                          onClick={(e) => {
-                            e.preventDefault();
-                            handleNavigation(item.id);
-                            setIsMobileMenuOpen(false);
-                          }}
-                          className={`flex items-center gap-3.5 w-full px-4 py-3.5 rounded-md text-lg transition-colors duration-150 ${
-                            isActive ? 'text-accent-blue' : 'text-white/85 hover:text-white'
-                          }`}
-                          whileHover={{ x: 4 }}
-                          whileTap={{ scale: 0.98 }}
-                          variants={itemVariants}
-                        >
-                          <Icon size={20} />
-                          {item.label}
-                        </motion.a>
-                      );
-                    })}
-                  </div>
-                </motion.nav>
+                <nav className="p-5 space-y-0">
+                  {navItems.map((item) => {
+                    const isActive = currentPage === item.id;
+                    return (
+                      <button
+                        key={item.id}
+                        type="button"
+                        onClick={() => { handleNavigation(item.id); setIsMobileMenuOpen(false); }}
+                        className={`w-full text-left py-4 text-base border-b border-smoke last:border-0 transition-colors font-medium ${
+                          isActive ? 'text-ink font-cinema' : 'text-fog hover:text-ink'
+                        }`}
+                      >
+                        {item.label}
+                      </button>
+                    );
+                  })}
+                </nav>
               </motion.div>
             </>
           )}
         </AnimatePresence>,
-        document.body,
+        document.body
       )}
     </header>
   );

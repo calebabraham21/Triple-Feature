@@ -1,16 +1,12 @@
+import { Fragment, useEffect, useState } from 'react';
 import { useRecommendations } from '../hooks/useRecommendations';
 import MovieCard from '../components/MovieCard';
 import MovieCardSkeleton from '../components/MovieCardSkeleton';
 import LoadingOverlay from '../components/LoadingOverlay';
-import { ChevronLeft, ChevronRight, Sparkles, Clock, Play, Home, RotateCcw } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Sparkles, Clock, RotateCcw } from 'lucide-react';
 import GlowButton from '../components/GlowButton';
-import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 
-// Using public asset path for reliability in dev/prod
-
-// Fast count-up number animation for fun stats
 const CountUp = ({ target, duration = 700, delayMs = 0, className = '' }) => {
   const [value, setValue] = useState(0);
   useEffect(() => {
@@ -29,14 +25,10 @@ const CountUp = ({ target, duration = 700, delayMs = 0, className = '' }) => {
     const timer = setTimeout(start, delayMs);
     return () => { clearTimeout(timer); if (rafId) cancelAnimationFrame(rafId); };
   }, [target, duration, delayMs]);
-  const minDigits = target >= 10 ? 2 : 1; // no leading zero for single-digit targets
-  const text = String(value).padStart(minDigits, '0');
-  return <div className={className}>{text}</div>;
+  return <span className={className}>{value}</span>;
 };
 
 const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
-  const navigate = useNavigate();
-
   const {
     genres,
     selectedGenres,
@@ -63,307 +55,244 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
     getRuntimeOptions,
   } = useRecommendations();
 
-  // Notify parent component of step changes
   useEffect(() => {
-    if (onStepChange) {
-      onStepChange(currentStep);
-    }
+    if (onStepChange) onStepChange(currentStep);
   }, [currentStep, onStepChange]);
 
   useEffect(() => {
-    if (currentStep > 1) {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
+    if (currentStep > 1) window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [currentStep]);
 
   const decadeOptions = getDecadeOptions();
   const runtimeOptions = getRuntimeOptions();
 
+  // ─── Step indicator ───────────────────────────────────────────
+  const StepIndicator = () => (
+    <div className="flex flex-col items-center gap-2 mb-8">
+      <div className="flex items-center gap-0">
+        {[1, 2, 3, 4].map((step, i) => (
+          <Fragment key={step}>
+            {i > 0 && (
+              <div
+                className="w-10 h-px transition-colors"
+                style={{ backgroundColor: currentStep > i ? '#1e1b18' : '#ccc8c3' }}
+              />
+            )}
+            <div
+              className="w-2.5 h-2.5 rounded-full transition-colors flex-shrink-0"
+              style={{ backgroundColor: currentStep >= step ? '#1e1b18' : '#ccc8c3' }}
+            />
+          </Fragment>
+        ))}
+      </div>
+      <span className="text-xs text-fog">
+        {currentStep === 1 && 'Step 1 of 4 — Genre'}
+        {currentStep === 2 && 'Step 2 of 4 — Decade & Runtime'}
+        {currentStep === 3 && 'Step 3 of 4 — Content Preferences'}
+        {currentStep === 4 && (loading ? 'Finding your films...' : 'Step 4 of 4 — Recommendations')}
+      </span>
+    </div>
+  );
+
+  // ─── Step 1: Genre ────────────────────────────────────────────
   const renderStep1 = () => (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      key="step1"
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.8 }}
-      className="max-w-4xl mx-auto"
-      data-step="1"
+      transition={{ duration: 0.3, ease: 'easeOut' }}
     >
-      {/* Step indicator */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.9 }}
-        className="text-center mb-6"
-      >
-        <div className="wizard-step-number mb-3">Step 1 of 4</div>
-        <h2 className="wizard-step-title mb-3">Genre Selection</h2>
-        <p className="text-white/50 text-sm leading-relaxed">Choose up to 2 genres</p>
-      </motion.div>
+      <div className="mb-6">
+        <div className="wizard-step-label mb-2">Genre selection</div>
+        <div className="wizard-step-title">What kind of film?</div>
+        <p className="text-sm text-fog mt-2">Pick up to two genres.</p>
+      </div>
 
-      {/* Genres */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.0 }}
-        className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-6"
-      >
-        {genres.map((genre, index) => (
-          <motion.button
+      <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 mb-8">
+        {genres.map((genre) => (
+          <button
             key={genre.id}
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 1.1 + (index * 0.05) }}
+            type="button"
             onClick={() => toggleGenre(genre.id)}
-            className={`chip-pill trace-snake p-2.5 rounded-md text-sm ${
+            className={`chip-pill py-2.5 px-3 text-sm text-center ${
               selectedGenres.includes(genre.id)
                 ? 'chip-selected'
-                : selectedGenres.length >= 2 ? 'opacity-50 cursor-not-allowed' : ''
+                : selectedGenres.length >= 2
+                ? 'opacity-40 cursor-not-allowed'
+                : ''
             }`}
             disabled={!selectedGenres.includes(genre.id) && selectedGenres.length >= 2}
           >
-            <span className="relative z-10">{genre.name === 'Science Fiction' ? 'Sci-Fi' : genre.name}</span>
-            <span className="trace-line trace-line--t" />
-            <span className="trace-line trace-line--r" />
-            <span className="trace-line trace-line--b" />
-            <span className="trace-line trace-line--l" />
-          </motion.button>
+            {genre.name === 'Science Fiction' ? 'Sci-Fi' : genre.name}
+          </button>
         ))}
-      </motion.div>
+      </div>
 
-      {/* Next button */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.3 }}
-        className="flex justify-center pb-4"
-      >
-        <GlowButton
-          onClick={nextStep}
-          disabled={!selectedGenres.length}
-          className="text-base px-6 py-3"
-        >
+      <div className="flex justify-end">
+        <GlowButton onClick={nextStep} disabled={!selectedGenres.length}>
           Continue
-          <ChevronRight size={18} />
+          <ChevronRight size={15} />
         </GlowButton>
-      </motion.div>
+      </div>
     </motion.div>
   );
 
+  // ─── Step 2: Decade & Runtime ─────────────────────────────────
   const renderStep2 = () => (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      key="step2"
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3 }}
-      className="max-w-4xl mx-auto"
+      transition={{ duration: 0.3, ease: 'easeOut' }}
     >
-      {/* Step indicator */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="text-center mb-6"
-      >
-        <div className="wizard-step-number mb-3">Step 2 of 4</div>
-        <h2 className="wizard-step-title mb-3">Decade &amp; Runtime</h2>
-        <p className="text-white/50 text-sm leading-relaxed">Optional — defaults to all decades and runtimes</p>
-      </motion.div>
+      <div className="mb-6">
+        <div className="wizard-step-label mb-2">Decade & Runtime</div>
+        <div className="wizard-step-title">When and how long?</div>
+        <p className="text-sm text-fog mt-2">Optional — defaults to all decades and runtimes.</p>
+      </div>
 
       {/* Decades */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="mb-6"
-      >
-        <div className="flex items-center justify-between mb-3 gap-2 flex-wrap">
-          <div className="flex items-center gap-2">
-            <GlowButton
-              variant="secondary"
-              onClick={() => setSelectedDecades(decadeOptions.map(d => d.value))}
-              className="py-1.5 px-3 text-xs"
-            >
-              Select All
-            </GlowButton>
-            <GlowButton
-              variant="secondary"
-              onClick={() => setSelectedDecades([])}
-              className="py-1.5 px-3 text-xs"
-            >
-              Clear All
-            </GlowButton>
-          </div>
+      <div className="mb-7">
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-xs font-semibold tracking-widest uppercase text-fog">Decade</span>
+          <div className="flex-1" />
+          <button
+            type="button"
+            className="text-xs text-fog hover:text-ink transition-colors underline underline-offset-2"
+            onClick={() => setSelectedDecades(decadeOptions.map((d) => d.value))}
+          >
+            All
+          </button>
+          <span className="text-ash text-xs">·</span>
+          <button
+            type="button"
+            className="text-xs text-fog hover:text-ink transition-colors underline underline-offset-2"
+            onClick={() => setSelectedDecades([])}
+          >
+            None
+          </button>
         </div>
         <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
-          {decadeOptions.map((decade, index) => {
-            const isSelected = selectedDecades.includes(decade.value);
-            return (
-              <motion.button
-                key={decade.value}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.6 + (index * 0.03) }}
-                onClick={() => toggleDecade(decade.value)}
-                className={`chip-pill trace-snake py-2 px-2 rounded-md text-xs ${isSelected ? 'chip-selected' : ''}`}
-              >
-                <span className="relative z-10">{decade.label}</span>
-                <span className="trace-line trace-line--t" />
-                <span className="trace-line trace-line--r" />
-                <span className="trace-line trace-line--b" />
-                <span className="trace-line trace-line--l" />
-              </motion.button>
-            );
-          })}
+          {decadeOptions.map((decade) => (
+            <button
+              key={decade.value}
+              type="button"
+              onClick={() => toggleDecade(decade.value)}
+              className={`chip-pill py-2 px-2 text-xs text-center ${
+                selectedDecades.includes(decade.value) ? 'chip-selected' : ''
+              }`}
+            >
+              {decade.label}
+            </button>
+          ))}
         </div>
-        <p className="text-xs text-white/70 mt-2 text-center">By default, all decades are selected.</p>
-      </motion.div>
+        <p className="text-xs text-fog mt-2">All decades are selected by default.</p>
+      </div>
 
-      {/* Runtime Selector */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
-        className="mb-6 pt-2"
-      >
-        <h3 className="text-xs font-semibold mb-3 text-white/50 uppercase tracking-widest flex items-center gap-2">
-          <Clock size={16} />
-          Runtime Preferences
-        </h3>
-        <p className="text-xs text-white/40 mb-3">Select your preferred movie lengths</p>
+      {/* Runtime */}
+      <div className="mb-8">
+        <div className="flex items-center gap-2 mb-3">
+          <Clock size={13} className="text-fog" />
+          <span className="text-xs font-semibold tracking-widest uppercase text-fog">Runtime</span>
+        </div>
         <div className="grid grid-cols-3 gap-2">
-          {runtimeOptions.map((runtime, index) => {
-            const isSelected = selectedRuntimes.includes(runtime.value);
-            return (
-              <motion.button
-                key={runtime.value}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.6 + (index * 0.05) }}
-                onClick={() => toggleRuntime(runtime.value)}
-                className={`chip-pill p-3 rounded-lg text-center ${isSelected ? 'chip-selected' : ''}`}
-              >
-                <div className="font-medium text-sm mb-1">{runtime.label}</div>
-                <div className="text-xs text-white/70">{runtime.description}</div>
-              </motion.button>
-            );
-          })}
+          {runtimeOptions.map((runtime) => (
+            <button
+              key={runtime.value}
+              type="button"
+              onClick={() => toggleRuntime(runtime.value)}
+              className={`chip-pill py-3 px-3 text-center ${
+                selectedRuntimes.includes(runtime.value) ? 'chip-selected' : ''
+              }`}
+            >
+              <div className="text-sm font-medium mb-0.5">{runtime.label}</div>
+              <div className="text-xs opacity-70">{runtime.description}</div>
+            </button>
+          ))}
         </div>
-        <p className="text-xs text-white/70 mt-2 text-center">Multiple selections allowed</p>
-      </motion.div>
+      </div>
 
-      {/* Navigation */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.8 }}
-        className="flex justify-between"
-      >
-        <GlowButton variant="secondary" onClick={prevStep} className="text-sm px-4 py-2">
-          <ChevronLeft size={16} />
+      <div className="flex justify-between">
+        <GlowButton variant="secondary" onClick={prevStep}>
+          <ChevronLeft size={15} />
           Back
         </GlowButton>
-
-        <GlowButton onClick={nextStep} className="text-sm px-4 py-2">
+        <GlowButton onClick={nextStep}>
           Continue
-          <ChevronRight size={16} />
+          <ChevronRight size={15} />
         </GlowButton>
-      </motion.div>
+      </div>
     </motion.div>
   );
 
+  // ─── Step 3: Content Preferences ─────────────────────────────
   const renderStep3 = () => (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      key="step3"
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.3 }}
-      className="max-w-4xl mx-auto"
+      transition={{ duration: 0.3, ease: 'easeOut' }}
     >
-      {/* Step indicator */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-        className="text-center mb-6"
-      >
-        <div className="wizard-step-number mb-3">Step 3 of 4</div>
-        <h2 className="wizard-step-title mb-3">Content Preferences</h2>
-        <p className="text-white/50 text-sm leading-relaxed">Customize your viewing experience</p>
-      </motion.div>
+      <div className="mb-6">
+        <div className="wizard-step-label mb-2">Content Preferences</div>
+        <div className="wizard-step-title">A few last things.</div>
+      </div>
 
-      {/* Adult Content Preference */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-        className="mb-5"
-      >
-        <h3 className="text-xs font-semibold mb-3 text-white/50 uppercase tracking-widest">Content Rating Preference</h3>
-        <p className="text-xs text-white/40 mb-3">Choose your content comfort level</p>
-        <div className="space-y-2">
+      {/* Rating */}
+      <div className="mb-6">
+        <div className="text-xs font-semibold tracking-widest uppercase text-fog mb-3">Content Rating</div>
+        <div className="space-y-1">
           {[
             { value: false, label: 'Family-friendly', description: 'G, PG, PG-13 only' },
             { value: true, label: 'Adult-rated', description: 'R, NC-17, X only' },
-            { value: null, label: 'Any rating', description: 'No rating restrictions' }
-          ].map((option, index) => (
-            <motion.label
-              key={option.value === null ? 'any' : option.value.toString()}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6 + (index * 0.05) }}
-              className="flex items-center cursor-pointer p-2 rounded-lg hover:bg-cinema-gray/30 transition-colors duration-150"
+            { value: null, label: 'Any rating', description: 'No restrictions' },
+          ].map((option) => (
+            <label
+              key={option.value === null ? 'any' : String(option.value)}
+              className="flex items-center cursor-pointer py-2.5 px-3 rounded hover:bg-smoke transition-colors"
             >
               <input
                 type="radio"
                 name="includeAdult"
-                value={option.value === null ? 'any' : option.value.toString()}
+                value={option.value === null ? 'any' : String(option.value)}
                 checked={includeAdult === option.value}
                 onChange={(e) => {
-                  const value = e.target.value;
-                  if (value === 'any') {
-                    setIncludeAdult(null);
-                  } else {
-                    setIncludeAdult(value === 'true');
-                  }
+                  const v = e.target.value;
+                  setIncludeAdult(v === 'any' ? null : v === 'true');
                 }}
                 className="sr-only"
               />
-              <div className={`w-4 h-4 rounded-full border-2 mr-3 flex items-center justify-center transition-colors ${
-                includeAdult === option.value 
-                  ? 'border-accent-blue' 
-                  : 'border-cinema-light'
-              }`}>
+              <div
+                className={`w-4 h-4 rounded-full border-2 mr-3 flex items-center justify-center flex-shrink-0 transition-colors ${
+                  includeAdult === option.value ? 'border-ink' : 'border-ash'
+                }`}
+              >
                 {includeAdult === option.value && (
-                  <div className="w-2 h-2 rounded-full bg-accent-blue"></div>
+                  <div className="w-2 h-2 rounded-full bg-ink" />
                 )}
               </div>
-              <div className="flex-1">
-                <div className="text-white font-medium text-sm">{option.label}</div>
-                <div className="text-xs text-white/70">{option.description}</div>
+              <div>
+                <div className="text-sm font-medium text-ink">{option.label}</div>
+                <div className="text-xs text-fog">{option.description}</div>
               </div>
-            </motion.label>
+            </label>
           ))}
         </div>
-      </motion.div>
+      </div>
 
-      {/* Language Preference */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.7 }}
-        className="mb-5"
-      >
-        <h3 className="text-xs font-semibold mb-3 text-white/50 uppercase tracking-widest">Language Preference</h3>
-        <p className="text-xs text-white/40 mb-3">Try a non-English movie — it's like travel, without the TSA.</p>
-        <div className="space-y-2">
+      {/* Language */}
+      <div className="mb-8">
+        <div className="text-xs font-semibold tracking-widest uppercase text-fog mb-3">Language</div>
+        <p className="text-xs text-fog mb-3">Try a non-English film. It's like travel, without the TSA.</p>
+        <div className="space-y-1">
           {[
             { value: 'english', label: 'English only' },
             { value: 'non-english', label: 'Non-English only' },
-            { value: 'both', label: 'Both' }
-          ].map((option, index) => (
-            <motion.label
+            { value: 'both', label: 'Both' },
+          ].map((option) => (
+            <label
               key={option.value}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.8 + (index * 0.05) }}
-              className="flex items-center cursor-pointer p-2 rounded-lg hover:bg-cinema-gray/30 transition-colors duration-150"
+              className="flex items-center cursor-pointer py-2.5 px-3 rounded hover:bg-smoke transition-colors"
             >
               <input
                 type="radio"
@@ -373,89 +302,85 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
                 onChange={(e) => setLanguagePreference(e.target.value)}
                 className="sr-only"
               />
-              <div className={`w-4 h-4 rounded-full border-2 mr-3 flex items-center justify-center transition-colors ${
-                languagePreference === option.value 
-                  ? 'border-accent-blue' 
-                  : 'border-cinema-light'
-              }`}>
+              <div
+                className={`w-4 h-4 rounded-full border-2 mr-3 flex items-center justify-center flex-shrink-0 transition-colors ${
+                  languagePreference === option.value ? 'border-ink' : 'border-ash'
+                }`}
+              >
                 {languagePreference === option.value && (
-                  <div className="w-2 h-2 rounded-full bg-accent-blue"></div>
+                  <div className="w-2 h-2 rounded-full bg-ink" />
                 )}
               </div>
-              <span className="text-white font-medium text-sm">{option.label}</span>
-            </motion.label>
+              <span className="text-sm font-medium text-ink">{option.label}</span>
+            </label>
           ))}
         </div>
-      </motion.div>
+      </div>
 
-      {/* Navigation */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.9 }}
-        className="flex justify-between"
-      >
-        <GlowButton variant="secondary" onClick={prevStep} className="text-sm px-4 py-2">
-          <ChevronLeft size={16} />
+      <div className="flex justify-between">
+        <GlowButton variant="secondary" onClick={prevStep}>
+          <ChevronLeft size={15} />
           Back
         </GlowButton>
-
-        <GlowButton 
+        <GlowButton
           onClick={generateRecommendations}
           disabled={loading}
-          className="text-sm px-6 py-3 snake-cta"
           aria-busy={loading}
-          aria-describedby={loading ? "loading-status" : undefined}
-          aria-controls="progress-announcement"
         >
           {loading ? (
             <>
-              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-              Getting Recommendations...
-              <span id="loading-status" className="sr-only">Loading recommendations, please wait</span>
+              <div className="h-3.5 w-3.5 rounded-full border border-paper/30 border-t-paper animate-spin" />
+              Getting picks...
             </>
           ) : (
             <>
               Get Recommendations
-              <Sparkles size={16} />
+              <Sparkles size={14} />
             </>
           )}
         </GlowButton>
-      </motion.div>
+      </div>
     </motion.div>
   );
 
+  // ─── Step 4 (5): Results ──────────────────────────────────────
   const renderStep5 = () => (
-    <div className="max-w-7xl mx-auto">
-      <div className="text-center mb-8">
-        <p className="text-white/50 text-sm italic leading-relaxed">Congratulations, you've successfully outsourced your decision-making to an algorithm.</p>
+    <motion.div
+      key="step5"
+      initial={{ opacity: 0, y: 12 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.35, ease: 'easeOut' }}
+    >
+      <div className="mb-6">
+        <div className="wizard-step-label mb-2">Your picks</div>
+        <div className="wizard-step-title">Three films for tonight.</div>
+        <p className="text-sm text-fog mt-2 italic">
+          Congratulations on outsourcing your decision to an algorithm.
+        </p>
       </div>
 
       {error && (
-        <div className="bg-red-500/20 border border-red-500 text-red-300 p-4 rounded-lg mb-6">
+        <div className="border border-ash rounded p-4 mb-6 text-sm text-fog bg-smoke">
           {error}
         </div>
       )}
 
-      <div className="grid md:grid-cols-3 gap-8 mb-12">
+      {/* Archive list */}
+      <div className="border-t border-smoke mb-8">
         {loading ? (
-          // Show skeleton cards while loading
           <>
             <MovieCardSkeleton />
             <MovieCardSkeleton />
             <MovieCardSkeleton />
           </>
         ) : (
-          // Show actual recommendations when loaded
           recommendations.map((movie) => (
-            <div key={movie.id}>
-              <MovieCard movie={movie} />
-            </div>
+            <MovieCard key={movie.id} movie={movie} />
           ))
         )}
       </div>
 
-      <div className="flex justify-center gap-4 pb-4 md:pb-0">
+      <div className="flex justify-start">
         <GlowButton
           variant="secondary"
           onClick={() => {
@@ -465,209 +390,93 @@ const HomePage = ({ onStepChange, onProtectedActionRequest }) => {
               resetFlow();
             }
           }}
-          className="text-sm px-6 py-3"
         >
-          <RotateCcw size={16} />
-          Start Over
+          <RotateCcw size={14} />
+          Start over
         </GlowButton>
       </div>
-    </div>
+    </motion.div>
   );
 
   return (
-    <div 
-      className="min-h-screen app-gradient"
-      aria-busy={loading}
-      aria-live="polite"
-    >
-      {/* Loading Overlay */}
-      <LoadingOverlay 
-        isVisible={loading} 
-        message={progressMessage || "Finding your perfect movies..."}
-      />
-      
-      {/* Screen reader live region for progress updates */}
-      <div 
-        aria-live="polite" 
-        aria-atomic="true" 
-        className="sr-only"
-        id="progress-announcement"
-      >
+    <div className="min-h-screen bg-paper" aria-busy={loading} aria-live="polite">
+      <LoadingOverlay isVisible={loading} message={progressMessage || 'Searching through thousands of films...'} />
+
+      <div aria-live="polite" aria-atomic="true" className="sr-only">
         {progressMessage}
       </div>
-      
-      {/* Intro Section */}
-      {currentStep === 1 && (
-        <div className="max-w-4xl mx-auto px-4 pt-6 md:pt-8">
-          {/* Mission Statement Container */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="relative bg-cinema-dark/20 border border-cinema-light/20 rounded-xl p-6 mb-4 overflow-hidden"
-          >
-            {/* Background Image */}
-            <div className="absolute inset-0 z-0">
-              <img
-                src="/movie-posters.jpg"
-                alt="Movie posters background"
-                className="w-full h-full object-cover blur-sm opacity-40"
-                loading="lazy"
-                decoding="async"
-              />
-              <div className="absolute inset-0 bg-cinema-dark/40" />
-            </div>
-            
-            {/* Content */}
-            <div className="relative z-10">
-              <h1 className="font-cinema text-2xl md:text-3xl tracking-wide text-white mb-3 text-center">
-                Stop scrolling, start watching
-              </h1>
-              <p className="text-base md:text-lg text-white/90 leading-relaxed mb-6">
-                Triple Feature helps you pick a movie and just watch it. No more scrolling forever on Netflix or HBO.
-                Tell us what you are in the mood for, we crunch the options, and give you three solid picks.
-              </p>
-              
-              {/* Start button removed per request */}
-            </div>
-          </motion.div>
 
-          {/* Fun Stats Strip */}
+      {/* Cinematic hero — only on step 1 */}
+      {currentStep === 1 && (
+        <div
+          className="relative overflow-hidden"
+          style={{ height: '40vh', minHeight: '260px', maxHeight: '420px' }}
+        >
+          <img
+            src="/movie-posters.jpg"
+            alt=""
+            aria-hidden="true"
+            className="absolute inset-0 w-full h-full object-cover"
+            style={{ filter: 'saturate(0.12) brightness(0.6)' }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-reel/20 to-reel/85" />
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="mb-6"
+            transition={{ duration: 0.6, ease: 'easeOut' }}
+            className="relative z-10 h-full flex flex-col justify-end pb-10 px-6 sm:px-8 max-w-5xl mx-auto"
           >
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.3 }}
-                className="bg-cinema-dark/40 border border-cinema-light/20 rounded-xl p-5 text-center hover:bg-cinema-dark/50 transition-colors cursor-pointer"
-              >
-                <CountUp target={80} duration={800} delayMs={200} className="stat-number mb-2" />
-                <div className="text-xs text-white/70">hours saved from scrolling*</div>
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.4 }}
-                className="bg-cinema-dark/40 border border-cinema-light/20 rounded-xl p-5 text-center hover:bg-cinema-dark/50 transition-colors cursor-pointer"
-              >
-                <CountUp target={38} duration={800} delayMs={260} className="stat-number mb-2" />
-                <div className="text-xs text-white/70">arguments prevented for couples*</div>
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.5 }}
-                className="bg-cinema-dark/40 border border-cinema-light/20 rounded-xl p-5 text-center hover:bg-cinema-dark/50 transition-colors cursor-pointer"
-              >
-                <CountUp target={3} duration={800} delayMs={320} className="stat-number mb-2" />
-                <div className="text-xs text-white/70">picks, zero decision fatigue</div>
-              </motion.div>
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.6 }}
-                className="bg-cinema-dark/40 border border-cinema-light/20 rounded-xl p-5 text-center hover:bg-cinema-dark/50 transition-colors cursor-pointer"
-              >
-                <CountUp target={90} duration={800} delayMs={380} className="stat-number mb-2" />
-                <div className="text-xs text-white/70">seconds from open to play</div>
-              </motion.div>
-            </div>
-            <div className="text-xs text-white/50 mt-2 text-right pr-1">*fun, fake stats</div>
+            <p className="text-xs font-semibold tracking-widest uppercase text-paper/40 mb-3 font-sans">
+              Triple Feature
+            </p>
+            <h1 className="font-cinema text-3xl sm:text-4xl md:text-5xl font-medium text-paper leading-tight mb-3 text-shadow">
+              Stop scrolling.<br />Start watching.
+            </h1>
+            <p className="text-paper/65 text-sm sm:text-base leading-relaxed max-w-lg">
+              Three good films, matched to your taste. No algorithm, no feed — just picks.
+            </p>
           </motion.div>
         </div>
       )}
 
-      {/* Recommendation Flow */}
-      <div className="px-4 pt-4 md:pt-4">
-        {/* Optional: How it Works section (shown on step 1 only, after stats, before generator) */}
-        {currentStep === 1 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.25 }}
-            className="max-w-4xl mx-auto mb-8"
-          >
-            <div className="bg-cinema-dark/30 border border-cinema-light/20 rounded-2xl p-6">
-              <h3 className="font-cinema text-xs uppercase tracking-widest text-white/60 text-left mb-6">How it works</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-5">
-                  <div className="w-10 h-10 rounded-full bg-cinema-gray/60 border border-cinema-light/20 flex items-center justify-center mb-3">
-                    <Sparkles size={18} className="text-white" />
-                  </div>
-                  <p className="text-sm font-semibold text-white mb-1">Tell us your mood</p>
-                  <p className="text-xs text-white/70">Pick a genre, a decade or two, and any must???haves. No overthinking.</p>
-                </div>
-                <div className="p-5">
-                  <div className="w-10 h-10 rounded-full bg-cinema-gray/60 border border-cinema-light/20 flex items-center justify-center mb-3">
-                    <Clock size={18} className="text-white" />
-                  </div>
-                  <p className="text-sm font-semibold text-white mb-1">We crunch the options</p>
-                  <p className="text-xs text-white/70">Smart filtering trims the noise and surfaces three high???signal picks.</p>
-                </div>
-                <div className="p-5">
-                  <div className="w-10 h-10 rounded-full bg-cinema-gray/60 border border-cinema-light/20 flex items-center justify-center mb-3">
-                    <Play size={18} className="text-white" />
-                  </div>
-                  <p className="text-sm font-semibold text-white mb-1">Press play</p>
-                  <p className="text-xs text-white/70">Pick one and go. Less scrolling, more watching.</p>
-                </div>
-              </div>
-            </div>
-          </motion.div>
-        )}
-        {/* Step Progress Indicator */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
-          className="max-w-4xl mx-auto mb-8"
-        >
-          <div className="flex items-center justify-center space-x-3">
-            {[1, 2, 3, 4].map((step) => (
-              <motion.div
-                key={step}
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.2 + (step * 0.1) }}
-                className="flex items-center"
-              >
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-cinema transition-all duration-300 ${
-                  currentStep >= step
-                    ? 'bg-accent-blue text-white'
-                    : 'bg-cinema-gray/60 text-white/40'
-                } ${currentStep === 4 && loading && step === 4 ? 'animate-pulse' : ''}`}>
-                  {step}
-                </div>
-                {step < 4 && (
-                  <div className={`w-10 h-0.5 mx-1.5 ${
-                    currentStep > step ? 'bg-accent-blue' : 'bg-cinema-gray'
-                  }`} />
-                )}
-              </motion.div>
-            ))}
-          </div>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.7 }}
-            className="text-center mt-2 text-xs text-white/70"
-          >
-            {currentStep === 1 && 'Genre Selection'}
-            {currentStep === 2 && 'Decade & Runtime'}
-            {currentStep === 3 && 'Content Preferences'}
-            {currentStep === 4 && (loading ? 'Loading Recommendations...' : 'Recommendations')}
-          </motion.div>
-        </motion.div>
-        
+      {/* Wizard */}
+      <div className="max-w-3xl mx-auto px-6 sm:px-8 py-10">
+        <StepIndicator />
+
         {currentStep === 1 && renderStep1()}
         {currentStep === 2 && renderStep2()}
         {currentStep === 3 && renderStep3()}
         {currentStep === 4 && renderStep5()}
       </div>
+
+      {/* Stats strip — editorial typographic, step 1 only */}
+      {currentStep === 1 && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5, duration: 0.4 }}
+          className="border-t border-smoke bg-paper"
+        >
+          <div className="max-w-3xl mx-auto px-6 sm:px-8 py-8">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+              {[
+                { target: 80, label: 'hours saved scrolling' },
+                { target: 38, label: 'arguments prevented' },
+                { target: 3, label: 'picks, zero fatigue' },
+                { target: 90, label: 'seconds to play' },
+              ].map(({ target, label }, i) => (
+                <div key={label}>
+                  <div className="stat-number mb-1">
+                    <CountUp target={target} duration={800} delayMs={600 + i * 80} />
+                  </div>
+                  <div className="text-xs text-fog leading-snug">{label}</div>
+                </div>
+              ))}
+            </div>
+            <p className="text-xs text-fog/50 mt-4">* fun, fake stats</p>
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 };
